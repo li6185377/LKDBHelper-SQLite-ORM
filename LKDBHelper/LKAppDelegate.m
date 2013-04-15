@@ -35,7 +35,7 @@
     test.like = 'I';
     test.img = [UIImage imageNamed:@"41.png"];
     test.date = [NSDate date];
-    
+    test.color = [UIColor orangeColor];
     [[LKDBHelper sharedDBHelper] insertToDB:test];
     test.name = @"li si";
     
@@ -82,6 +82,6 @@
 }
 +(int)getTableVersion
 {
-    return 2;
+    return 3;
 }
 @end

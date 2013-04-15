@@ -113,7 +113,6 @@ static char LKModelBase_Key_RowID;
 }
 
 #pragma mark- translate value
-
 -(id)modelGetValueWithKey:(NSString *)key type:(NSString *)columeType
 {
     id value = [self valueForKey:key];
@@ -124,7 +123,7 @@ static char LKModelBase_Key_RowID;
         NSString* filename = [NSString stringWithFormat:@"img%ld%ld",date&0xFFFFF,random&0xFFF];
         
         NSData* datas = UIImageJPEGRepresentation(value, 1);
-        [datas writeToFile:[LKDBUtils getPathForDocuments:filename inDir:@"dbimg"] atomically:YES];
+        [datas writeToFile:[LKDBUtils getPathForDocuments:filename inDir:[NSString stringWithFormat:@"dbimg/%@",NSStringFromClass(self.class)]] atomically:YES];
         value = filename;
     }
     else if([value isKindOfClass:[NSData class]])
@@ -133,12 +132,19 @@ static char LKModelBase_Key_RowID;
         long date = [[NSDate date] timeIntervalSince1970];
         NSString* filename = [NSString stringWithFormat:@"data%ld%ld",date&0xFFFFF,random&0xFFF];
         
-        [value writeToFile:[LKDBUtils getPathForDocuments:filename inDir:@"dbdata"] atomically:YES];
+        [value writeToFile:[LKDBUtils getPathForDocuments:filename inDir:[NSString stringWithFormat:@"dbdata/%@",NSStringFromClass(self.class)]] atomically:YES];
         value = filename;
     }
     else if([value isKindOfClass:[NSDate class]])
     {
         value = [LKDBUtils stringWithDate:value];
+    }
+    else if([value isKindOfClass:[UIColor class]])
+    {
+        UIColor* color = value;
+        float r,g,b,a;
+        [color getRed:&r green:&g blue:&b alpha:&a];
+        value = [NSString stringWithFormat:@"%.3f,%.3f,%.3f,%.3f",r,g,b,a];
     }
     else if([columeType isEqualToString:@"char"])
     {
@@ -166,12 +172,24 @@ static char LKModelBase_Key_RowID;
     }
     else if([columeType isEqualToString:@"NSData"])
     {
+        
         NSString* filename = value;
         if([LKDBUtils isFileExists:[LKDBUtils getPathForDocuments:filename inDir:@"dbdata"]])
         {
             NSData* data = [NSData dataWithContentsOfFile:[LKDBUtils getPathForDocuments:filename inDir:@"dbdata"]];
             modelValue = data;
         }
+    }else if([columeType isEqualToString:@"UIColor"])
+    {
+        NSString* color = value;
+        NSArray* array = [color componentsSeparatedByString:@","];
+        float r,g,b,a;
+        r = [[array objectAtIndex:0] floatValue];
+        g = [[array objectAtIndex:1] floatValue];
+        b = [[array objectAtIndex:2] floatValue];
+        a = [[array objectAtIndex:3] floatValue];
+        
+        value = [UIColor colorWithRed:r green:g blue:b alpha:a];
     }
     
     [self setValue:modelValue forKey:key];

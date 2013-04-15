@@ -29,4 +29,5 @@
 @property(retain,nonatomic) NSDate* date;
 
 @property(copy,nonatomic)NSString* error;
+@property(copy,nonatomic)UIColor* color;
 @end
