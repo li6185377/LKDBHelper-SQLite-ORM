@@ -1,0 +1,380 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		53226E01171B9E5A00B1A490 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53226E00171B9E5A00B1A490 /* UIKit.framework */; };
+		53226E03171B9E5A00B1A490 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53226E02171B9E5A00B1A490 /* Foundation.framework */; };
+		53226E05171B9E5B00B1A490 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53226E04171B9E5A00B1A490 /* CoreGraphics.framework */; };
+		53226E0B171B9E5B00B1A490 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 53226E09171B9E5B00B1A490 /* InfoPlist.strings */; };
+		53226E0D171B9E5B00B1A490 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 53226E0C171B9E5B00B1A490 /* main.m */; };
+		53226E11171B9E5B00B1A490 /* LKAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 53226E10171B9E5B00B1A490 /* LKAppDelegate.m */; };
+		53226E13171B9E5B00B1A490 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 53226E12171B9E5B00B1A490 /* Default.png */; };
+		53226E15171B9E5B00B1A490 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 53226E14171B9E5B00B1A490 /* Default@2x.png */; };
+		53226E17171B9E5B00B1A490 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 53226E16171B9E5B00B1A490 /* Default-568h@2x.png */; };
+		53226E32171BA09F00B1A490 /* FMDatabase+InMemoryOnDiskIO.m in Sources */ = {isa = PBXBuildFile; fileRef = 53226E26171BA09F00B1A490 /* FMDatabase+InMemoryOnDiskIO.m */; };
+		53226E33171BA09F00B1A490 /* FMDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 53226E29171BA09F00B1A490 /* FMDatabase.m */; };
+		53226E34171BA09F00B1A490 /* FMDatabaseAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 53226E2B171BA09F00B1A490 /* FMDatabaseAdditions.m */; };
+		53226E35171BA09F00B1A490 /* FMDatabasePool.m in Sources */ = {isa = PBXBuildFile; fileRef = 53226E2D171BA09F00B1A490 /* FMDatabasePool.m */; };
+		53226E36171BA09F00B1A490 /* FMDatabaseQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 53226E2F171BA09F00B1A490 /* FMDatabaseQueue.m */; };
+		53226E37171BA09F00B1A490 /* FMResultSet.m in Sources */ = {isa = PBXBuildFile; fileRef = 53226E31171BA09F00B1A490 /* FMResultSet.m */; };
+		53226E3F171BA16E00B1A490 /* LKDBHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 53226E3D171BA16E00B1A490 /* LKDBHelper.m */; };
+		53226E45171BA44100B1A490 /* LKDBUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 53226E44171BA44100B1A490 /* LKDBUtils.m */; };
+		53226E47171BFB6900B1A490 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 53226E46171BFB6900B1A490 /* libsqlite3.dylib */; };
+		53226E4A171C1F0400B1A490 /* NSObject+LKModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 53226E49171C1F0400B1A490 /* NSObject+LKModel.m */; };
+		53226E4C171C207F00B1A490 /* 41.png in Resources */ = {isa = PBXBuildFile; fileRef = 53226E4B171C207F00B1A490 /* 41.png */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		53226DFD171B9E5A00B1A490 /* LKDBHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LKDBHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		53226E00171B9E5A00B1A490 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		53226E02171B9E5A00B1A490 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		53226E04171B9E5A00B1A490 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		53226E08171B9E5B00B1A490 /* LKDBHelper-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "LKDBHelper-Info.plist"; sourceTree = "<group>"; };
+		53226E0A171B9E5B00B1A490 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		53226E0C171B9E5B00B1A490 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		53226E0E171B9E5B00B1A490 /* LKDBHelper-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "LKDBHelper-Prefix.pch"; sourceTree = "<group>"; };
+		53226E0F171B9E5B00B1A490 /* LKAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LKAppDelegate.h; sourceTree = "<group>"; };
+		53226E10171B9E5B00B1A490 /* LKAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LKAppDelegate.m; sourceTree = "<group>"; };
+		53226E12171B9E5B00B1A490 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
+		53226E14171B9E5B00B1A490 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
+		53226E16171B9E5B00B1A490 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		53226E25171BA09F00B1A490 /* FMDatabase+InMemoryOnDiskIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FMDatabase+InMemoryOnDiskIO.h"; sourceTree = "<group>"; };
+		53226E26171BA09F00B1A490 /* FMDatabase+InMemoryOnDiskIO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FMDatabase+InMemoryOnDiskIO.m"; sourceTree = "<group>"; };
+		53226E28171BA09F00B1A490 /* FMDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabase.h; sourceTree = "<group>"; };
+		53226E29171BA09F00B1A490 /* FMDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabase.m; sourceTree = "<group>"; };
+		53226E2A171BA09F00B1A490 /* FMDatabaseAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabaseAdditions.h; sourceTree = "<group>"; };
+		53226E2B171BA09F00B1A490 /* FMDatabaseAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabaseAdditions.m; sourceTree = "<group>"; };
+		53226E2C171BA09F00B1A490 /* FMDatabasePool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabasePool.h; sourceTree = "<group>"; };
+		53226E2D171BA09F00B1A490 /* FMDatabasePool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabasePool.m; sourceTree = "<group>"; };
+		53226E2E171BA09F00B1A490 /* FMDatabaseQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabaseQueue.h; sourceTree = "<group>"; };
+		53226E2F171BA09F00B1A490 /* FMDatabaseQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabaseQueue.m; sourceTree = "<group>"; };
+		53226E30171BA09F00B1A490 /* FMResultSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMResultSet.h; sourceTree = "<group>"; };
+		53226E31171BA09F00B1A490 /* FMResultSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMResultSet.m; sourceTree = "<group>"; };
+		53226E3C171BA16E00B1A490 /* LKDBHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKDBHelper.h; sourceTree = "<group>"; };
+		53226E3D171BA16E00B1A490 /* LKDBHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKDBHelper.m; sourceTree = "<group>"; };
+		53226E43171BA44100B1A490 /* LKDBUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKDBUtils.h; sourceTree = "<group>"; };
+		53226E44171BA44100B1A490 /* LKDBUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKDBUtils.m; sourceTree = "<group>"; };
+		53226E46171BFB6900B1A490 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
+		53226E48171C1F0400B1A490 /* NSObject+LKModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+LKModel.h"; sourceTree = "<group>"; };
+		53226E49171C1F0400B1A490 /* NSObject+LKModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+LKModel.m"; sourceTree = "<group>"; };
+		53226E4B171C207F00B1A490 /* 41.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 41.png; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		53226DFA171B9E5A00B1A490 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				53226E47171BFB6900B1A490 /* libsqlite3.dylib in Frameworks */,
+				53226E01171B9E5A00B1A490 /* UIKit.framework in Frameworks */,
+				53226E03171B9E5A00B1A490 /* Foundation.framework in Frameworks */,
+				53226E05171B9E5B00B1A490 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		53226DF4171B9E5A00B1A490 = {
+			isa = PBXGroup;
+			children = (
+				53226E46171BFB6900B1A490 /* libsqlite3.dylib */,
+				53226E06171B9E5B00B1A490 /* LKDBHelper */,
+				53226DFF171B9E5A00B1A490 /* Frameworks */,
+				53226DFE171B9E5A00B1A490 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		53226DFE171B9E5A00B1A490 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				53226DFD171B9E5A00B1A490 /* LKDBHelper.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		53226DFF171B9E5A00B1A490 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				53226E00171B9E5A00B1A490 /* UIKit.framework */,
+				53226E02171B9E5A00B1A490 /* Foundation.framework */,
+				53226E04171B9E5A00B1A490 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		53226E06171B9E5B00B1A490 /* LKDBHelper */ = {
+			isa = PBXGroup;
+			children = (
+				53226E4B171C207F00B1A490 /* 41.png */,
+				53226E39171BA10800B1A490 /* Helper */,
+				53226E23171BA09F00B1A490 /* FMDB */,
+				53226E0F171B9E5B00B1A490 /* LKAppDelegate.h */,
+				53226E10171B9E5B00B1A490 /* LKAppDelegate.m */,
+				53226E07171B9E5B00B1A490 /* Supporting Files */,
+			);
+			path = LKDBHelper;
+			sourceTree = "<group>";
+		};
+		53226E07171B9E5B00B1A490 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				53226E08171B9E5B00B1A490 /* LKDBHelper-Info.plist */,
+				53226E09171B9E5B00B1A490 /* InfoPlist.strings */,
+				53226E0C171B9E5B00B1A490 /* main.m */,
+				53226E0E171B9E5B00B1A490 /* LKDBHelper-Prefix.pch */,
+				53226E12171B9E5B00B1A490 /* Default.png */,
+				53226E14171B9E5B00B1A490 /* Default@2x.png */,
+				53226E16171B9E5B00B1A490 /* Default-568h@2x.png */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		53226E23171BA09F00B1A490 /* FMDB */ = {
+			isa = PBXGroup;
+			children = (
+				53226E24171BA09F00B1A490 /* extra */,
+				53226E27171BA09F00B1A490 /* src */,
+			);
+			path = FMDB;
+			sourceTree = "<group>";
+		};
+		53226E24171BA09F00B1A490 /* extra */ = {
+			isa = PBXGroup;
+			children = (
+				53226E25171BA09F00B1A490 /* FMDatabase+InMemoryOnDiskIO.h */,
+				53226E26171BA09F00B1A490 /* FMDatabase+InMemoryOnDiskIO.m */,
+			);
+			path = extra;
+			sourceTree = "<group>";
+		};
+		53226E27171BA09F00B1A490 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				53226E28171BA09F00B1A490 /* FMDatabase.h */,
+				53226E29171BA09F00B1A490 /* FMDatabase.m */,
+				53226E2A171BA09F00B1A490 /* FMDatabaseAdditions.h */,
+				53226E2B171BA09F00B1A490 /* FMDatabaseAdditions.m */,
+				53226E2C171BA09F00B1A490 /* FMDatabasePool.h */,
+				53226E2D171BA09F00B1A490 /* FMDatabasePool.m */,
+				53226E2E171BA09F00B1A490 /* FMDatabaseQueue.h */,
+				53226E2F171BA09F00B1A490 /* FMDatabaseQueue.m */,
+				53226E30171BA09F00B1A490 /* FMResultSet.h */,
+				53226E31171BA09F00B1A490 /* FMResultSet.m */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		53226E39171BA10800B1A490 /* Helper */ = {
+			isa = PBXGroup;
+			children = (
+				53226E3C171BA16E00B1A490 /* LKDBHelper.h */,
+				53226E3D171BA16E00B1A490 /* LKDBHelper.m */,
+				53226E48171C1F0400B1A490 /* NSObject+LKModel.h */,
+				53226E49171C1F0400B1A490 /* NSObject+LKModel.m */,
+				53226E43171BA44100B1A490 /* LKDBUtils.h */,
+				53226E44171BA44100B1A490 /* LKDBUtils.m */,
+			);
+			path = Helper;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		53226DFC171B9E5A00B1A490 /* LKDBHelper */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 53226E20171B9E5B00B1A490 /* Build configuration list for PBXNativeTarget "LKDBHelper" */;
+			buildPhases = (
+				53226DF9171B9E5A00B1A490 /* Sources */,
+				53226DFA171B9E5A00B1A490 /* Frameworks */,
+				53226DFB171B9E5A00B1A490 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LKDBHelper;
+			productName = LKDBHelper;
+			productReference = 53226DFD171B9E5A00B1A490 /* LKDBHelper.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		53226DF5171B9E5A00B1A490 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = LK;
+				LastUpgradeCheck = 0460;
+				ORGANIZATIONNAME = ljh;
+			};
+			buildConfigurationList = 53226DF8171B9E5A00B1A490 /* Build configuration list for PBXProject "LKDBHelper" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 53226DF4171B9E5A00B1A490;
+			productRefGroup = 53226DFE171B9E5A00B1A490 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				53226DFC171B9E5A00B1A490 /* LKDBHelper */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		53226DFB171B9E5A00B1A490 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				53226E0B171B9E5B00B1A490 /* InfoPlist.strings in Resources */,
+				53226E13171B9E5B00B1A490 /* Default.png in Resources */,
+				53226E15171B9E5B00B1A490 /* Default@2x.png in Resources */,
+				53226E17171B9E5B00B1A490 /* Default-568h@2x.png in Resources */,
+				53226E4C171C207F00B1A490 /* 41.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		53226DF9171B9E5A00B1A490 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				53226E0D171B9E5B00B1A490 /* main.m in Sources */,
+				53226E11171B9E5B00B1A490 /* LKAppDelegate.m in Sources */,
+				53226E32171BA09F00B1A490 /* FMDatabase+InMemoryOnDiskIO.m in Sources */,
+				53226E33171BA09F00B1A490 /* FMDatabase.m in Sources */,
+				53226E34171BA09F00B1A490 /* FMDatabaseAdditions.m in Sources */,
+				53226E35171BA09F00B1A490 /* FMDatabasePool.m in Sources */,
+				53226E36171BA09F00B1A490 /* FMDatabaseQueue.m in Sources */,
+				53226E37171BA09F00B1A490 /* FMResultSet.m in Sources */,
+				53226E3F171BA16E00B1A490 /* LKDBHelper.m in Sources */,
+				53226E45171BA44100B1A490 /* LKDBUtils.m in Sources */,
+				53226E4A171C1F0400B1A490 /* NSObject+LKModel.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		53226E09171B9E5B00B1A490 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				53226E0A171B9E5B00B1A490 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		53226E1E171B9E5B00B1A490 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		53226E1F171B9E5B00B1A490 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		53226E21171B9E5B00B1A490 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "LKDBHelper/LKDBHelper-Prefix.pch";
+				INFOPLIST_FILE = "LKDBHelper/LKDBHelper-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		53226E22171B9E5B00B1A490 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "LKDBHelper/LKDBHelper-Prefix.pch";
+				INFOPLIST_FILE = "LKDBHelper/LKDBHelper-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		53226DF8171B9E5A00B1A490 /* Build configuration list for PBXProject "LKDBHelper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				53226E1E171B9E5B00B1A490 /* Debug */,
+				53226E1F171B9E5B00B1A490 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		53226E20171B9E5B00B1A490 /* Build configuration list for PBXNativeTarget "LKDBHelper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				53226E21171B9E5B00B1A490 /* Debug */,
+				53226E22171B9E5B00B1A490 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 53226DF5171B9E5A00B1A490 /* Project object */;
+}
