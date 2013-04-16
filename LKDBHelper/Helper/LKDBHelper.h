@@ -108,14 +108,6 @@
 -(BOOL)deleteWithClass:(Class)modelClass where:(id)where;
 -(void)deleteWithClass:(Class)modelClass where:(id)where callback:(void (^)(BOOL))block;
 
-
-/**
- *	@brief	根据 实体类 清空数据
- *
- *	@param 	modelClass 	实体类
- */
--(void)clearTableData:(Class)modelClass;
-
 /**
  *	@brief  直接判断primary key 的值是否存在  （如果有rowid 就肯定存在 所以就不用rowid 判断了）
  *
@@ -125,6 +117,17 @@
  */
 -(BOOL)isExistsModel:(NSObject*)model;
 -(BOOL)isExistsClass:(Class)modelClass where:(id)where;
+
+
+/**
+ *	@brief	根据 实体类 清空数据
+ *
+ *	@param 	modelClass 	实体类
+ */
+-(void)clearTableData:(Class)modelClass;
+
+-(void)clearNoneImage:(Class)modelClass columes:(NSArray*)columes;
+-(void)clearNoneData:(Class)modelClass columes:(NSArray*)columes;
 @end
 
 

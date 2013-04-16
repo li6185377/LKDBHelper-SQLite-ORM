@@ -96,4 +96,9 @@ typedef enum {
  *	@brief   sqlite 中存储的rowid
  */
 @property int rowid;
+
+
+//获取保存的 图片和数据的文件夹路径
++(NSString*)getDBImageDir;
++(NSString*)getDBDataDir;
 @end

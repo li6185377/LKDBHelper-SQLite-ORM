@@ -113,6 +113,14 @@ static char LKModelBase_Key_RowID;
 }
 
 #pragma mark- translate value
++(NSString*)getDBImageDir
+{
+    return [NSString stringWithFormat:@"dbimg/%@",NSStringFromClass(self)];
+}
++(NSString*)getDBDataDir
+{
+    return [NSString stringWithFormat:@"dbdata/%@",NSStringFromClass(self)];
+}
 -(id)modelGetValueWithKey:(NSString *)key type:(NSString *)columeType
 {
     id value = [self valueForKey:key];
@@ -123,7 +131,7 @@ static char LKModelBase_Key_RowID;
         NSString* filename = [NSString stringWithFormat:@"img%ld%ld",date&0xFFFFF,random&0xFFF];
         
         NSData* datas = UIImageJPEGRepresentation(value, 1);
-        [datas writeToFile:[LKDBUtils getPathForDocuments:filename inDir:[NSString stringWithFormat:@"dbimg/%@",NSStringFromClass(self.class)]] atomically:YES];
+        [datas writeToFile:[LKDBUtils getPathForDocuments:filename inDir:[self.class getDBImageDir]] atomically:YES];
         value = filename;
     }
     else if([value isKindOfClass:[NSData class]])
@@ -132,7 +140,7 @@ static char LKModelBase_Key_RowID;
         long date = [[NSDate date] timeIntervalSince1970];
         NSString* filename = [NSString stringWithFormat:@"data%ld%ld",date&0xFFFFF,random&0xFFF];
         
-        [value writeToFile:[LKDBUtils getPathForDocuments:filename inDir:[NSString stringWithFormat:@"dbdata/%@",NSStringFromClass(self.class)]] atomically:YES];
+        [value writeToFile:[LKDBUtils getPathForDocuments:filename inDir:[self.class getDBDataDir]] atomically:YES];
         value = filename;
     }
     else if([value isKindOfClass:[NSDate class]])
@@ -159,9 +167,9 @@ static char LKModelBase_Key_RowID;
     if([columeType isEqualToString:@"UIImage"])
     {
         NSString* filename = value;
-        if([LKDBUtils isFileExists:[LKDBUtils getPathForDocuments:filename inDir:@"dbimg"]])
+        if([LKDBUtils isFileExists:[LKDBUtils getPathForDocuments:filename inDir:[self.class getDBImageDir]]])
         {
-            UIImage* img = [UIImage imageWithContentsOfFile:[LKDBUtils getPathForDocuments:filename inDir:@"dbimg"]];
+            UIImage* img = [UIImage imageWithContentsOfFile:[LKDBUtils getPathForDocuments:filename inDir:[self.class getDBImageDir]]];
             modelValue = img;
         }
     }
@@ -174,9 +182,9 @@ static char LKModelBase_Key_RowID;
     {
         
         NSString* filename = value;
-        if([LKDBUtils isFileExists:[LKDBUtils getPathForDocuments:filename inDir:@"dbdata"]])
+        if([LKDBUtils isFileExists:[LKDBUtils getPathForDocuments:filename inDir:[self.class getDBDataDir]]])
         {
-            NSData* data = [NSData dataWithContentsOfFile:[LKDBUtils getPathForDocuments:filename inDir:@"dbdata"]];
+            NSData* data = [NSData dataWithContentsOfFile:[LKDBUtils getPathForDocuments:filename inDir:[self.class getDBDataDir]]];
             modelValue = data;
         }
     }else if([columeType isEqualToString:@"UIColor"])

@@ -647,14 +647,7 @@ const static NSString* blobtypestring = @"NSDataUIImage";
     return result;
 }
 #pragma mark - other operation
--(void)clearTableData:(Class)modelClass
-{
-    [self.bindingQueue inDatabase:^(FMDatabase* db)
-     {
-         NSString* delete = [NSString stringWithFormat:@"DELETE FROM %@",[modelClass getTableName]];
-         [db executeUpdate:delete];
-     }];
-}
+
 -(BOOL)isExistsModel:(NSObject *)model
 {
     Class modelClass = model.class;
@@ -702,6 +695,72 @@ const static NSString* blobtypestring = @"NSDataUIImage";
         [resultSet close];
     }
     return exists;
+}
+
+#pragma mark- clear operation
+
+-(void)clearTableData:(Class)modelClass
+{
+    [self.bindingQueue inDatabase:^(FMDatabase* db)
+     {
+         NSString* delete = [NSString stringWithFormat:@"DELETE FROM %@",[modelClass getTableName]];
+         [db executeUpdate:delete];
+     }];
+}
+
+-(void)clearNoneData:(Class)modelClass columes:(NSArray *)columes
+{
+    [self clearFileWithTable:[modelClass getTableName] columes:columes dir:[modelClass getDBDataDir]];
+}
+-(void)clearNoneImage:(Class)modelClass columes:(NSArray *)columes
+{
+    [self clearFileWithTable:[modelClass getTableName]  columes:columes dir:[modelClass getDBImageDir]];
+}
+-(void)clearFileWithTable:(NSString*)tableName columes:(NSArray*)columes dir:(NSString*)relativeDIR
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+        
+        int count =  columes.count;
+        NSString* dir =  [LKDBUtils getDirectoryForDocuments:relativeDIR];
+        //获取该目录下所有文件名
+        NSArray* files = [LKDBUtils getFilenamesWithDir:dir];
+        
+        NSString* seleteColume = [columes componentsJoinedByString:@","];
+        NSMutableString* whereStr =[NSMutableString string];
+        for (int i=0; i<count ; i++) {
+            [whereStr appendFormat:@" %@ != '' ",[columes objectAtIndex:i]];
+            if(i< count -1)
+            {
+                [whereStr appendString:@" or "];
+            }
+        }
+        NSString* querySql = [NSString stringWithFormat:@"select %@ from %@ where %@",seleteColume,tableName,whereStr];
+        __block NSArray* dbfiles;
+        [[LKDBHelper sharedDBHelper] executeDB:^(FMDatabase *db) {
+            
+            NSMutableArray* tempfiles = [NSMutableArray arrayWithCapacity:6];
+            FMResultSet* set = [db executeQuery:querySql];
+            while ([set next]) {
+                for (int j=0; j<count; j++) {
+                    NSString* str = [set stringForColumnIndex:j];
+                    if([LKDBUtils checkStringIsEmpty:str] ==NO)
+                    {
+                        [tempfiles addObject:str];
+                    }
+                }
+            }
+            [set close];
+            dbfiles = tempfiles;
+        }];
+        
+        //遍历  当不再数据库记录中 就删除
+        for (NSString* deletefile in files) {
+            if([dbfiles indexOfObject:deletefile] == NSNotFound)
+            {
+                [LKDBUtils deleteWithFilepath:[dir stringByAppendingPathComponent:deletefile]];
+            }
+        }
+    });
 }
 @end
 
