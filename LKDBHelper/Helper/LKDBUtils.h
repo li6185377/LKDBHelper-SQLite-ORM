@@ -19,7 +19,10 @@
 +(NSString*) getPathForDocuments:(NSString *)filename inDir:(NSString*)dir;
 //文件是否存在
 +(BOOL) isFileExists:(NSString*)filepath;
-
+//删除文件
++(BOOL)deleteWithFilepath:(NSString*)filepath;
+//返回该文件目录下 所有文件名
++(NSArray*)getFilenamesWithDir:(NSString*)dir;
 
 //检测字符串是否为空
 +(BOOL)checkStringIsEmpty:(NSString *)string;

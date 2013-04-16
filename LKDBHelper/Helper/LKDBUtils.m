@@ -38,6 +38,17 @@
 {
     return [[NSFileManager defaultManager] fileExistsAtPath:filepath];
 }
++(BOOL)deleteWithFilepath:(NSString *)filepath
+{
+   return [[NSFileManager defaultManager] removeItemAtPath:filepath error:nil];
+}
++(NSArray*)getFilenamesWithDir:(NSString*)dir
+{
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSArray *fileList = [fileManager contentsOfDirectoryAtPath:dir error:nil];
+    return fileList;
+}
+
 
 
 +(BOOL)checkStringIsEmpty:(NSString *)string

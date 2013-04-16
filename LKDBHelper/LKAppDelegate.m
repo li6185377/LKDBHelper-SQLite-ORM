@@ -66,6 +66,40 @@
     
         NSLog(@"示例 结束 \n\n");
     
+    
+   
+    NSLog(@"扩展:  删除已不再数据库中保存的 图片记录");
+    //目前 还不知 如何  合并到LKDBHelper 中  就先写出来 给大家参考下
+    
+    //获取相应 实体类图片保存路径  可看NSObject + LKModel 源代码 得知位置
+    NSString* dir =  [LKDBUtils getDirectoryForDocuments:[NSString stringWithFormat:@"dbimg/%@",NSStringFromClass([LKTest class])]];
+    
+    //获取该目录下所有文件名
+    NSArray* files = [LKDBUtils getFilenamesWithDir:dir];
+    __block NSArray* dbfiles;
+    [[LKDBHelper sharedDBHelper] executeDB:^(FMDatabase *db) {
+
+        //获取img列集合
+        NSString* sql = @"select img from LKTextTable where img !='' ";
+        
+        NSMutableArray* tempfiles = [NSMutableArray arrayWithCapacity:6];
+        FMResultSet* set = [db executeQuery:sql];
+        while ([set next]) {
+            //保存起来
+            [tempfiles addObject:[set stringForColumnIndex:0]];
+        }
+        [set close];
+        dbfiles = tempfiles;
+    }];
+    
+    //遍历  当不再数据库记录中 就删除
+    for (NSString* deletefile in files) {
+        if([dbfiles indexOfObject:deletefile] == NSNotFound)
+        {
+            [LKDBUtils deleteWithFilepath:[dir stringByAppendingPathComponent:deletefile]];
+        }
+    }
+    
     [self.window makeKeyAndVisible];
     return YES;
 }
