@@ -23,7 +23,6 @@
 @end
 
 @interface LKDBHelper(DatabaseManager)
-
 //根据model 创建表
 -(void)createTableWithModelClass:(Class)model;
 

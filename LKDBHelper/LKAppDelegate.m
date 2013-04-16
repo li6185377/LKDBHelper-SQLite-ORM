@@ -24,7 +24,7 @@
             NSLog(@"示例 开始 \n\n");
     //创建表  会根据表的版本号  来判断具体的操作
     [[LKDBHelper sharedDBHelper] createTableWithModelClass:[LKTest class]];
-
+    
     //清空表数据
     [[LKDBHelper sharedDBHelper] clearTableData:[LKTest class]];
     

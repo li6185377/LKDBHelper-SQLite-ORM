@@ -33,19 +33,7 @@
 {
     self = [super init];
     if (self) {
-        [self setDBName:@"LKDB"];
-        
-        __block NSMutableDictionary* dic = [NSMutableDictionary dictionaryWithCapacity:0];
-        [self executeDB:^(FMDatabase *db) {
-            [db executeUpdate:@"CREATE TABLE IF NOT EXISTS LKTableManager(table_name text primary key,version integer)"];
-            FMResultSet* set = [db executeQuery:@"select table_name,version from LKTableManager"];
-            while ([set next]) {
-                [dic setObject:[NSNumber numberWithInt:[set intForColumnIndex:1]] forKey:[set stringForColumnIndex:0]];
-            }
-            [set close];
-        }];
-        
-        self.tableManager = dic;
+        [self setDBName:@"LKDB"];   
     }
     return self;
 }
@@ -63,6 +51,20 @@
         }
         [self.bindingQueue close];
         self.bindingQueue = [[[FMDatabaseQueue alloc]initWithPath:[LKDBUtils getPathForDocuments:self.dbname inDir:@"db"]] autorelease];
+        
+        
+        //获取表版本管理
+        __block NSMutableDictionary* dic = [NSMutableDictionary dictionaryWithCapacity:0];
+        [self executeDB:^(FMDatabase *db) {
+            [db executeUpdate:@"CREATE TABLE IF NOT EXISTS LKTableManager(table_name text primary key,version integer)"];
+            FMResultSet* set = [db executeQuery:@"select table_name,version from LKTableManager"];
+            while ([set next]) {
+                [dic setObject:[NSNumber numberWithInt:[set intForColumnIndex:1]] forKey:[set stringForColumnIndex:0]];
+            }
+            [set close];
+        }];
+        
+        self.tableManager = dic;
     }
 }
 
