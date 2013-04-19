@@ -718,6 +718,7 @@ const static NSString* blobtypestring = @"NSDataUIImage";
 {
     [self clearFileWithTable:[modelClass getTableName]  columes:columes dir:[modelClass getDBImageDir]];
 }
+
 -(void)clearFileWithTable:(NSString*)tableName columes:(NSArray*)columes dir:(NSString*)relativeDIR
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
