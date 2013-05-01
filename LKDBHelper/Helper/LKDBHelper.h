@@ -73,6 +73,15 @@
 -(BOOL)insertToDB:(NSObject*)model;
 -(void)insertToDB:(NSObject*)model callback:(void(^)(BOOL))block;
 
+/**
+ *	@brief	当实体 主键不存在的时候 插入
+ *
+ *	@param 	model 	要插入的实体类
+ *
+ *	@return	插入是否成功
+ */
+-(BOOL)insertWhenNotExists:(NSObject*)model;
+-(void)insertWhenNotExists:(NSObject*)model callback:(void(^)(BOOL))block;
 
 /**
  *	@brief 根据条件更新   当where 传 nil 时  根据 rowid 或者 primary 列的值 更新数据

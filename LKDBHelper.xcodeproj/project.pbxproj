@@ -335,6 +335,7 @@
 		53226E21171B9E5B00B1A490 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LKDBHelper/LKDBHelper-Prefix.pch";
 				INFOPLIST_FILE = "LKDBHelper/LKDBHelper-Info.plist";
@@ -346,6 +347,7 @@
 		53226E22171B9E5B00B1A490 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LKDBHelper/LKDBHelper-Prefix.pch";
 				INFOPLIST_FILE = "LKDBHelper/LKDBHelper-Info.plist";
@@ -373,6 +375,7 @@
 				53226E22171B9E5B00B1A490 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -25,8 +25,8 @@
 @property int  age;
 @property BOOL isGirl;
 @property char like;
-@property(retain,nonatomic) UIImage* img;
-@property(retain,nonatomic) NSDate* date;
+@property(strong,nonatomic) UIImage* img;
+@property(strong,nonatomic) NSDate* date;
 
 @property(copy,nonatomic)NSString* error;
 @property(copy,nonatomic)UIColor* color;

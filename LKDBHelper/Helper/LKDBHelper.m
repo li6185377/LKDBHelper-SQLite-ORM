@@ -9,10 +9,9 @@
 #import "LKDBHelper.h"
 
 @interface LKDBHelper()
-
-@property(retain,nonatomic)FMDatabaseQueue* bindingQueue;
+@property(strong,nonatomic)FMDatabaseQueue* bindingQueue;
 @property(copy,nonatomic)NSString* dbname;
-@property(retain,nonatomic)NSMutableDictionary* tableManager;
+@property(strong,nonatomic)NSMutableDictionary* tableManager;
 @end
 
 @implementation LKDBHelper
@@ -50,21 +49,19 @@
             self.dbname = fileName;
         }
         [self.bindingQueue close];
-        self.bindingQueue = [[[FMDatabaseQueue alloc]initWithPath:[LKDBUtils getPathForDocuments:self.dbname inDir:@"db"]] autorelease];
+        self.bindingQueue = [[FMDatabaseQueue alloc]initWithPath:[LKDBUtils getPathForDocuments:self.dbname inDir:@"db"]];
         
         
         //获取表版本管理
-        __block NSMutableDictionary* dic = [NSMutableDictionary dictionaryWithCapacity:0];
+        self.tableManager = [NSMutableDictionary dictionaryWithCapacity:0];
         [self executeDB:^(FMDatabase *db) {
             [db executeUpdate:@"CREATE TABLE IF NOT EXISTS LKTableManager(table_name text primary key,version integer)"];
             FMResultSet* set = [db executeQuery:@"select table_name,version from LKTableManager"];
             while ([set next]) {
-                [dic setObject:[NSNumber numberWithInt:[set intForColumnIndex:1]] forKey:[set stringForColumnIndex:0]];
+                [_tableManager setObject:[NSNumber numberWithInt:[set intForColumnIndex:1]] forKey:[set stringForColumnIndex:0]];
             }
             [set close];
         }];
-        
-        self.tableManager = dic;
     }
 }
 
@@ -123,11 +120,7 @@
 }
 -(void)dealloc
 {
-    self.tableManager = nil;
     [self.bindingQueue close];
-    self.bindingQueue = nil;
-    self.dbname = nil;
-    [super dealloc];
 }
 @end
 @implementation LKDBHelper(DatabaseManager)
@@ -378,7 +371,7 @@ const static NSString* blobtypestring = @"NSDataUIImage";
     NSArray* protypes = [dic objectForKey:@"type"];
     
     while ([set next]) {
-        NSObject* bindingModel = [[[modelClass alloc]init] autorelease];
+        NSObject* bindingModel = [[modelClass alloc]init];
         bindingModel.rowid = [set intForColumnIndex:0];
         for (int i=0; i< pronames.count; i++) {
             NSString* columeName = [pronames objectAtIndex:i];
@@ -418,6 +411,23 @@ const static NSString* blobtypestring = @"NSDataUIImage";
         }
     }];
 }
+
+-(BOOL)insertWhenNotExists:(NSObject *)model
+{
+    if([self isExistsModel:model]==NO)
+    {
+        return [self insertToDB:model];
+    }
+    return NO;
+}
+-(void)insertWhenNotExists:(NSObject *)model callback:(void (^)(BOOL))block
+{
+    if([self isExistsModel:model]==NO)
+    {
+        [self insertToDB:model callback:block];
+    }
+}
+
 -(BOOL)insertToDB:(NSObject*)model db:(FMDatabase*)db{
     if(model == nil)
     {
@@ -677,7 +687,8 @@ const static NSString* blobtypestring = @"NSDataUIImage";
     {
         NSString* rowCountSql = [NSString stringWithFormat:@"select count(rowid) from %@ where %@",[modelClass getTableName],where];
         FMResultSet* resultSet = [db executeQuery:rowCountSql];
-        if([resultSet next])
+        [resultSet next];
+        if([resultSet intForColumnIndex:0]>0)
         {
             exists = YES;
         }
@@ -690,7 +701,8 @@ const static NSString* blobtypestring = @"NSDataUIImage";
         NSString* rowCountSql = [NSString stringWithFormat:@"select count(rowid) from %@ where %@",[modelClass getTableName],wherekey];
         
         FMResultSet* resultSet = [db executeQuery:rowCountSql withArgumentsInArray:values];
-        if([resultSet next])
+        [resultSet next];
+        if([resultSet intForColumnIndex:0]>0)
         {
             exists = YES;
         }
