@@ -276,7 +276,7 @@ const static NSString* blobtypestring = @"NSDataUIImage";
 {
     NSMutableString* rowCountSql = [NSMutableString stringWithFormat:@"select count(rowid) from %@ ",[modelClass getTableName]];
     FMResultSet* resultSet = nil;
-    if([where isKindOfClass:[NSString class]] && [LKDBUtils checkStringIsEmpty:where])
+    if([where isKindOfClass:[NSString class]] && [LKDBUtils checkStringIsEmpty:where]==NO)
     {
         [rowCountSql appendFormat:@" where %@",where];
         resultSet = [db executeQuery:rowCountSql];
