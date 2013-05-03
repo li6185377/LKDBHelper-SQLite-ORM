@@ -1,14 +1,16 @@
-LKDBHelper
-==========
+#LKDBHelper
+This is an automatic database operater.
+## wrapper around FMDB:https://github.com/ccgus/fmdb
+## Automatic Reference Counting (ARC)
+##example code can download the source code to look at it
 
-automatic database operation . use fmdb 
+
+
 根据Model自动数据库 操作  不用写 繁琐的SQL语句了  
 
 再也不用一个个去找字段 是否写错 格式 是否对应
 
 yeah 总于有人star了  thanks  
-
-
 
 1.使用方法跟 LKDaobase 差不多  不过 取消了 继承LKDaobase 的方式  采用了LKDBHelper 统一管理
 
