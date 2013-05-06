@@ -16,15 +16,15 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
-            NSLog(@"示例 开始 \n\n");
+    NSLog(@"示例 开始 example start \n\n");
 
-    //创建表  会根据表的版本号  来判断具体的操作
+    //创建表  会根据表的版本号  来判断具体的操作 . create table need to manually call
     [[LKDBHelper sharedDBHelper] createTableWithModelClass:[LKTest class]];
     
-    //清空表数据
+    //清空表数据   clear table data
     [[LKDBHelper sharedDBHelper] clearTableData:[LKTest class]];
     
-    //插入数据
+    //插入数据    insert table row
     LKTest* test = [[LKTest alloc]init];
     test.name = @"zhan san";
     test.age = 16;
@@ -34,27 +34,29 @@
     test.date = [NSDate date];
     test.color = [UIColor orangeColor];
     
-    //插入第一条 数据
+    //插入第一条 数据   Insert the first
     [[LKDBHelper sharedDBHelper] insertToDB:test];
     
-    //改个 主键 插入第2条数据
+    //改个 主键 插入第2条数据   update primary colume value  Insert the second
     test.name = @"li si";
     BOOL isInsert = [[LKDBHelper sharedDBHelper] insertToDB:test];
-    NSLog(@"插入完成 %d",isInsert);
+    NSLog(@"插入完成 insert finished : %@",isInsert>0?@"YES":@"NO");
     
     
-    //查询
+    //查询   search
     NSMutableArray* array =  [[LKDBHelper sharedDBHelper] search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
     for (NSObject* obj in array) {
         [obj printAllPropertys];
     }
     
     
-    //修改
+    //修改    update
     LKTest* test2 = [array objectAtIndex:0];
     test2.name = @"wang wu";
     [[LKDBHelper sharedDBHelper] updateToDB:test2 where:nil];
-    NSLog(@"修改完成");
+    
+    NSLog(@"修改完成 updated ");
+    
     array =  [[LKDBHelper sharedDBHelper] search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
     for (NSObject* obj in array) {
         [obj printAllPropertys];
@@ -62,18 +64,21 @@
     
     
     
-    //删除
+    //删除    delete
     [[LKDBHelper sharedDBHelper] deleteToDB:test2];
-    NSLog(@"删除完成");
+    
+    NSLog(@"删除完成        deleted");
+    
     array =  [[LKDBHelper sharedDBHelper] search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
     for (NSObject* obj in array) {
         [obj printAllPropertys];
     }
     
-        NSLog(@"示例 结束 \n\n");
+        NSLog(@"示例 结束  example finished\n\n");
     
     
    
+    //Expansion: Delete the picture is no longer stored in the database record
     NSLog(@"扩展:  删除已不再数据库中保存的 图片记录");
     //目前 已合并到LKDBHelper 中  就先写出来 给大家参考下
     
@@ -86,6 +91,15 @@
 @end
 
 @implementation LKTest
++(void)dbWillInsert:(NSObject *)entity
+{
+    NSLog(@"will insert : %@",NSStringFromClass(self));
+}
++(void)dbDidInserted:(NSObject *)entity result:(BOOL)result
+{
+    NSLog(@"did insert : %@",NSStringFromClass(self));
+}
+
 +(NSString *)getPrimaryKey
 {
     return @"name";
@@ -96,6 +110,20 @@
 }
 +(int)getTableVersion
 {
-    return 3;
+    return 2;
+}
++(LKTableUpdateType)tableUpdateWithDBHelper:(LKDBHelper *)helper oldVersion:(int)oldVersion newVersion:(int)newVersion
+{
+    switch (oldVersion) {
+        case 1:
+        {
+            [helper executeDB:^(FMDatabase *db) {
+                 NSString* sql = @"alter table LKTextTable add column color text";
+                [db executeUpdate:sql];
+            }];
+        }
+            break;
+    }
+    return LKTableUpdateTypeCustom;
 }
 @end

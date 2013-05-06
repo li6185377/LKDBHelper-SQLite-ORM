@@ -105,11 +105,11 @@ static char LKModelBase_Key_RowID;
 
 +(NSString *)getPrimaryKey
 {
-    return @"";
+    return nil;
 }
 +(NSString *)getTableName
 {
-    return NSStringFromClass(self);
+    return nil;
 }
 
 #pragma mark- translate value
@@ -121,6 +121,7 @@ static char LKModelBase_Key_RowID;
 {
     return [NSString stringWithFormat:@"dbdata/%@",NSStringFromClass(self)];
 }
+
 -(id)modelGetValueWithKey:(NSString *)key type:(NSString *)columeType
 {
     id value = [self valueForKey:key];

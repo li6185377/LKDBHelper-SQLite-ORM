@@ -247,10 +247,12 @@ const static NSString* blobtypestring = @"NSDataUIImage";
     }];
     if(isCreated)
     {
+        [modelClass dbDidCreateTable:self];
         [self.tableManager setObject:tableName forKey:[NSNumber numberWithInt:newVersion]];
         [self executeDB:^(FMDatabase *db) {
             [db executeUpdate:[NSString stringWithFormat:@"replace into LKTableManager(table_name,version) values('%@',%d)",tableName,newVersion]];
         }];
+        
     }
 }
 
@@ -426,15 +428,28 @@ const static NSString* blobtypestring = @"NSDataUIImage";
     {
         [self insertToDB:model callback:block];
     }
+    else
+    {
+        if(block != nil)
+        {
+            block(NO);
+        }
+    }
 }
 
 -(BOOL)insertToDB:(NSObject*)model db:(FMDatabase*)db{
-    if(model == nil)
+    
+    Class modelClass = model.class;
+    if(model == nil || [LKDBUtils checkStringIsEmpty:[modelClass getTableName]])
     {
-        NSLog(@"LKDBHelper Insert Fail 。。 Model = nil");
+        NSLog(@"LKDBHelper Insert Fail 。。 Model = nil or  not has Table Name");
         return false;
     }
-    Class modelClass = model.class;
+
+    //callback
+    [modelClass dbWillInsert:model];
+    
+    //--
     NSDictionary* dic  = [modelClass getPropertys];
     NSArray* pronames = [dic objectForKey:@"name"];
     NSArray* protypes = [dic objectForKey:@"type"];
@@ -483,6 +498,9 @@ const static NSString* blobtypestring = @"NSDataUIImage";
     {
         NSLog(@"database insert fail %@",NSStringFromClass(modelClass));
     }
+    //callback
+    [modelClass dbDidInserted:model result:execute];
+    
     return execute;
 }
 
@@ -504,6 +522,14 @@ const static NSString* blobtypestring = @"NSDataUIImage";
 -(BOOL)updateToDB:(NSObject *)model where:(id)where db:(FMDatabase*)db
 {
     Class modelClass = model.class;
+    if(model == nil || [LKDBUtils checkStringIsEmpty:[modelClass getTableName]])
+    {
+        NSLog(@"LKDBHelper Update Fail 。。 model = nil or  not has Table Name");
+        return false;
+    }
+    //callback
+    [modelClass dbWillUpdate:model];
+    
     NSDictionary* dic  = [modelClass getPropertys];
     NSArray* pronames = [dic objectForKey:@"name"];
     NSArray* protypes = [dic objectForKey:@"type"];
@@ -576,6 +602,9 @@ const static NSString* blobtypestring = @"NSDataUIImage";
     {
         NSLog(@"database update fail %@   ----->rowid: %d",NSStringFromClass(modelClass),model.rowid);
     }
+    //callback
+    [modelClass dbDidUpdated:model result:execute];
+    
     return execute;
 }
 #pragma mark - delete operation
@@ -601,6 +630,15 @@ const static NSString* blobtypestring = @"NSDataUIImage";
 {
     BOOL result = NO;
     Class modelClass = model.class;
+    if(model == nil || [LKDBUtils checkStringIsEmpty:[modelClass getTableName]])
+    {
+        NSLog(@"LKDBHelper Delete Fail 。。 model = nil or  not has Table Name");
+        return false;
+    }
+    
+    //callback
+    [modelClass dbWillDelete:model];
+    
     if(model.rowid > 0)
     {
         NSString*  delete = [NSString stringWithFormat:@"delete from %@ where rowid=%d",[modelClass getTableName],model.rowid];
@@ -621,6 +659,10 @@ const static NSString* blobtypestring = @"NSDataUIImage";
         }
         result = [db executeUpdate:delete withArgumentsInArray:[NSArray arrayWithObject:value]];
     }
+    
+    //callback
+    [modelClass dbDidIDeleted:model result:result];
+    
     return result;
 }
 
@@ -779,3 +821,75 @@ const static NSString* blobtypestring = @"NSDataUIImage";
 }
 @end
 
+
+
+@implementation NSObject(LKDBHelper)
+
++(void)dbDidCreateTable:(LKDBHelper *)helper{}
+
++(void)dbDidIDeleted:(NSObject *)entity result:(BOOL)result{}
++(void)dbWillDelete:(NSObject *)entity{}
+
++(void)dbDidInserted:(NSObject *)entity result:(BOOL)result{}
++(void)dbWillInsert:(NSObject *)entity{}
+
++(void)dbDidUpdated:(NSObject *)entity result:(BOOL)result{}
++(void)dbWillUpdate:(NSObject *)entity{}
+
+#pragma mark - simplify synchronous function
++(BOOL)checkModelClass:(NSObject*)model
+{
+    if([model isKindOfClass:self])
+    {
+        return YES;
+    }
+    else
+    {
+        NSLog(@"%@ can not insert %@",NSStringFromClass(self),NSStringFromClass(model.class));
+        return NO;
+    }
+}
+
++(int)rowCountWithWhere:(id)where{
+    return [[LKDBHelper sharedDBHelper] rowCount:self where:where];
+}
+
++(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count{
+    return [[LKDBHelper sharedDBHelper] search:self where:where orderBy:orderBy offset:offset count:count];
+}
+
++(BOOL)insertToDB:(NSObject*)model{
+    
+    if([self checkModelClass:model])
+    {
+        return [[LKDBHelper sharedDBHelper] insertToDB:model];
+    }
+    return NO;
+    
+}
++(BOOL)insertWhenNotExists:(NSObject*)model{
+    if([self checkModelClass:model])
+    {
+        return [[LKDBHelper sharedDBHelper] insertWhenNotExists:model];
+    }
+    return NO;
+}
++(BOOL)updateToDB:(NSObject *)model where:(id)where{
+    if([self checkModelClass:model])
+    {
+        return [[LKDBHelper sharedDBHelper] updateToDB:model where:where];
+    }
+    return NO;
+}
++(BOOL)deleteToDB:(NSObject*)model{
+    if([self checkModelClass:model])
+    {
+        return [[LKDBHelper sharedDBHelper] deleteToDB:model];
+    }
+    return NO;
+}
++(BOOL)deleteWithWhere:(id)where{
+    
+    return [[LKDBHelper sharedDBHelper] deleteWithClass:self where:where];
+}
+@end
