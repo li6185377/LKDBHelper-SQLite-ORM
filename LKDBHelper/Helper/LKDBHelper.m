@@ -57,7 +57,7 @@
             [db executeUpdate:@"CREATE TABLE IF NOT EXISTS LKTableManager(table_name text primary key,version integer)"];
             FMResultSet* set = [db executeQuery:@"select table_name,version from LKTableManager"];
             while ([set next]) {
-                [self.tableManager setObject:[NSNumber numberWithInt:[set intForColumnIndex:1]] forKey:[set stringForColumnIndex:0]];
+                [_tableManager setObject:[NSNumber numberWithInt:[set intForColumnIndex:1]] forKey:[set stringForColumnIndex:0]];
             }
             [set close];
         }];
@@ -148,7 +148,7 @@
 }
 -(NSMutableDictionary *)getTableManager
 {
-    return self.tableManager;
+    return _tableManager;
 }
 -(void)dealloc
 {
@@ -205,7 +205,7 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
         NSLog(@"ERROR TableName is None! with model %@",NSStringFromClass(modelClass));
         return;
     }
-    int version = [[self.tableManager objectForKey:tableName] intValue];
+    int version = [[_tableManager objectForKey:tableName] intValue];
     int newVersion = [modelClass getTableVersion];
     if(newVersion != version && version > 0)
     {
@@ -267,7 +267,7 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
         if(isCreated)
         {
             [modelClass dbDidCreateTable:self];
-            [self.tableManager setObject:tableName forKey:[NSNumber numberWithInt:newVersion]];
+            [_tableManager setObject:tableName forKey:[NSNumber numberWithInt:newVersion]];
             
             NSString* replaceSQL = [NSString stringWithFormat:@"replace into LKTableManager(table_name,version) values('%@',%d)",tableName,newVersion];
             [db executeUpdate:replaceSQL];
