@@ -158,12 +158,6 @@ static char LKModelBase_Key_RowID;
 
 -(id)modelGetValueWithKey:(NSString *)key type:(NSString *)columeType
 {
-    Class valueClass = NSClassFromString(columeType);
-    if([LKDBUtils checkStringIsEmpty:[valueClass getTableName]] == NO)
-    {
-        
-    }
-    
     id value = [self valueForKey:key];
     if([value isKindOfClass:[UIImage class]])
     {

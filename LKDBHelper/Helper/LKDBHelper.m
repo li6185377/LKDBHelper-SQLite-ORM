@@ -72,7 +72,7 @@
     }
     else
     {
-        [self.bindingQueue inDatabase:^(FMDatabase *db) {
+        [_bindingQueue inDatabase:^(FMDatabase *db) {
             self.usingdb = db;
             block(db);
             self.usingdb = nil;
@@ -156,6 +156,7 @@
 }
 @end
 @implementation LKDBHelper(DatabaseManager)
+
 const __strong static NSString* normaltypestring = @"floatdoubledecimal";
 const __strong static NSString* inttypesstring = @"intcharshortlong";
 const __strong static NSString* blobtypestring = @"NSDataUIImage";
@@ -384,7 +385,7 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
             id value = nil;
             if([normaltypestring rangeOfString:columeType].location != NSNotFound)
             {
-                value = [NSNumber numberWithDouble:[set doubleForColumn:columeName]];
+                value = [NSNumber numberWithFloat:[set doubleForColumn:columeName]];
             }
             else if([inttypesstring rangeOfString:columeType].location != NSNotFound)
             {
@@ -399,6 +400,7 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
         [array addObject:bindingModel];
     }
     [set close];
+    
     return array;
 }
 #pragma mark- insert operation
@@ -854,7 +856,7 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
     }
     else
     {
-        NSLog(@"%@ can not insert %@",NSStringFromClass(self),NSStringFromClass(model.class));
+        NSLog(@"%@ can not use %@",NSStringFromClass(self),NSStringFromClass(model.class));
         return NO;
     }
 }
@@ -902,7 +904,6 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
     return NO;
 }
 +(BOOL)deleteWithWhere:(id)where{
-    
     return [[LKDBHelper sharedDBHelper] deleteWithClass:self where:where];
 }
 @end

@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 
 #import "LKDBUtils.h"
+#import "LKDBHelper.h"
+
 #import <objc/runtime.h>
 #define LKSQLText @"text"
 #define LKSQLInt @"integer"

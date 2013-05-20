@@ -16,16 +16,19 @@
  
  Description of parameters "where"
  For example: 
-          single:  @"rowid = 1" or @{@"rowid":@1}
+        single:  @"rowid = 1"                         or      @{@"rowid":@1}
  
-          more:    @"rowid = 1 and sex = 0" or @{@"rowid":@1,@"sex":@0}
-                   when where is "or" type , such as @"rowid = 1 or sex = 0"
-                   you only use NSString
+        more:    @"rowid = 1 and sex = 0"             or      @{@"rowid":@1,@"sex":@0}
+                   
+                    when where is "or" type , such as @"rowid = 1 or sex = 0"
+                    you only use NSString
  
-          array:   @"rowid in (1,2,3)" or @{@"rowid":@[@1,@2,@3]}
+        array:   @"rowid in (1,2,3)"                  or      @{@"rowid":@[@1,@2,@3]}
+            
+        composite:  @"rowid in (1,2,3) and sex=0 "      or      @{@"rowid":@[@1,@2,@3],@"sex":@0}
  
-          If you want to be judged , only use NSString
-          For example: @"date >= '2013-04-01 00:00:00'"
+        If you want to be judged , only use NSString
+        For example: @"date >= '2013-04-01 00:00:00'"
 */
 
 @interface LKDBHelper : NSObject
@@ -70,7 +73,7 @@
  *	@return	rows number
  */
 -(int)rowCount:(Class)modelClass where:(id)where;
--(void)rowCount:(Class)modelClass where:(id)where callback:(void(^)(int))callback;
+-(void)rowCount:(Class)modelClass where:(id)where callback:(void(^)(int rowCount))callback;
 
 /**
  *	@brief	query table
@@ -87,7 +90,7 @@
  *	@return	query finished result is an array(model instance collection)
  */
 -(NSMutableArray*)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
--(void)search:( Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count callback:(void(^)(NSMutableArray*))block;
+-(void)search:( Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count callback:(void(^)(NSMutableArray* array))block;
 
 
 /**
@@ -98,7 +101,7 @@
  *	@return	the inserted was successful
  */
 -(BOOL)insertToDB:(NSObject*)model;
--(void)insertToDB:(NSObject*)model callback:(void(^)(BOOL))block;
+-(void)insertToDB:(NSObject*)model callback:(void(^)(BOOL result))block;
 
 /**
  *	@brief	insert when the entity primary key does not exist
@@ -108,7 +111,7 @@
  *	@return	the inserted was successful
  */
 -(BOOL)insertWhenNotExists:(NSObject*)model;
--(void)insertWhenNotExists:(NSObject*)model callback:(void(^)(BOOL))block;
+-(void)insertWhenNotExists:(NSObject*)model callback:(void(^)(BOOL result))block;
 
 /**
  *	@brief update table
@@ -120,7 +123,7 @@
  *	@return	the updated was successful
  */
 -(BOOL)updateToDB:(NSObject *)model where:(id)where;
--(void)updateToDB:(NSObject *)model where:(id)where callback:(void (^)(BOOL))block;
+-(void)updateToDB:(NSObject *)model where:(id)where callback:(void (^)(BOOL result))block;
 -(BOOL)updateToDB:(Class)modelClass set:(NSString*)sets where:(id)where;
 /**
  *	@brief	delete table
@@ -131,7 +134,7 @@
  *	@return	the deleted was successful
  */
 -(BOOL)deleteToDB:(NSObject*)model;
--(void)deleteToDB:(NSObject*)model callback:(void(^)(BOOL))block;
+-(void)deleteToDB:(NSObject*)model callback:(void(^)(BOOL result))block;
 
 /**
  *	@brief	delete table with "where" constraint
@@ -142,7 +145,7 @@
  *	@return	the deleted was successful
  */
 -(BOOL)deleteWithClass:(Class)modelClass where:(id)where;
--(void)deleteWithClass:(Class)modelClass where:(id)where callback:(void (^)(BOOL))block;
+-(void)deleteWithClass:(Class)modelClass where:(id)where callback:(void (^)(BOOL result))block;
 
 /**
  *	@brief   entity exists?
