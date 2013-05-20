@@ -1,6 +1,14 @@
 #LKDBHelper
 this is sqlite ORM (an automatic database operater) <br>
-thread-safe and not afraid of recursive deadlock <br>
+thread-safe and not afraid of recursive deadlock
+#version 1.0
+1, fix a recursive deadlock. <br>
+2, rewrite the asynchronous operation - <br>
+3, thread-safe <br>
+4, various bug modified optimize cache to improve performance <br>
+<br>
+code using FMDatabase , can use the latest FMDatabase: https://github.com/ccgus/fmdb <br>
+The entity class automatic operation data
 #v1.0版本
 1、修复了 递归死锁。   <br>
 2、重写了 异步操作   <br>
