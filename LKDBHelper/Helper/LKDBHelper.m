@@ -189,6 +189,7 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
             [db executeUpdate:dropTable];
         }
     }];
+    [self.tableManager removeAllObjects];
 }
 -(void)dropTableWithClass:(Class)modelClass
 {

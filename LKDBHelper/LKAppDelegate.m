@@ -8,33 +8,67 @@
 
 #import "LKAppDelegate.h"
 
-
+@interface LKAppDelegate()
+@property(strong,nonatomic)NSMutableString* ms;
+@property(weak,nonatomic)UITextView* tv;
+@end
 @implementation LKAppDelegate
--(void)m1:(NSString*)sql,...
+-(void)add:(NSString*)txt
 {
-    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [_ms appendString:@"\n"];
+        [_ms appendString:txt];
+        [_ms appendString:@"\n"];
+        
+        self.tv.text = _ms;
+    });
 }
--(void)m2:(NSString*)sql,...
-{
-    
-}
+#define addText(fmt, ...) [self add:[NSString stringWithFormat:fmt,##__VA_ARGS__]]
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
-    NSLog(@"示例 开始 example start \n\n");
-
+    self.ms = [NSMutableString string];
+    UITextView* textview = [[UITextView alloc]init];
+    textview.frame = CGRectMake(0, 20, 320, self.window.bounds.size.height);
+    textview.textColor = [UIColor blackColor];
+    [self.window addSubview:textview];
+    self.tv = textview;
+    [self.window makeKeyAndVisible];
+    
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        [self test];
+    });
+    return YES;
+}
+-(void)test
+{
+    
+    addText(@"示例 开始 example start \n\n");
+    
+    //清空数据库
+    [[LKDBHelper sharedDBHelper] dropAllTable];
     //创建表  会根据表的版本号  来判断具体的操作 . create table need to manually call
     [[LKDBHelper sharedDBHelper] createTableWithModelClass:[LKTest class]];
+    [[LKDBHelper sharedDBHelper] createTableWithModelClass:[LKTestForeign class]];
     
     //清空表数据   clear table data
     [[LKDBHelper sharedDBHelper] clearTableData:[LKTest class]];
     
+    LKTestForeign* foreign = [[LKTestForeign alloc]init];
+    foreign.address = @":asdasdasdsadasdsdas";
+    foreign.postcode  = 123341;
+    foreign.addid = 213214;
+
     //插入数据    insert table row
     LKTest* test = [[LKTest alloc]init];
     test.name = @"zhan san";
     test.age = 16;
+    
+    //外键
+    test.address = foreign;
+    
     test.isGirl = YES;
     test.like = 'I';
     test.img = [UIImage imageNamed:@"41.png"];
@@ -42,42 +76,48 @@
     test.color = [UIColor orangeColor];
     
     //异步 插入第一条 数据   Insert the first
-    [[LKDBHelper sharedDBHelper] insertToDB:test callback:nil];
-
+    
+    [[LKDBHelper sharedDBHelper] insertToDB:test];
+    
+    addText(@"同步插入 完成!");
+    sleep(1);
+    
+    
     //改个 主键 插入第2条数据   update primary colume value  Insert the second
     test.name = @"li si";
     [[LKDBHelper sharedDBHelper] insertToDB:test callback:^(BOOL isInsert) {
-        NSLog(@"插入完成 insert finished : %@",isInsert>0?@"YES":@"NO");    
+        addText(@"异步插入 %@",isInsert>0?@"YES":@"NO");
     }];
     
-    
     //查询   search
-    NSLog(@"同步打印");
+    addText(@"同步搜索");
     NSMutableArray* array = [LKTest searchWithWhere:nil orderBy:nil offset:0 count:100];
     for (NSObject* obj in array) {
-        [obj printAllPropertys];
+        addText(@"%@",[obj printAllPropertys]);
     }
-
+    
+    addText(@"休息2秒 开始  为了说明 是异步插入的");
     sleep(2);
+    addText(@"休息2秒 结束");
     //异步
     [[LKDBHelper sharedDBHelper] search:[LKTest class] where:nil orderBy:nil offset:0 count:100 callback:^(NSMutableArray *array) {
-
-            NSLog(@"异步打印");
-        for (NSObject* obj in array) {
-            [obj printAllPropertys];
-        }
         
+        addText(@"异步搜索 结束");
+        for (NSObject* obj in array) {
+            addText(@"%@",[obj printAllPropertys]);
+        }
+        sleep(1);
         
         //修改    update
         LKTest* test2 = [array objectAtIndex:0];
         test2.name = @"wang wu";
         [[LKDBHelper sharedDBHelper] updateToDB:test2 where:nil];
         
-        NSLog(@"修改完成 updated ");
+        addText(@"修改完成 updated ");
         
         array =  [[LKDBHelper sharedDBHelper] search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
         for (NSObject* obj in array) {
-            [obj printAllPropertys];
+            addText(@"%@",[obj printAllPropertys]);
         }
         
         test2.rowid = 0;
@@ -89,39 +129,67 @@
             [[LKDBHelper sharedDBHelper] deleteToDB:test2];
         }
         
-        NSLog(@"删除完成        deleted");
+        addText(@"删除完成        deleted");
+        sleep(1);
         
         array =  [[LKDBHelper sharedDBHelper] search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
         for (NSObject* obj in array) {
-            [obj printAllPropertys];
+            addText(@"%@",[obj printAllPropertys]);
         }
         
-        NSLog(@"示例 结束  example finished\n\n");
+        addText(@"示例 结束  example finished\n\n");
         
         
         
         //Expansion: Delete the picture is no longer stored in the database record
-        NSLog(@"扩展:  删除已不再数据库中保存的 图片记录");
+        addText(@"扩展:  删除已不再数据库中保存的 图片记录");
         //目前 已合并到LKDBHelper 中  就先写出来 给大家参考下
         
         [[LKDBHelper sharedDBHelper] clearNoneImage:[LKTest class] columes:[NSArray arrayWithObjects:@"img",nil]];
     }];
-    
-    [self.window makeKeyAndVisible];
-    return YES;
 }
 @end
 
 @implementation LKTest
 +(void)dbWillInsert:(NSObject *)entity
 {
-//    NSLog(@"will insert : %@",NSStringFromClass(self));
+    NSLog(@"will insert : %@",NSStringFromClass(self));
 }
 +(void)dbDidInserted:(NSObject *)entity result:(BOOL)result
 {
-//    NSLog(@"did insert : %@",NSStringFromClass(self));
+    NSLog(@"did insert : %@",NSStringFromClass(self));
 }
-
+-(id)modelGetValueWithKey:(NSString *)key type:(NSString *)columeType
+{
+    if([key isEqualToString:@"address"])
+    {
+        [LKTestForeign insertToDB:self.address];
+        return @(self.address.addid);
+    }
+    else
+    {
+        return [super modelGetValueWithKey:key type:columeType];
+    }
+}
+-(void)modelSetValue:(id)value key:(NSString *)key type:(NSString *)type
+{
+    if([key isEqualToString:@"address"])
+    {
+        NSMutableArray* array  = [LKTestForeign searchWithWhere:[NSString stringWithFormat:@"addid = %d",[value intValue]] orderBy:nil offset:0 count:1];
+        if(array.count>0)
+        {
+            self.address = [array objectAtIndex:0];
+        }
+        else
+        {
+            self.address = nil;
+        }
+    }
+    else
+    {
+        [super modelSetValue:value key:key type:type];
+    }
+}
 +(NSString *)getPrimaryKey
 {
     return @"name";
@@ -132,7 +200,7 @@
 }
 +(int)getTableVersion
 {
-    return 2;
+    return 3;
 }
 +(LKTableUpdateType)tableUpdateWithDBHelper:(LKDBHelper *)helper oldVersion:(int)oldVersion newVersion:(int)newVersion
 {
@@ -140,12 +208,35 @@
         case 1:
         {
             [helper executeDB:^(FMDatabase *db) {
-                 NSString* sql = @"alter table LKTextTable add column color text";
+                NSString* sql = @"alter table LKTextTable add column error text";
+                [db executeUpdate:sql];
+            }];
+        }
+            //no write break
+        case 2:
+        {
+            [helper executeDB:^(FMDatabase *db) {
+                NSString* sql = @"alter table LKTextTable add column color text";
                 [db executeUpdate:sql];
             }];
         }
             break;
     }
     return LKTableUpdateTypeCustom;
+}
+@end
+
+@implementation LKTestForeign
++(NSString *)getPrimaryKey
+{
+    return @"addid";
+}
++(NSString *)getTableName
+{
+    return @"LKTestAddress";
+}
++(int)getTableVersion
+{
+    return 1;
 }
 @end

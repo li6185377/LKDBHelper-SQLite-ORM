@@ -253,7 +253,7 @@ static char LKModelBase_Key_RowID;
     return [objc_getAssociatedObject(self, &LKModelBase_Key_RowID) intValue];
 }
 
--(void)printAllPropertys
+-(NSString*)printAllPropertys
 {
     NSMutableString* sb = [NSMutableString stringWithCapacity:0];
     unsigned int outCount, i;
@@ -265,7 +265,8 @@ static char LKModelBase_Key_RowID;
         [sb appendFormat:@"\n %@ : %@ ",propertyName,[self valueForKey:propertyName]];
     }
     free(properties);
-    NSLog(@"\n%@\n",sb);
+    NSLog(@"%@",sb);
+    return sb;
 }
 
 #pragma mark version manager

@@ -77,7 +77,7 @@ typedef enum {
 /**
  *	@brief	打印所有的属性名称和数据
  */
--(void)printAllPropertys;
+-(NSString*)printAllPropertys;
 
 /**
  *	@brief	默认实现了 UIColor NSDate UIImage NSData 的数据转换存储
