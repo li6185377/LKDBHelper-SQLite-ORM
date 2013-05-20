@@ -1,5 +1,5 @@
 #LKDBHelper
-this is sqlite ORM (an automatic database operater) <br>
+this is sqlite ORM (an automatic database operation) <br>
 thread-safe and not afraid of recursive deadlock
 #version 1.0
 1, fix a recursive deadlock. <br>
