@@ -49,7 +49,7 @@
     return fileList;
 }
 +(BOOL)checkStringIsEmpty:(NSString *)string
-{
+{ 
     if(string == nil)
     {
         return YES;

@@ -17,7 +17,7 @@
 +(NSString*) getPathForDocuments:(NSString*)filename;
 //返回 "document/dir/filename" 路径
 +(NSString*) getPathForDocuments:(NSString *)filename inDir:(NSString*)dir;
-//文件是否存在
+//文件是否存在 
 +(BOOL) isFileExists:(NSString*)filepath;
 //删除文件
 +(BOOL)deleteWithFilepath:(NSString*)filepath;

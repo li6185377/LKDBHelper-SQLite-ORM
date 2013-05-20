@@ -45,6 +45,12 @@ typedef enum {
  */
 +(NSString*)getPrimaryKey;
 /**
+ *	@brief	主键类型,不用重载
+ */
++(NSString*)getPrimaryKeyType;
+-(id)getPrimaryValue;
+
+/**
  *	@brief	表名 默认实体类名称
  */
 +(NSString*)getTableName;

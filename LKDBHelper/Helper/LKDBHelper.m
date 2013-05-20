@@ -9,9 +9,11 @@
 #import "LKDBHelper.h"
 
 @interface LKDBHelper()
+@property(weak,nonatomic)FMDatabase* usingdb;
 @property(strong,nonatomic)FMDatabaseQueue* bindingQueue;
 @property(copy,nonatomic)NSString* dbname;
 @property(strong,nonatomic)NSMutableDictionary* tableManager;
+@property(strong,nonatomic)NSRecursiveLock* threadLock;
 @end
 
 @implementation LKDBHelper
@@ -24,15 +26,12 @@
     });
     return dbhelper;
 }
--(FMDatabaseQueue *)getBindingQueue
-{
-    return self.bindingQueue;
-}
 - (id)init
 {
     self = [super init];
     if (self) {
-        [self setDBName:@"LKDB"];   
+        [self setDBName:@"LKDB"];
+        self.threadLock = [[NSRecursiveLock alloc]init];
     }
     return self;
 }
@@ -58,14 +57,47 @@
             [db executeUpdate:@"CREATE TABLE IF NOT EXISTS LKTableManager(table_name text primary key,version integer)"];
             FMResultSet* set = [db executeQuery:@"select table_name,version from LKTableManager"];
             while ([set next]) {
-                [_tableManager setObject:[NSNumber numberWithInt:[set intForColumnIndex:1]] forKey:[set stringForColumnIndex:0]];
+                [self.tableManager setObject:[NSNumber numberWithInt:[set intForColumnIndex:1]] forKey:[set stringForColumnIndex:0]];
             }
             [set close];
         }];
     }
 }
+-(void)executeDB:(void (^)(FMDatabase *db))block
+{
+    [_threadLock lock];
+    if(self.usingdb != nil)
+    {
+        block(self.usingdb);
+    }
+    else
+    {
+        [self.bindingQueue inDatabase:^(FMDatabase *db) {
+            self.usingdb = db;
+            block(db);
+            self.usingdb = nil;
+        }];
+    }
+    [_threadLock unlock];
+}
 
-//当 NSDictionary 的value 是NSArray 类型时  使用 in 语句   where  name in (value1,value2)
+//splice 'where' 拼接where语句
+- (NSMutableArray *)extractQuery:(NSMutableString *)query where:(id)where
+{
+    NSMutableArray* values = nil;
+    if([where isKindOfClass:[NSString class]] && [LKDBUtils checkStringIsEmpty:where]==NO)
+    {
+        [query appendFormat:@" where %@ ",where];
+    }
+    else if ([where isKindOfClass:[NSDictionary class]] && [where count] > 0)
+    {
+        values = [NSMutableArray arrayWithCapacity:[where count]];
+        NSString* wherekey = [self dictionaryToSqlWhere:where andValues:values];
+        [query appendFormat:@" where %@ ",wherekey];
+    }
+    return values;
+}
+//dic where parse
 -(NSString*)dictionaryToSqlWhere:(NSDictionary*)dic andValues:(NSMutableArray*)values
 {
     NSMutableString* wherekey = [NSMutableString stringWithCapacity:0];
@@ -124,9 +156,9 @@
 }
 @end
 @implementation LKDBHelper(DatabaseManager)
-const static NSString* normaltypestring = @"floatdoublelongshort";
-const static NSString* inttypesstring = @"intcharshort";
-const static NSString* blobtypestring = @"NSDataUIImage";
+const __strong static NSString* normaltypestring = @"floatdoubledecimal";
+const __strong static NSString* inttypesstring = @"intcharshortlong";
+const __strong static NSString* blobtypestring = @"NSDataUIImage";
 //把Object-c 类型 转换为sqlite 类型
 +(NSString *)toDBType:(NSString *)type
 {
@@ -142,19 +174,9 @@ const static NSString* blobtypestring = @"NSDataUIImage";
     }
     return LKSQLText;
 }
-
--(void)executeDB:(void (^)(FMDatabase *db))block
-{
-    __block BOOL lock = YES;
-    [self.bindingQueue inDatabase:^(FMDatabase *db) {
-        block(db);
-        lock = NO;
-    }];
-    while (lock) {}
-}
 -(void)dropAllTable
 {
-    [self.bindingQueue inDatabase:^(FMDatabase* db){
+    [self executeDB:^(FMDatabase *db) {
         FMResultSet* set = [db executeQuery:@"select name from sqlite_master where type='table'"];
         NSMutableArray* dropTables = [NSMutableArray arrayWithCapacity:0];
         while ([set next]) {
@@ -169,7 +191,7 @@ const static NSString* blobtypestring = @"NSDataUIImage";
 }
 -(void)dropTableWithClass:(Class)modelClass
 {
-    [self.bindingQueue inDatabase:^(FMDatabase *db) {
+    [self executeDB:^(FMDatabase *db) {
         NSString* dropTable = [NSString stringWithFormat:@"drop table %@",[modelClass getTableName]];
         [db executeUpdate:dropTable];
     }];
@@ -240,121 +262,102 @@ const static NSString* blobtypestring = @"NSDataUIImage";
     }
     
     NSString* createTable = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@(%@)",tableName,pars];
-    
-    __block BOOL isCreated = NO;
     [self executeDB:^(FMDatabase *db) {
-       isCreated = [db executeUpdate:createTable];
+        BOOL isCreated = [db executeUpdate:createTable];
+        if(isCreated)
+        {
+            [modelClass dbDidCreateTable:self];
+            [self.tableManager setObject:tableName forKey:[NSNumber numberWithInt:newVersion]];
+            
+            NSString* replaceSQL = [NSString stringWithFormat:@"replace into LKTableManager(table_name,version) values('%@',%d)",tableName,newVersion];
+            [db executeUpdate:replaceSQL];
+        }
     }];
-    if(isCreated)
-    {
-        [modelClass dbDidCreateTable:self];
-        [self.tableManager setObject:tableName forKey:[NSNumber numberWithInt:newVersion]];
-        [self executeDB:^(FMDatabase *db) {
-            [db executeUpdate:[NSString stringWithFormat:@"replace into LKTableManager(table_name,version) values('%@',%d)",tableName,newVersion]];
-        }];
-        
-    }
 }
 
 @end
 @implementation LKDBHelper(DatabaseExecute)
 
+-(void)asyncBlock:(void(^)(void))block
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),block);
+}
 #pragma mark - row count operation
 -(int)rowCount:(Class)modelClass where:(id)where
 {
-    __block int result= 0;
-    [self executeDB:^(FMDatabase *db) {
-        result = [self rowCount:modelClass where:where db:db];
-    }];
-    return result;
+    return [self rowCountBase:modelClass where:where];
 }
 -(void)rowCount:(Class)modelClass where:(id)where callback:(void (^)(int))callback
 {
-    [self.bindingQueue inDatabase:^(FMDatabase *db) {
-        callback([self rowCount:modelClass where:where db:db]);
+    [self asyncBlock:^{
+        int result = [self rowCountBase:modelClass where:where];
+        if(callback != nil)
+        {
+            callback(result);
+        }
     }];
 }
--(int)rowCount:(Class)modelClass where:(id)where db:(FMDatabase*)db
+-(int)rowCountBase:(Class)modelClass where:(id)where
 {
     NSMutableString* rowCountSql = [NSMutableString stringWithFormat:@"select count(rowid) from %@ ",[modelClass getTableName]];
-    FMResultSet* resultSet = nil;
-    if([where isKindOfClass:[NSString class]] && [LKDBUtils checkStringIsEmpty:where]==NO)
-    {
-        [rowCountSql appendFormat:@" where %@",where];
-        resultSet = [db executeQuery:rowCountSql];
-    }
-    else if([where isKindOfClass:[NSDictionary class]])
-    {
-        NSMutableArray* valuesarray = [NSMutableArray array];
-        NSString* ww = [self dictionaryToSqlWhere:where andValues:valuesarray];
-        [rowCountSql appendFormat:@" where %@",ww];
-        resultSet = [db executeQuery:rowCountSql withArgumentsInArray:valuesarray];
-    }
-    else
-    {
-        resultSet = [db executeQuery:rowCountSql];
-    }
-    int result = 0;
-    if([resultSet next])
-    {
-        result =  [resultSet intForColumnIndex:0];
-    }
-    [resultSet close];
+    
+    NSMutableArray* valuesarray = [self extractQuery:rowCountSql where:where];
+    
+    __block int result = 0;
+    [self executeDB:^(FMDatabase *db) {
+        FMResultSet* resultSet = nil;
+        if(valuesarray == nil)
+        {
+            resultSet = [db executeQuery:rowCountSql];
+        }
+        else
+        {
+            resultSet = [db executeQuery:rowCountSql withArgumentsInArray:valuesarray];
+        }
+        if([resultSet next])
+        {
+            result =  [resultSet intForColumnIndex:0];
+        }
+        [resultSet close];
+    }];
     return result;
 }
 #pragma mark- search operation
--(NSMutableArray *)search:(Class)modelClass where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count db:(FMDatabase*)db
+-(NSMutableArray *)search:(Class)modelClass where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
+{
+    return [self searchBase:modelClass where:where orderBy:orderBy offset:offset count:count];
+}
+-(void)search:(Class)modelClass where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count callback:(void (^)(NSMutableArray *))block
+{
+    [self asyncBlock:^{
+        NSMutableArray* array = [self searchBase:modelClass where:where orderBy:orderBy offset:offset count:count];
+        if(block != nil)
+        {
+            block(array);
+        }
+    }];
+}
+-(NSMutableArray *)searchBase:(Class)modelClass where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
 {
     NSMutableString* query = [NSMutableString stringWithFormat:@"select rowid,* from %@ ",[modelClass getTableName]];
-    NSMutableArray* values = nil;
-    if([where isKindOfClass:[NSString class]] && [LKDBUtils checkStringIsEmpty:where]==NO)
-    {
-        [query appendFormat:@" where %@ ",where];
-    }
-    else if ([where isKindOfClass:[NSDictionary class]] && [where count] > 0)
-    {
-        values = [NSMutableArray arrayWithCapacity:[where count]];
-        NSString* wherekey = [self dictionaryToSqlWhere:where andValues:values];
-        [query appendFormat:@" where %@ ",wherekey];
-    }
+    NSMutableArray * values = [self extractQuery:query where:where];
     
     [self sqlString:query AddOder:orderBy offset:offset count:count];
     
     __block NSMutableArray* results = nil;
-    if(db == nil)
-    {
-        [self executeDB:^(FMDatabase *db) {
-            results = [self executeSql:query values:values db:db Class:modelClass];
-        }];
-    }
-    else
-    {
-        results = [self executeSql:query values:values db:db Class:modelClass];
-    }
-    return results;
-}
--(NSMutableArray *)search:(Class)modelClass where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
-{
-    return [self search:modelClass where:where orderBy:orderBy offset:offset count:count db:nil];
-}
--(void)search:(Class)modelClass where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count callback:(void (^)(NSMutableArray *))block
-{
-    [self.bindingQueue inDatabase:^(FMDatabase *db) {
-        block([self search:modelClass where:where orderBy:orderBy offset:offset count:count db:db]);
+    [self executeDB:^(FMDatabase *db) {
+        FMResultSet* set = nil;
+        if(values == nil)
+        {
+            set = [db executeQuery:query];
+        }
+        else
+        {
+            set = [db executeQuery:query withArgumentsInArray:values];
+        }
+        results = [self executeResult:set Class:modelClass];
     }];
-}
--(NSMutableArray*)executeSql:(NSString*)sql values:(NSArray*)values db:(FMDatabase*)db Class:(Class) modelClass
-{
-    FMResultSet* set = nil;
-    if(values == nil)
-    {
-        set = [db executeQuery:sql];
-    }
-    else
-    {
-        set = [db executeQuery:sql withArgumentsInArray:values];
-    }
-    return [self executeResult:set Class:modelClass];
+    return results;
 }
 -(void)sqlString:(NSMutableString*)sql AddOder:(NSString*)orderby offset:(int)offset count:(int)count
 {
@@ -401,19 +404,18 @@ const static NSString* blobtypestring = @"NSDataUIImage";
 #pragma mark- insert operation
 -(BOOL)insertToDB:(NSObject *)model
 {
-    return [self insertToDB:model db:nil];
+    return [self insertBase:model];
 }
 -(void)insertToDB:(NSObject *)model callback:(void (^)(BOOL))block
 {
-    [self.bindingQueue inDatabase:^(FMDatabase *db) {
-        BOOL result = [self insertToDB:model db:db];
+    [self asyncBlock:^{
+        BOOL result = [self insertBase:model];
         if(block != nil)
         {
             block(result);
         }
     }];
 }
-
 -(BOOL)insertWhenNotExists:(NSObject *)model
 {
     if([self isExistsModel:model]==NO)
@@ -424,28 +426,26 @@ const static NSString* blobtypestring = @"NSDataUIImage";
 }
 -(void)insertWhenNotExists:(NSObject *)model callback:(void (^)(BOOL))block
 {
-    if([self isExistsModel:model]==NO)
-    {
-        [self insertToDB:model callback:block];
-    }
-    else
-    {
+    [self asyncBlock:^{
         if(block != nil)
         {
-            block(NO);
+            block([self insertWhenNotExists:model]);
         }
-    }
+        else
+        {
+            [self insertWhenNotExists:model];
+        }
+    }];
 }
-
--(BOOL)insertToDB:(NSObject*)model db:(FMDatabase*)db{
+-(BOOL)insertBase:(NSObject*)model{
     
     Class modelClass = model.class;
     if(model == nil || [LKDBUtils checkStringIsEmpty:[modelClass getTableName]])
     {
         NSLog(@"LKDBHelper Insert Fail 。。 Model = nil or  not has Table Name");
-        return false;
+        return NO;
     }
-
+    
     //callback
     [modelClass dbWillInsert:model];
     
@@ -481,45 +481,39 @@ const static NSString* blobtypestring = @"NSDataUIImage";
     
     __block BOOL execute = NO;
     __block int lastInsertRowId = 0;
-    if(db == nil)
-    {
-        [self executeDB:^(FMDatabase *db) {
-            execute = [db executeUpdate:insertSQL withArgumentsInArray:insertValues];
-            lastInsertRowId= db.lastInsertRowId;
-        }];
-    }
-    else
-    {
+    
+    [self executeDB:^(FMDatabase *db) {
         execute = [db executeUpdate:insertSQL withArgumentsInArray:insertValues];
         lastInsertRowId= db.lastInsertRowId;
-    }
+    }];
+    
     model.rowid = lastInsertRowId;
     if(execute == NO)
     {
-        NSLog(@"database insert fail %@",NSStringFromClass(modelClass));
+        NSLog(@"database insert fail %@, sql:%@",NSStringFromClass(modelClass),insertSQL);
     }
+    
     //callback
     [modelClass dbDidInserted:model result:execute];
-    
     return execute;
 }
 
 #pragma mark- update operation
 -(BOOL)updateToDB:(NSObject *)model where:(id)where
 {
-    return [self updateToDB:model where:where db:nil];
+    return [self updateToDBBase:model where:where];
 }
 -(void)updateToDB:(NSObject *)model where:(id)where callback:(void (^)(BOOL))block
 {
-    [self.bindingQueue inDatabase:^(FMDatabase *db) {
-        BOOL result = [self updateToDB:model where:where db:db];
+    [self asyncBlock:^{
+        BOOL result = [self updateToDBBase:model where:where];
         if(block != nil)
         {
             block(result);
         }
     }];
 }
--(BOOL)updateToDB:(NSObject *)model where:(id)where db:(FMDatabase*)db
+-(BOOL)updateToDBBase:(NSObject *)model where:(id)where
 {
     Class modelClass = model.class;
     if(model == nil || [LKDBUtils checkStringIsEmpty:[modelClass getTableName]])
@@ -552,7 +546,7 @@ const static NSString* blobtypestring = @"NSDataUIImage";
     }
     [updateKey deleteCharactersInRange:NSMakeRange(updateKey.length - 1, 1)];
     
-    NSMutableString* updateSQL = [NSMutableString stringWithFormat:@"update %@ set %@ where  ",[modelClass getTableName],updateKey];
+    NSMutableString* updateSQL = [NSMutableString stringWithFormat:@"update %@ set %@ where ",[modelClass getTableName],updateKey];
     
     //添加where 语句
     if([where isKindOfClass:[NSString class]] && [LKDBUtils checkStringIsEmpty:where]== NO)
@@ -579,8 +573,14 @@ const static NSString* blobtypestring = @"NSDataUIImage";
         {
             return NO;
         }
+        int index = [pronames indexOfObject:primaryKey];
+        if(index == NSNotFound)
+        {
+            return NO;
+        }
+        NSString* primaryValue = [protypes objectAtIndex:index];
         [updateSQL appendFormat:@"%@=?",primaryKey];
-        id value = [model modelGetValueWithKey:primaryKey type:nil];
+        id value = [model modelGetValueWithKey:primaryKey type:primaryValue];
         if(value == nil)
         {
             value = @"";
@@ -588,16 +588,9 @@ const static NSString* blobtypestring = @"NSDataUIImage";
         [updateValues addObject:value];
     }
     __block BOOL execute = NO;
-    if(db == nil)
-    {
-        [self executeDB:^(FMDatabase *db) {
-            execute = [db executeUpdate:updateSQL withArgumentsInArray:updateValues];
-        }];
-    }
-    else
-    {
+    [self executeDB:^(FMDatabase *db) {
         execute = [db executeUpdate:updateSQL withArgumentsInArray:updateValues];
-    }
+    }];
     if(execute == NO)
     {
         NSLog(@"database update fail %@   ----->rowid: %d",NSStringFromClass(modelClass),model.rowid);
@@ -607,58 +600,100 @@ const static NSString* blobtypestring = @"NSDataUIImage";
     
     return execute;
 }
+
+//table update
+-(BOOL)updateToDB:(Class)modelClass set:(NSString *)sets where:(id)where
+{
+    if([LKDBUtils checkStringIsEmpty:[modelClass getTableName]])
+    {
+        NSLog(@"LKDBHelper Update Fail 。。not has Table Name");
+        return NO;
+    }
+    if([LKDBUtils checkStringIsEmpty:sets])
+    {
+        NSLog(@"LKDBHelper Update Fail 。。no set statement 没set语句");
+        return NO;
+    }
+    NSMutableString* updateSQL = [NSMutableString stringWithFormat:@"update %@ set %@ ",[modelClass getTableName],sets];
+    NSMutableArray* updateValues = [self extractQuery:updateSQL where:where];
+    __block BOOL execute = NO;
+    [self executeDB:^(FMDatabase *db) {
+        if(updateValues.count>0)
+        {
+            execute = [db executeUpdate:updateSQL withArgumentsInArray:updateValues];
+        }
+        else
+        {
+            execute = [db executeUpdate:updateSQL];
+        }
+    }];
+    if(execute == NO)
+    {
+        NSLog(@"database update fail %@   ----->sql:%@",NSStringFromClass(modelClass),updateSQL);
+    }
+    //callback
+    [modelClass dbDidUpdated:nil result:execute];
+    
+    return execute;
+}
 #pragma mark - delete operation
 -(BOOL)deleteToDB:(NSObject *)model
 {
-    __block BOOL isDeleted = NO;
-    [self executeDB:^(FMDatabase *db) {
-        isDeleted = [self deleteToDB:model db:db];
-    }];
-    return isDeleted;
+    return [self deleteToDBBase:model];
 }
 -(void)deleteToDB:(NSObject *)model callback:(void (^)(BOOL))block
 {
-    [self.bindingQueue inDatabase:^(FMDatabase *db) {
-        BOOL isDeleted = [self deleteToDB:model db:db];
+    [self asyncBlock:^{
+        BOOL isDeleted = [self deleteToDBBase:model];
         if(block != nil)
         {
             block(isDeleted);
         }
     }];
 }
--(BOOL)deleteToDB:(NSObject *)model db:(FMDatabase*)db
+-(BOOL)deleteToDBBase:(NSObject *)model
 {
-    BOOL result = NO;
     Class modelClass = model.class;
     if(model == nil || [LKDBUtils checkStringIsEmpty:[modelClass getTableName]])
     {
         NSLog(@"LKDBHelper Delete Fail 。。 model = nil or  not has Table Name");
-        return false;
+        return NO;
     }
     
     //callback
     [modelClass dbWillDelete:model];
     
+    NSMutableString*  deleteSQL =[NSMutableString stringWithFormat:@"delete from %@ where ",[modelClass getTableName]];
+    id primaryValue = nil;
     if(model.rowid > 0)
     {
-        NSString*  delete = [NSString stringWithFormat:@"delete from %@ where rowid=%d",[modelClass getTableName],model.rowid];
-        result = [db executeUpdate:delete];
+        [deleteSQL appendFormat:@" rowid = %d",model.rowid];
     }
     else
     {
-        NSString* primarykey = [modelClass  getPrimaryKey];
-        if ([LKDBUtils checkStringIsEmpty:primarykey]) {
-            NSLog(@"delete model fail . %@ primary key is nil",NSStringFromClass(modelClass));
+        primaryValue = [model getPrimaryValue];
+        if(primaryValue)
+        {
+            NSString* primarykey = [modelClass  getPrimaryKey];
+            [deleteSQL appendFormat:@" %@=? ",primarykey];
+        }
+        else
+        {
+            NSLog(@"delete fail : %@ primary value is nil",NSStringFromClass(modelClass));
             return NO;
         }
-        NSString* delete = [NSString stringWithFormat:@"delete from %@ where %@=?",[modelClass getTableName],primarykey];
-        id value = [model modelGetValueWithKey:primarykey type:nil];
-        if(value == nil)
-        {
-            value = @"";
-        }
-        result = [db executeUpdate:delete withArgumentsInArray:[NSArray arrayWithObject:value]];
     }
+    __block BOOL result = NO;
+    [self executeDB:^(FMDatabase *db) {
+        if(primaryValue)
+        {
+            result = [db executeUpdate:deleteSQL withArgumentsInArray:@[primaryValue]];
+        }
+        else
+        {
+            result = [db executeUpdate:deleteSQL];
+        }
+    }];
     
     //callback
     [modelClass dbDidIDeleted:model result:result];
@@ -668,100 +703,76 @@ const static NSString* blobtypestring = @"NSDataUIImage";
 
 -(BOOL)deleteWithClass:(Class)modelClass where:(id)where
 {
-    __block BOOL isDeleted = NO;
-    [self executeDB:^(FMDatabase *db) {
-        isDeleted = [self deleteWithClass:modelClass where:where db:db];
-    }];
-    return isDeleted;
+    return [self deleteWithClassBase:modelClass where:where];
 }
 -(void)deleteWithClass:(Class)modelClass where:(id)where callback:(void (^)(BOOL))block
 {
-    [self.bindingQueue inDatabase:^(FMDatabase *db) {
-        BOOL isDeleted = [self deleteWithClass:modelClass where:where db:db];
+    [self asyncBlock:^{
+        BOOL isDeleted = [self deleteWithClassBase:modelClass where:where];
         if (block != nil) {
             block(isDeleted);
         }
     }];
 }
--(BOOL)deleteWithClass:(Class)modelClass where:(id)where db:(FMDatabase*)db
+-(BOOL)deleteWithClassBase:(Class)modelClass where:(id)where
 {
-    BOOL result = NO;
-    if([where isKindOfClass:[NSString class]] && [LKDBUtils checkStringIsEmpty:where] == NO)
-    {
-        NSString*  delete = [NSString stringWithFormat:@"delete from %@ where %@",[modelClass getTableName],where];
-        result = [db executeUpdate:delete];
-    }
-    else if([where isKindOfClass:[NSDictionary class]] && [where count] > 0)
-    {
-        NSMutableArray* values = [NSMutableArray arrayWithCapacity:6];
-        NSString* wherekey = [self dictionaryToSqlWhere:where andValues:values];
-        NSString* delete = [NSString stringWithFormat:@"delete from %@ where %@",[modelClass getTableName],wherekey];
-        result = [db executeUpdate:delete withArgumentsInArray:values];
-    }
+    __block BOOL result = NO;
+    NSMutableString* deleteSQL = [NSMutableString stringWithFormat:@"delete from %@",[modelClass getTableName]];
+    NSMutableArray* values = [self extractQuery:deleteSQL where:where];
+    [self executeDB:^(FMDatabase *db) {
+        if(values.count>0)
+        {
+            result = [db executeUpdate:deleteSQL withArgumentsInArray:values];
+        }
+        else
+        {
+            result = [db executeUpdate:deleteSQL];
+        }
+    }];
     return result;
 }
 #pragma mark - other operation
-
 -(BOOL)isExistsModel:(NSObject *)model
 {
     Class modelClass = model.class;
-    NSString* primaryKey = [modelClass getPrimaryKey];
-    NSString* where = [NSString stringWithFormat:@"%@ = '%@'",primaryKey,[model modelGetValueWithKey:primaryKey type:nil]];
-    
-    __block BOOL isExists = NO;
-    [self executeDB:^(FMDatabase *db) {
-        isExists = [self isExistsClass:modelClass where:where db:db];
-    }];
-    return isExists;
+    NSString* primarykey = [modelClass getPrimaryKey];
+    id primaryValue = [model getPrimaryValue];
+    if(primarykey&&primaryValue)
+    {
+        NSString* where = [NSString stringWithFormat:@"%@ = '%@'",primarykey,primaryValue];
+        return [self isExistsClass:modelClass where:where];
+    }
+    else
+    {
+        NSLog(@"exists model fail: primary key is nil or invalid");
+        return NO;
+    }
 }
 -(BOOL)isExistsClass:(Class)modelClass where:(id)where
 {
-    __block BOOL isExists = NO;
-    [self executeDB:^(FMDatabase *db) {
-       isExists = [self isExistsClass:modelClass where:where db:db];
-    }];
-    return isExists;
+    return [self isExistsClassBase:modelClass where:where];
 }
--(BOOL)isExistsClass:(Class)modelClass where:(id)where db:(FMDatabase*)db
+-(BOOL)isExistsClassBase:(Class)modelClass where:(id)where
 {
-    BOOL exists = NO;
-    if([where isKindOfClass:[NSString class]] && [LKDBUtils checkStringIsEmpty:where] == NO)
+    int rowcount = [self rowCountBase:modelClass where:where];
+    if(rowcount > 0)
     {
-        NSString* rowCountSql = [NSString stringWithFormat:@"select count(rowid) from %@ where %@",[modelClass getTableName],where];
-        FMResultSet* resultSet = [db executeQuery:rowCountSql];
-        [resultSet next];
-        if([resultSet intForColumnIndex:0]>0)
-        {
-            exists = YES;
-        }
-        [resultSet close];
+        return YES;
     }
-    else if([where isKindOfClass:[NSDictionary class]] && [where count] > 0)
+    else
     {
-        NSMutableArray* values = [NSMutableArray arrayWithCapacity:6];
-        NSString* wherekey = [self dictionaryToSqlWhere:where andValues:values];
-        NSString* rowCountSql = [NSString stringWithFormat:@"select count(rowid) from %@ where %@",[modelClass getTableName],wherekey];
-        
-        FMResultSet* resultSet = [db executeQuery:rowCountSql withArgumentsInArray:values];
-        [resultSet next];
-        if([resultSet intForColumnIndex:0]>0)
-        {
-            exists = YES;
-        }
-        [resultSet close];
+        return NO;
     }
-    return exists;
 }
 
 #pragma mark- clear operation
 
 -(void)clearTableData:(Class)modelClass
 {
-    [self.bindingQueue inDatabase:^(FMDatabase* db)
-     {
-         NSString* delete = [NSString stringWithFormat:@"DELETE FROM %@",[modelClass getTableName]];
-         [db executeUpdate:delete];
-     }];
+    [self executeDB:^(FMDatabase *db) {
+        NSString* delete = [NSString stringWithFormat:@"DELETE FROM %@",[modelClass getTableName]];
+        [db executeUpdate:delete];
+    }];
 }
 
 -(void)clearNoneData:(Class)modelClass columes:(NSArray *)columes
@@ -793,8 +804,7 @@ const static NSString* blobtypestring = @"NSDataUIImage";
         }
         NSString* querySql = [NSString stringWithFormat:@"select %@ from %@ where %@",seleteColume,tableName,whereStr];
         __block NSArray* dbfiles;
-        [[LKDBHelper sharedDBHelper] executeDB:^(FMDatabase *db) {
-            
+        [self executeDB:^(FMDatabase *db) {
             NSMutableArray* tempfiles = [NSMutableArray arrayWithCapacity:6];
             FMResultSet* set = [db executeQuery:querySql];
             while ([set next]) {
@@ -809,7 +819,6 @@ const static NSString* blobtypestring = @"NSDataUIImage";
             [set close];
             dbfiles = tempfiles;
         }];
-        
         //遍历  当不再数据库记录中 就删除
         for (NSString* deletefile in files) {
             if([dbfiles indexOfObject:deletefile] == NSNotFound)
@@ -880,6 +889,10 @@ const static NSString* blobtypestring = @"NSDataUIImage";
         return [[LKDBHelper sharedDBHelper] updateToDB:model where:where];
     }
     return NO;
+}
++(BOOL)updateToDBWithSet:(NSString *)sets where:(id)where
+{
+    return [[LKDBHelper sharedDBHelper] updateToDB:self set:sets where:where];
 }
 +(BOOL)deleteToDB:(NSObject*)model{
     if([self checkModelClass:model])

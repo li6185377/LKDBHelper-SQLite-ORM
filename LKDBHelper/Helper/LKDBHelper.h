@@ -35,8 +35,10 @@
 //change database filepath : "documents/db/" + fileName + ".db"
 -(void)setDBName:(NSString*)fileName;
 
-//get using FMDatabaseQueue
--(FMDatabaseQueue*)getBindingQueue;
+/**
+ *	@brief  execute database operations synchronously,not afraid of recursive deadlock  同步执行数据库操作 可递归调用
+ */
+-(void)executeDB:(void (^)(FMDatabase *db))block;
 
 //get all by LKDBHelper create table name and version number
 -(NSMutableDictionary*)getTableManager;
@@ -46,9 +48,6 @@
 
 //create table with entity class
 -(void)createTableWithModelClass:(Class)model;
-
-//execute database operations synchronously    同步执行数据库操作
--(void)executeDB:(void (^)(FMDatabase *db))block;
 
 //drop all table
 -(void)dropAllTable;
@@ -122,8 +121,7 @@
  */
 -(BOOL)updateToDB:(NSObject *)model where:(id)where;
 -(void)updateToDB:(NSObject *)model where:(id)where callback:(void (^)(BOOL))block;
-
-
+-(BOOL)updateToDB:(Class)modelClass set:(NSString*)sets where:(id)where;
 /**
  *	@brief	delete table
  *
@@ -165,7 +163,7 @@
  */
 -(void)clearTableData:(Class)modelClass;
 
-
+   
 /**
  *	@brief	Clear Unused Data File
             if you property has UIImage or NSData, will save their data in the (documents dir)
@@ -202,6 +200,7 @@
 +(BOOL)insertToDB:(NSObject*)model;
 +(BOOL)insertWhenNotExists:(NSObject*)model;
 +(BOOL)updateToDB:(NSObject *)model where:(id)where;
++(BOOL)updateToDBWithSet:(NSString*)sets where:(id)where;
 +(BOOL)deleteToDB:(NSObject*)model;
 +(BOOL)deleteWithWhere:(id)where;
 @end

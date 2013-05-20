@@ -10,7 +10,14 @@
 
 
 @implementation LKAppDelegate
-
+-(void)m1:(NSString*)sql,...
+{
+    
+}
+-(void)m2:(NSString*)sql,...
+{
+    
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -36,15 +43,14 @@
     
     //插入第一条 数据   Insert the first
     [[LKDBHelper sharedDBHelper] insertToDB:test];
-    
+
     //改个 主键 插入第2条数据   update primary colume value  Insert the second
     test.name = @"li si";
     BOOL isInsert = [[LKDBHelper sharedDBHelper] insertToDB:test];
     NSLog(@"插入完成 insert finished : %@",isInsert>0?@"YES":@"NO");
     
-    
     //查询   search
-    NSMutableArray* array =  [[LKDBHelper sharedDBHelper] search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
+    NSMutableArray* array = [LKTest searchWithWhere:nil orderBy:nil offset:0 count:100];
     for (NSObject* obj in array) {
         [obj printAllPropertys];
     }
@@ -62,10 +68,14 @@
         [obj printAllPropertys];
     }
     
-    
-    
-    //删除    delete
-    [[LKDBHelper sharedDBHelper] deleteToDB:test2];
+    test2.rowid = 0;
+
+    BOOL ishas = [[LKDBHelper sharedDBHelper] isExistsModel:test2];
+    if(ishas)
+    {
+        //删除    delete
+        [[LKDBHelper sharedDBHelper] deleteToDB:test2];
+    }
     
     NSLog(@"删除完成        deleted");
     
@@ -93,11 +103,11 @@
 @implementation LKTest
 +(void)dbWillInsert:(NSObject *)entity
 {
-    NSLog(@"will insert : %@",NSStringFromClass(self));
+//    NSLog(@"will insert : %@",NSStringFromClass(self));
 }
 +(void)dbDidInserted:(NSObject *)entity result:(BOOL)result
 {
-    NSLog(@"did insert : %@",NSStringFromClass(self));
+//    NSLog(@"did insert : %@",NSStringFromClass(self));
 }
 
 +(NSString *)getPrimaryKey

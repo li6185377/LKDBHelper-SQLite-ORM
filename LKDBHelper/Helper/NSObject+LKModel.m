@@ -15,7 +15,7 @@ static char LKModelBase_Key_RowID;
 
 +(NSDictionary *)getPropertys
 {
-    static NSMutableDictionary* oncePropertyDic;
+    static __strong NSMutableDictionary* oncePropertyDic;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         oncePropertyDic = [[NSMutableDictionary alloc]initWithCapacity:8];
@@ -107,6 +107,40 @@ static char LKModelBase_Key_RowID;
 {
     return nil;
 }
++(NSString *)getPrimaryKeyType
+{
+    static NSString* primaryKeyType;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSString* primarykey = [self getPrimaryKey];
+        if ([LKDBUtils checkStringIsEmpty:primarykey]) {
+            NSLog(@"#error %@ primary key is nil",NSStringFromClass(self));
+            return;
+        }
+        NSDictionary* dic  = [self getPropertys];
+        NSArray* pronames = [dic objectForKey:@"name"];
+        NSArray* protypes = [dic objectForKey:@"type"];
+        int index = [pronames indexOfObject:primarykey];
+        if(index == NSNotFound)
+        {
+            NSLog(@"#error %@ primary key is invalid ....!",NSStringFromClass(self));
+            return;
+        }
+        primaryKeyType = [protypes objectAtIndex:index];
+    });
+    return primaryKeyType;    
+}
+-(id)getPrimaryValue
+{
+    NSString* primarykey = [self.class getPrimaryKey];
+    NSString* primaryType = [self.class getPrimaryKeyType];
+    
+    if(primarykey&&primaryType)
+    {
+       return [self modelGetValueWithKey:primarykey type:primaryType];
+    }
+    return nil;
+}
 +(NSString *)getTableName
 {
     return nil;
@@ -124,6 +158,12 @@ static char LKModelBase_Key_RowID;
 
 -(id)modelGetValueWithKey:(NSString *)key type:(NSString *)columeType
 {
+    Class valueClass = NSClassFromString(columeType);
+    if([LKDBUtils checkStringIsEmpty:[valueClass getTableName]] == NO)
+    {
+        
+    }
+    
     id value = [self valueForKey:key];
     if([value isKindOfClass:[UIImage class]])
     {
@@ -159,6 +199,11 @@ static char LKModelBase_Key_RowID;
     {
         value = [value stringValue];
     }
+    else if([columeType isEqualToString:@"float"])
+    {
+        value = [value stringValue];
+    }
+
     return value;
 }
 
@@ -219,6 +264,7 @@ static char LKModelBase_Key_RowID;
     NSMutableString* sb = [NSMutableString stringWithCapacity:0];
     unsigned int outCount, i;
     objc_property_t *properties = class_copyPropertyList([self class], &outCount);
+    [sb appendFormat:@"\n %@ : %@ ",@"rowid",[self valueForKey:@"rowid"]];
     for (i = 0; i < outCount; i++) {
         objc_property_t property = properties[i];
         NSString *propertyName = [NSString stringWithCString:property_getName(property) encoding:NSUTF8StringEncoding];
