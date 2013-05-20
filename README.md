@@ -1,6 +1,15 @@
-#LKDBHelper 
-v1.0 over This is an automatic database operater. Thread-safe and not afraid of recursive deadlock
-## wrapper around FMDB:https://github.com/ccgus/fmdb
+#LKDBHelper
+this is sqlite ORM (an automatic database operater)
+thread-safe and not afraid of recursive deadlock
+#v1.0版本
+1、修复了 递归死锁。 
+2、重写了 异步操作
+3、线程安全
+4、各种bug 修改,优化缓存,提高性能
+
+低层采用FMDatabase 可自行使用最新的FMDatabase :https://github.com/ccgus/fmdb
+根据实体类 自动操作数据
+
 ## Automatic Reference Counting (ARC)
 ##example code can download the source code to look at it
 
