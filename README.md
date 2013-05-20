@@ -1,5 +1,5 @@
-#LKDBHelper
-This is an automatic database operater. Thread-safe and not afraid of recursive deadlock
+#LKDBHelper 
+v1.0 over This is an automatic database operater. Thread-safe and not afraid of recursive deadlock
 ## wrapper around FMDB:https://github.com/ccgus/fmdb
 ## Automatic Reference Counting (ARC)
 ##example code can download the source code to look at it
