@@ -212,7 +212,8 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
     if(newVersion != version && version > 0)
     {
         LKTableUpdateType updateType = [modelClass tableUpdateWithDBHelper:self oldVersion:version newVersion:newVersion];
-        switch (updateType) {
+        switch (updateType)
+        {
             case LKTableUpdateTypeDefault:
             {
                 [self dropTableWithClass:modelClass];
@@ -220,17 +221,20 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
                 break;
             case LKTableUpdateTypeCustom:
             {
+                [_tableManager setObject:tableName forKey:[NSNumber numberWithInt:newVersion]];
+                [[LKDBHelper sharedDBHelper] executeDB:^(FMDatabase *db) {
+                    NSString* replaceSQL = [NSString stringWithFormat:@"replace into LKTableManager(table_name,version) values('%@',%d)",tableName,newVersion];
+                    [db executeUpdate:replaceSQL];
+                }];
                 return;
             }
                 break;
         }
     }
-    if(version == newVersion)
-    {
-        //已创建表 就跳过
-        return;
-    }
     
+    //已创建表 就跳过
+    if(version == newVersion)
+        return;
     
     NSDictionary* dic  = [modelClass getPropertys];
     NSString* primaryKey = [modelClass getPrimaryKey];
