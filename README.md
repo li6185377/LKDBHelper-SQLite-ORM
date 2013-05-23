@@ -39,14 +39,16 @@ The entity class automatic operation data
 具体 示例代码可下载源码自行查看
 ```object-c
 
- //清空数据库
+    //清空数据库
     [[LKDBHelper sharedDBHelper] dropAllTable];
+    
     //创建表  会根据表的版本号  来判断具体的操作 . create table need to manually call
     [[LKDBHelper sharedDBHelper] createTableWithModelClass:[LKTest class]];
     [[LKDBHelper sharedDBHelper] createTableWithModelClass:[LKTestForeign class]];
     
     //清空表数据   clear table data
     [[LKDBHelper sharedDBHelper] clearTableData:[LKTest class]];
+    
     
     LKTestForeign* foreign = [[LKTestForeign alloc]init];
     foreign.address = @":asdasdasdsadasdsdas";
@@ -58,7 +60,7 @@ The entity class automatic operation data
     test.name = @"zhan san";
     test.age = 16;
     
-    //外键
+    //外键 foreign key
     test.address = foreign;
     
     test.isGirl = YES;
@@ -67,15 +69,13 @@ The entity class automatic operation data
     test.date = [NSDate date];
     test.color = [UIColor orangeColor];
     
-    //异步 插入第一条 数据   Insert the first
+    // 插入第一条 数据   Insert the first row
     
     [[LKDBHelper sharedDBHelper] insertToDB:test];
     
     addText(@"同步插入 完成!");
-    sleep(1);
     
-    
-    //改个 主键 插入第2条数据   update primary colume value  Insert the second
+    //改个 主键 插入第2条数据   update primary colume value ,  Insert the second
     test.name = @"li si";
     [[LKDBHelper sharedDBHelper] insertToDB:test callback:^(BOOL isInsert) {
         addText(@"异步插入 %@",isInsert>0?@"YES":@"NO");
