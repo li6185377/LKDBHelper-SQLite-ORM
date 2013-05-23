@@ -21,7 +21,8 @@ The entity class automatic operation data
 ## Automatic Reference Counting (ARC)
 ##example code can download the source code to look at it
 
-···ruby 需要重载下  你自己的实体类中的 +getTableName 方法  来设置表名 <br> 还可以 重载 + getTableVersion 来设置表版本 ```
+```ruby 需要重载下  你自己的实体类中的 +getTableName 方法  来设置表名 
+  还可以 重载 + getTableVersion 来设置表版本 ```
 
 根据Model自动数据库 操作  不用写 繁琐的SQL语句了  
 
