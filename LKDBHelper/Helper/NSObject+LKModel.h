@@ -7,9 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
 #import "LKDBUtils.h"
-#import "LKDBHelper.h"
 
 #import <objc/runtime.h>
 #define LKSQLText @"text"
@@ -80,7 +78,7 @@ typedef enum {
 -(NSString*)printAllPropertys;
 
 /**
- *	@brief	默认实现了 UIColor NSDate UIImage NSData 的数据转换存储
+ *	@brief	默认实现了 UIColor NSDate UIImage NSData , CGRect, CGSize,CGPoint,和基础类型 :int,float,double,NSString,short,char,bool.. 的数据转换存储
             子类 可重载  比如 可将  NSArray 和 NSDictionary 转成JSON 进行存储
  *
  *	@param 	key 	要返回的属性名称
@@ -91,7 +89,7 @@ typedef enum {
 
 
 /**
- *	@brief	默认实现了 UIColor NSDate UIImage NSData 的数据转换存储 
+ *	@brief	默认实现了 UIColor NSDate UIImage NSData , CGRect, CGSize,CGPoint,和基础类型 :int,float,double,NSString,short,char,bool.. 的数据转换存储 
             子类 可重载  比如 可将  NSArray 和 NSDictionary 转成JSON 进行存储
  *
  *	@param 	value 	要传入的 值

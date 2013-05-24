@@ -69,31 +69,42 @@ static char LKModelBase_Key_RowID;
          ...  BOOL 获取到的表示 方式是 char
          .... ^i 表示  int*  一般都不会用到
          */
-        
+
         if ([propertyType hasPrefix:@"T@"]) {
             [protypes addObject:[propertyType substringWithRange:NSMakeRange(3, [propertyType rangeOfString:@","].location-4)]];
         }
-        else if ([propertyType hasPrefix:@"Ti"])
+        else if([propertyType hasPrefix:@"T{"])
         {
-            [protypes addObject:@"int"];
+            [protypes addObject:[propertyType substringWithRange:NSMakeRange(2, [propertyType rangeOfString:@"="].location-2)]];
         }
-        else if ([propertyType hasPrefix:@"Tf"])
+        else
         {
-            [protypes addObject:@"float"];
-        }
-        else if([propertyType hasPrefix:@"Td"]) {
-            [protypes addObject:@"double"];
-        }
-        else if([propertyType hasPrefix:@"Tl"])
-        {
-            [protypes addObject:@"long"];
-        }
-        else if ([propertyType hasPrefix:@"Tc"]) {
-            [protypes addObject:@"char"];
-        }
-        else if([propertyType hasPrefix:@"Ts"])
-        {
-            [protypes addObject:@"short"];
+            propertyType = [propertyType lowercaseString];
+            if ([propertyType hasPrefix:@"ti"])
+            {
+                [protypes addObject:@"int"];
+            }
+            else if ([propertyType hasPrefix:@"tf"])
+            {
+                [protypes addObject:@"float"];
+            }
+            else if([propertyType hasPrefix:@"td"]) {
+                [protypes addObject:@"double"];
+            }
+            else if([propertyType hasPrefix:@"tl"])
+            {
+                [protypes addObject:@"long"];
+            }
+            else if ([propertyType hasPrefix:@"tc"]) {
+                [protypes addObject:@"char"];
+            }
+            else if([propertyType hasPrefix:@"ts"])
+            {
+                [protypes addObject:@"short"];
+            }
+            else {
+                [protypes addObject:@"NSString"];
+            }
         }
     }
     free(properties);
@@ -197,7 +208,18 @@ static char LKModelBase_Key_RowID;
     {
         value = [value stringValue];
     }
-
+    else if([columeType isEqualToString:@"CGRect"])
+    {
+        value = NSStringFromCGRect([value CGRectValue]);
+    }
+    else if([columeType isEqualToString:@"CGPoint"])
+    {
+        value = NSStringFromCGPoint([value CGPointValue]);
+    }
+    else if([columeType isEqualToString:@"CGSize"])
+    {
+        value = NSStringFromCGSize([value CGSizeValue]);
+    }
     return value;
 }
 
@@ -237,7 +259,19 @@ static char LKModelBase_Key_RowID;
         b = [[array objectAtIndex:2] floatValue];
         a = [[array objectAtIndex:3] floatValue];
         
-        value = [UIColor colorWithRed:r green:g blue:b alpha:a];
+        modelValue = [UIColor colorWithRed:r green:g blue:b alpha:a];
+    }
+    else if([columeType isEqualToString:@"CGRect"])
+    {
+        modelValue = [NSValue valueWithCGRect:CGRectFromString(value)];
+    }
+    else if([columeType isEqualToString:@"CGPoint"])
+    {
+        modelValue = [NSValue valueWithCGPoint:CGPointFromString(value)];
+    }
+    else if([columeType isEqualToString:@"CGSize"])
+    {
+        modelValue = [NSValue valueWithCGSize:CGSizeFromString(value)];
     }
     
     [self setValue:modelValue forKey:key];

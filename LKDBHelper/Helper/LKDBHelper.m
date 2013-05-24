@@ -50,7 +50,6 @@
         [self.bindingQueue close];
         self.bindingQueue = [[FMDatabaseQueue alloc]initWithPath:[LKDBUtils getPathForDocuments:self.dbname inDir:@"db"]];
         
-        
         //获取表版本管理
         self.tableManager = [NSMutableDictionary dictionaryWithCapacity:0];
         [self executeDB:^(FMDatabase *db) {
@@ -910,5 +909,14 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
 }
 +(BOOL)deleteWithWhere:(id)where{
     return [[LKDBHelper sharedDBHelper] deleteWithClass:self where:where];
+}
+- (void)saveToDB
+{
+    [self.class insertToDB:self];
+}
+
+- (void)deleteToDB
+{
+    [self.class deleteToDB:self];
 }
 @end

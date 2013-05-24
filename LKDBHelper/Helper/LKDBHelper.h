@@ -206,5 +206,8 @@
 +(BOOL)updateToDBWithSet:(NSString*)sets where:(id)where;
 +(BOOL)deleteToDB:(NSObject*)model;
 +(BOOL)deleteWithWhere:(id)where;
+
+- (void)saveToDB;
+- (void)deleteToDB;
 @end
 
