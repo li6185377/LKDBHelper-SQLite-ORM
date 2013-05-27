@@ -79,30 +79,30 @@
     
     [[LKDBHelper sharedDBHelper] insertToDB:test];
     
-    addText(@"同步插入 完成!");
+    addText(@"同步插入 完成!  Insert completed synchronization");
     sleep(1);
     
     
     //改个 主键 插入第2条数据   update primary colume value  Insert the second
     test.name = @"li si";
     [[LKDBHelper sharedDBHelper] insertToDB:test callback:^(BOOL isInsert) {
-        addText(@"异步插入 %@",isInsert>0?@"YES":@"NO");
+        addText(@"asynchronization insert complete: %@",isInsert>0?@"YES":@"NO");
     }];
     
     //查询   search
-    addText(@"同步搜索");
+    addText(@"同步搜索    sync search");
     NSMutableArray* array = [LKTest searchWithWhere:nil orderBy:nil offset:0 count:100];
     for (NSObject* obj in array) {
         addText(@"%@",[obj printAllPropertys]);
     }
     
-    addText(@"休息2秒 开始  为了说明 是异步插入的");
+    addText(@"休息2秒 开始  为了说明 是异步插入的\n rest for 2 seconds to start is asynchronous inserted to illustrate");
     sleep(2);
-    addText(@"休息2秒 结束");
+    addText(@"休息2秒 结束 \n rest for 2 seconds at the end");
     //异步
     [[LKDBHelper sharedDBHelper] search:[LKTest class] where:nil orderBy:nil offset:0 count:100 callback:^(NSMutableArray *array) {
         
-        addText(@"异步搜索 结束");
+        addText(@"异步搜索 结束,  async search end");
         for (NSObject* obj in array) {
             addText(@"%@",[obj printAllPropertys]);
         }
@@ -113,7 +113,7 @@
         test2.name = @"wang wu";
         [[LKDBHelper sharedDBHelper] updateToDB:test2 where:nil];
         
-        addText(@"修改完成 updated ");
+        addText(@"修改完成 , update completed ");
         
         array =  [[LKDBHelper sharedDBHelper] search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
         for (NSObject* obj in array) {
@@ -129,7 +129,7 @@
             [[LKDBHelper sharedDBHelper] deleteToDB:test2];
         }
         
-        addText(@"删除完成        deleted");
+        addText(@"删除完成, delete completed");
         sleep(1);
         
         array =  [[LKDBHelper sharedDBHelper] search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
@@ -142,7 +142,7 @@
         
         
         //Expansion: Delete the picture is no longer stored in the database record
-        addText(@"扩展:  删除已不再数据库中保存的 图片记录");
+        addText(@"扩展:  删除已不再数据库中保存的 图片记录 \n expansion: Delete the picture is no longer stored in the database record");
         //目前 已合并到LKDBHelper 中  就先写出来 给大家参考下
         
         [[LKDBHelper sharedDBHelper] clearNoneImage:[LKTest class] columes:[NSArray arrayWithObjects:@"img",nil]];
