@@ -6,10 +6,10 @@
 //  Copyright (c) 2012年 linggan. All rights reserved.
 //
 
-#import "LKDBHelper.h"
 
+#import "LKDBHelper.h"
 @interface LKDBHelper()
-@property(weak,nonatomic)FMDatabase* usingdb;
+@property(unsafe_unretained,nonatomic)FMDatabase* usingdb;
 @property(strong,nonatomic)FMDatabaseQueue* bindingQueue;
 @property(copy,nonatomic)NSString* dbname;
 @property(strong,nonatomic)NSMutableDictionary* tableManager;
@@ -152,6 +152,12 @@
 -(void)dealloc
 {
     [self.bindingQueue close];
+    self.usingdb = nil;
+    self.bindingQueue = nil;
+    self.dbname = nil;
+    self.tableManager = nil;
+    self.threadLock = nil;
+
 }
 @end
 @implementation LKDBHelper(DatabaseManager)
