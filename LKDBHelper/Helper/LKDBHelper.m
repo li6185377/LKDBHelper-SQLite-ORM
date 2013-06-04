@@ -26,14 +26,18 @@
     });
     return dbhelper;
 }
-- (id)init
+-(id)initWithDBName:(NSString *)dbname
 {
     self = [super init];
     if (self) {
-        [self setDBName:@"LKDB"];
+        [self setDBName:dbname];
         self.threadLock = [[NSRecursiveLock alloc]init];
     }
     return self;
+}
+- (id)init
+{
+    return [self initWithDBName:@"LKDB"];
 }
 -(void)setDBName:(NSString *)fileName
 {
@@ -49,6 +53,13 @@
         }
         [self.bindingQueue close];
         self.bindingQueue = [[FMDatabaseQueue alloc]initWithPath:[LKDBUtils getPathForDocuments:self.dbname inDir:@"db"]];
+        
+#ifdef DEBUG
+        //debug 模式下  打印错误日志
+        [_bindingQueue inDatabase:^(FMDatabase *db) {
+            db.logsErrors = YES;
+        }];
+#endif
         
         //获取表版本管理
         self.tableManager = [NSMutableDictionary dictionaryWithCapacity:0];
@@ -157,7 +168,6 @@
     self.dbname = nil;
     self.tableManager = nil;
     self.threadLock = nil;
-
 }
 @end
 @implementation LKDBHelper(DatabaseManager)
@@ -227,7 +237,7 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
             case LKTableUpdateTypeCustom:
             {
                 [_tableManager setObject:tableName forKey:[NSNumber numberWithInt:newVersion]];
-                [[LKDBHelper sharedDBHelper] executeDB:^(FMDatabase *db) {
+                [self executeDB:^(FMDatabase *db) {
                     NSString* replaceSQL = [NSString stringWithFormat:@"replace into LKTableManager(table_name,version) values('%@',%d)",tableName,newVersion];
                     [db executeUpdate:replaceSQL];
                 }];
@@ -845,7 +855,10 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
 
 
 @implementation NSObject(LKDBHelper)
-
++(LKDBHelper *)modelUsingLKDBHelper
+{
+    return [LKDBHelper sharedDBHelper];
+}
 +(void)dbDidCreateTable:(LKDBHelper *)helper{}
 
 +(void)dbDidIDeleted:(NSObject *)entity result:(BOOL)result{}
@@ -872,18 +885,18 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
 }
 
 +(int)rowCountWithWhere:(id)where{
-    return [[LKDBHelper sharedDBHelper] rowCount:self where:where];
+    return [[self modelUsingLKDBHelper] rowCount:self where:where];
 }
 
 +(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count{
-    return [[LKDBHelper sharedDBHelper] search:self where:where orderBy:orderBy offset:offset count:count];
+    return [[self modelUsingLKDBHelper] search:self where:where orderBy:orderBy offset:offset count:count];
 }
 
 +(BOOL)insertToDB:(NSObject*)model{
     
     if([self checkModelClass:model])
     {
-        return [[LKDBHelper sharedDBHelper] insertToDB:model];
+        return [[self modelUsingLKDBHelper] insertToDB:model];
     }
     return NO;
     
@@ -891,30 +904,30 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
 +(BOOL)insertWhenNotExists:(NSObject*)model{
     if([self checkModelClass:model])
     {
-        return [[LKDBHelper sharedDBHelper] insertWhenNotExists:model];
+        return [[self modelUsingLKDBHelper] insertWhenNotExists:model];
     }
     return NO;
 }
 +(BOOL)updateToDB:(NSObject *)model where:(id)where{
     if([self checkModelClass:model])
     {
-        return [[LKDBHelper sharedDBHelper] updateToDB:model where:where];
+        return [[self modelUsingLKDBHelper] updateToDB:model where:where];
     }
     return NO;
 }
 +(BOOL)updateToDBWithSet:(NSString *)sets where:(id)where
 {
-    return [[LKDBHelper sharedDBHelper] updateToDB:self set:sets where:where];
+    return [[self modelUsingLKDBHelper] updateToDB:self set:sets where:where];
 }
 +(BOOL)deleteToDB:(NSObject*)model{
     if([self checkModelClass:model])
     {
-        return [[LKDBHelper sharedDBHelper] deleteToDB:model];
+        return [[self modelUsingLKDBHelper] deleteToDB:model];
     }
     return NO;
 }
 +(BOOL)deleteWithWhere:(id)where{
-    return [[LKDBHelper sharedDBHelper] deleteWithClass:self where:where];
+    return [[self modelUsingLKDBHelper] deleteWithClass:self where:where];
 }
 - (void)saveToDB
 {

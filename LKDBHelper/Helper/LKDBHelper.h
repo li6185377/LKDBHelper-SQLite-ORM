@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "FMDatabaseQueue.h"
+#import <FMDatabaseQueue.h>
 #import "FMDatabase.h"
 #import "LKDBUtils.h"
 #import "NSObject+LKModel.h"
@@ -34,8 +34,9 @@
 @interface LKDBHelper : NSObject
 
 +(LKDBHelper*)sharedDBHelper;
+-(id)initWithDBName:(NSString*)dbname;
 
-//change database filepath : "documents/db/" + fileName + ".db"
+//change database , filepath the use of : "documents/db/" + fileName + ".db"
 -(void)setDBName:(NSString*)fileName;
 
 /**
@@ -63,6 +64,8 @@
 @end
 
 @interface LKDBHelper(DatabaseExecute)
+
+
 
 /**
  *	@brief	The number of rows query table
@@ -184,6 +187,9 @@
     add entity class verification
 */
 @interface NSObject(LKDBHelper)
+
+//return model use LKDBHelper , default return [LKDBHelper shareDBHelper];
++(LKDBHelper*)modelUsingLKDBHelper;
 
 //callback delegate
 +(void)dbDidCreateTable:(LKDBHelper*)helper;
