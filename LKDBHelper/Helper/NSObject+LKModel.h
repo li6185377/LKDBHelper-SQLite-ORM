@@ -79,7 +79,7 @@ typedef enum {
 
 /**
  *	@brief	默认实现了 UIColor NSDate UIImage NSData , CGRect, CGSize,CGPoint,和基础类型 :int,float,double,NSString,short,char,bool.. 的数据转换存储
-            子类 可重载  比如 可将  NSArray 和 NSDictionary 转成JSON 进行存储
+ 子类 可重载  比如 可将  NSArray 和 NSDictionary 转成JSON 进行存储
  *
  *	@param 	key 	要返回的属性名称
  *
@@ -89,8 +89,8 @@ typedef enum {
 
 
 /**
- *	@brief	默认实现了 UIColor NSDate UIImage NSData , CGRect, CGSize,CGPoint,和基础类型 :int,float,double,NSString,short,char,bool.. 的数据转换存储 
-            子类 可重载  比如 可将  NSArray 和 NSDictionary 转成JSON 进行存储
+ *	@brief	默认实现了 UIColor NSDate UIImage NSData , CGRect, CGSize,CGPoint,和基础类型 :int,float,double,NSString,short,char,bool.. 的数据转换存储
+ 子类 可重载  比如 可将  NSArray 和 NSDictionary 转成JSON 进行存储
  *
  *	@param 	value 	要传入的 值
  *	@param 	key 	要设置属性的 名称
@@ -105,6 +105,6 @@ typedef enum {
 
 
 //获取保存的 图片和数据的文件夹路径
-+(NSString*)getDBImageDir;
-+(NSString*)getDBDataDir;
++(NSString*)getDBImagePathWithName:(NSString*)filename;
++(NSString*)getDBDataPathWithName:(NSString*)filename;
 @end

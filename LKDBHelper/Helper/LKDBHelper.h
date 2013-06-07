@@ -167,8 +167,7 @@
  *
  *	@param 	modelClass 	entity class
  */
--(void)clearTableData:(Class)modelClass;
-
++(void)clearTableData:(Class)modelClass;
    
 /**
  *	@brief	Clear Unused Data File
@@ -177,8 +176,8 @@
  *	@param 	modelClass      entity class
  *	@param 	columes         UIImage or NSData Colume Name
  */
--(void)clearNoneImage:(Class)modelClass columes:(NSArray*)columes;
--(void)clearNoneData:(Class)modelClass columes:(NSArray*)columes;
++(void)clearNoneImage:(Class)modelClass columes:(NSArray*)columes;
++(void)clearNoneData:(Class)modelClass columes:(NSArray*)columes;
 @end
 
 

@@ -789,29 +789,43 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
 
 #pragma mark- clear operation
 
--(void)clearTableData:(Class)modelClass
++(void)clearTableData:(Class)modelClass
 {
-    [self executeDB:^(FMDatabase *db) {
+    [[modelClass modelUsingLKDBHelper] executeDB:^(FMDatabase *db) {
         NSString* delete = [NSString stringWithFormat:@"DELETE FROM %@",[modelClass getTableName]];
         [db executeUpdate:delete];
     }];
 }
 
--(void)clearNoneData:(Class)modelClass columes:(NSArray *)columes
++(void)clearNoneImage:(Class)modelClass columes:(NSArray *)columes
 {
-    [self clearFileWithTable:[modelClass getTableName] columes:columes dir:[modelClass getDBDataDir]];
+    [self clearFileWithTable:modelClass columes:columes type:1];
 }
--(void)clearNoneImage:(Class)modelClass columes:(NSArray *)columes
++(void)clearNoneData:(Class)modelClass columes:(NSArray *)columes
 {
-    [self clearFileWithTable:[modelClass getTableName]  columes:columes dir:[modelClass getDBImageDir]];
+    [self clearFileWithTable:modelClass columes:columes type:2];
 }
-
--(void)clearFileWithTable:(NSString*)tableName columes:(NSArray*)columes dir:(NSString*)relativeDIR
+#define LKTestDirFilename @"LKTestDirFilename111"
++(void)clearFileWithTable:(Class)modelClass columes:(NSArray*)columes type:(int)type
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         
+        NSString* testpath = nil;
+        switch (type) {
+            case 1:
+                testpath = [modelClass getDBImagePathWithName:LKTestDirFilename];
+                break;
+            case 2:
+                testpath = [modelClass getDBDataPathWithName:LKTestDirFilename];
+                break;
+        }
+        if([LKDBUtils checkStringIsEmpty:testpath])
+            return ;
+        
+        NSString* dir  = [testpath stringByReplacingOccurrencesOfString:LKTestDirFilename withString:@""];
+        
         int count =  columes.count;
-        NSString* dir =  [LKDBUtils getDirectoryForDocuments:relativeDIR];
+        
         //获取该目录下所有文件名
         NSArray* files = [LKDBUtils getFilenamesWithDir:dir];
         
@@ -824,9 +838,9 @@ const __strong static NSString* blobtypestring = @"NSDataUIImage";
                 [whereStr appendString:@" or "];
             }
         }
-        NSString* querySql = [NSString stringWithFormat:@"select %@ from %@ where %@",seleteColume,tableName,whereStr];
+        NSString* querySql = [NSString stringWithFormat:@"select %@ from %@ where %@",seleteColume,[modelClass getTableName],whereStr];
         __block NSArray* dbfiles;
-        [self executeDB:^(FMDatabase *db) {
+        [[modelClass modelUsingLKDBHelper] executeDB:^(FMDatabase *db) {
             NSMutableArray* tempfiles = [NSMutableArray arrayWithCapacity:6];
             FMResultSet* set = [db executeQuery:querySql];
             while ([set next]) {

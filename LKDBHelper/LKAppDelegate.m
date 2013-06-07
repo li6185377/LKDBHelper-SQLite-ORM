@@ -44,17 +44,17 @@
 }
 -(void)test
 {
-    
     addText(@"示例 开始 example start \n\n");
     
     //清空数据库
     [[LKDBHelper sharedDBHelper] dropAllTable];
+    
     //创建表  会根据表的版本号  来判断具体的操作 . create table need to manually call
     [[LKDBHelper sharedDBHelper] createTableWithModelClass:[LKTest class]];
     [[LKDBHelper sharedDBHelper] createTableWithModelClass:[LKTestForeign class]];
     
     //清空表数据   clear table data
-    [[LKDBHelper sharedDBHelper] clearTableData:[LKTest class]];
+    [LKDBHelper clearTableData:[LKTest class]];
     
     LKTestForeign* foreign = [[LKTestForeign alloc]init];
     foreign.address = @":asdasdasdsadasdsdas";
@@ -145,7 +145,7 @@
         addText(@"扩展:  删除已不再数据库中保存的 图片记录 \n expansion: Delete the picture is no longer stored in the database record");
         //目前 已合并到LKDBHelper 中  就先写出来 给大家参考下
         
-        [[LKDBHelper sharedDBHelper] clearNoneImage:[LKTest class] columes:[NSArray arrayWithObjects:@"img",nil]];
+        [LKDBHelper clearNoneImage:[LKTest class] columes:[NSArray arrayWithObjects:@"img",nil]];
     }];
 }
 @end
