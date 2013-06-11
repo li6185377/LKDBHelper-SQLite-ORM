@@ -16,5 +16,5 @@ thread-safe and not afraid of recursive deadlock."
   s.source_files = 'LKDBHelper/Helper/*.{h,m}'
   s.requires_arc = true
 
-  s.dependency 'FMDB', '~> 2.0'
+  s.dependency 'FMDB'
 end
