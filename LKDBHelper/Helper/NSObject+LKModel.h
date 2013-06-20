@@ -7,104 +7,86 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "LKDBUtils.h"
-
 #import <objc/runtime.h>
-#define LKSQLText @"text"
-#define LKSQLInt @"integer"
-#define LKSQLDouble @"float"
-#define LKSQLBlob @"blob"
-#define LKSQLNull @"null"
-#define LKSQLPrimaryKey @"primary key"
+
+@class LKDBProperty;
+@class LKModelInfos;
 @class LKDBHelper;
 
-typedef enum {
-    LKTableUpdateTypeDefault = 1<<0,        // 直接删除旧表  创建新表
-    LKTableUpdateTypeCustom = 1<<1          //自定义 更新
-}LKTableUpdateType;
+#pragma mark- 表结构
+@interface NSObject(LKTabelStructure)
+
+// overwrite in your models, return # table name #
++(NSString*)getTableName;
+
+// overwrite in your models, set colume attribute
++(void)columeAttributeWithProperty:(LKDBProperty*)property;
+
+/**
+ *	@brief	overwrite in your models, if your table has primary key
+            return # colume name  #
+ 
+            主键列名 如果rowid<0 则跟据此名称update 和delete
+ */
++(NSString*)getPrimaryKey;
+
+@property int rowid;
+
+/**
+ *	@brief   get saved pictures and data file path,can overwirte
+ 
+             获取保存的 图片和数据的文件路径
+ */
++(NSString*)getDBImagePathWithName:(NSString*)filename;
++(NSString*)getDBDataPathWithName:(NSString*)filename;
+@end
+
+
+#pragma mark- 表数据操作
+@interface NSObject(LKTableData)
+
+/**
+ *	@brief      overwrite in your models,return insert sqlite table data
+ *
+ *
+ *	@return     property the data after conversion
+ */
+-(id)userGetValueForModel:(LKDBProperty*)property;
+
+/**
+ *	@brief	overwrite in your models,return insert sqlite table data
+ *
+ *	@param 	property        will set property
+ *	@param 	value           sqlite value (normal value is NSString type)
+ */
+-(void)userSetValueForModel:(LKDBProperty*)property value:(id)value;
+
+
+//lkdbhelper use
+-(id)modelGetValue:(LKDBProperty*)property;
+-(void)modelSetValue:(LKDBProperty*)property value:(id)value;
+-(id)getPrimaryValue;
+@end
 
 @interface NSObject (LKModel)
 
-/**
- *	@brief  该类的所有属性
- 是否上溯到NSObject类（不会获取NSObject 的属性）由isContainParent 方法返回  可在子类种重载此方法
- *
- *	@return	返回 该类的所有属性
- */
-+(NSDictionary*)getPropertys;
+//return model use LKDBHelper , default return global LKDBHelper;
++(LKDBHelper*)getUsingLKDBHelper;
 
 /**
- *	@brief	设置getPropertys方法 是否上溯到 父类
+ *	@brief  返回 该Model 的基础信息
  *
- *  @return
+ */
++(LKModelInfos*)getModelInfos;
+
+/**
+ *	@brief Containing the super class attributes	设置是否包含 父类 的属性
  */
 +(BOOL)isContainParent;
 
 /**
- *	@brief	主键名称 如果rowid<0 则跟据此名称update 和delete
- */
-+(NSString*)getPrimaryKey;
-/**
- *	@brief	主键类型,不用重载
- */
-+(NSString*)getPrimaryKeyType;
--(id)getPrimaryValue;
-
-/**
- *	@brief	表名 默认实体类名称
- */
-+(NSString*)getTableName;
-
-/**
- *	@brief	返回当前版本
- */
-+(int)getTableVersion;
-
-/**
- *	@brief	更新表结构
- *
- *	@param 	helper      helper
- *	@param 	oldVersion 	旧版本号
- *	@param 	newVersion 	新版本号
- *
- *	@return	更新策略
- */
-+(LKTableUpdateType)tableUpdateWithDBHelper:(LKDBHelper*)helper oldVersion:(int)oldVersion newVersion:(int)newVersion;
-
-
-/**
- *	@brief	打印所有的属性名称和数据
+ *	@brief log all property 	打印所有的属性名称和数据
  */
 -(NSString*)printAllPropertys;
 
-/**
- *	@brief	默认实现了 UIColor NSDate UIImage NSData , CGRect, CGSize,CGPoint,和基础类型 :int,float,double,NSString,short,char,bool.. 的数据转换存储
- 子类 可重载  比如 可将  NSArray 和 NSDictionary 转成JSON 进行存储
- *
- *	@param 	key 	要返回的属性名称
- *
- *	@return	属性值
- */
--(id)modelGetValueWithKey:(NSString*)key type:(NSString *)columeType;
-
-
-/**
- *	@brief	默认实现了 UIColor NSDate UIImage NSData , CGRect, CGSize,CGPoint,和基础类型 :int,float,double,NSString,short,char,bool.. 的数据转换存储
- 子类 可重载  比如 可将  NSArray 和 NSDictionary 转成JSON 进行存储
- *
- *	@param 	value 	要传入的 值
- *	@param 	key 	要设置属性的 名称
- *	@param 	type 	value 的类型
- */
--(void)modelSetValue:(id)value key:(NSString*)key type:(NSString*)type;
-
-/**
- *	@brief   sqlite 中存储的rowid
- */
-@property int rowid;
-
-
-//获取保存的 图片和数据的文件夹路径
-+(NSString*)getDBImagePathWithName:(NSString*)filename;
-+(NSString*)getDBDataPathWithName:(NSString*)filename;
 @end

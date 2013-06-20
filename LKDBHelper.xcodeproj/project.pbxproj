@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5311E11C1762DEFE00ADBB7D /* NSObject+LKDBHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 5311E11B1762DEFE00ADBB7D /* NSObject+LKDBHelper.m */; };
 		53226E01171B9E5A00B1A490 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53226E00171B9E5A00B1A490 /* UIKit.framework */; };
 		53226E03171B9E5A00B1A490 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53226E02171B9E5A00B1A490 /* Foundation.framework */; };
 		53226E05171B9E5B00B1A490 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53226E04171B9E5A00B1A490 /* CoreGraphics.framework */; };
@@ -27,9 +28,13 @@
 		53226E47171BFB6900B1A490 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 53226E46171BFB6900B1A490 /* libsqlite3.dylib */; };
 		53226E4A171C1F0400B1A490 /* NSObject+LKModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 53226E49171C1F0400B1A490 /* NSObject+LKModel.m */; };
 		53226E4C171C207F00B1A490 /* 41.png in Resources */ = {isa = PBXBuildFile; fileRef = 53226E4B171C207F00B1A490 /* 41.png */; };
+		534D38D51772FA5B00E24E96 /* LKDB+Manager.m in Sources */ = {isa = PBXBuildFile; fileRef = 534D38D41772FA5B00E24E96 /* LKDB+Manager.m */; };
+		534D38D81772FA6A00E24E96 /* LKDB+Mapping.m in Sources */ = {isa = PBXBuildFile; fileRef = 534D38D71772FA6A00E24E96 /* LKDB+Mapping.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5311E11A1762DEFE00ADBB7D /* NSObject+LKDBHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+LKDBHelper.h"; sourceTree = "<group>"; };
+		5311E11B1762DEFE00ADBB7D /* NSObject+LKDBHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+LKDBHelper.m"; sourceTree = "<group>"; };
 		53226DFD171B9E5A00B1A490 /* LKDBHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LKDBHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		53226E00171B9E5A00B1A490 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		53226E02171B9E5A00B1A490 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -63,6 +68,10 @@
 		53226E48171C1F0400B1A490 /* NSObject+LKModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+LKModel.h"; sourceTree = "<group>"; };
 		53226E49171C1F0400B1A490 /* NSObject+LKModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+LKModel.m"; sourceTree = "<group>"; };
 		53226E4B171C207F00B1A490 /* 41.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 41.png; sourceTree = "<group>"; };
+		534D38D31772FA5B00E24E96 /* LKDB+Manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "LKDB+Manager.h"; sourceTree = "<group>"; };
+		534D38D41772FA5B00E24E96 /* LKDB+Manager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "LKDB+Manager.m"; sourceTree = "<group>"; };
+		534D38D61772FA6A00E24E96 /* LKDB+Mapping.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "LKDB+Mapping.h"; sourceTree = "<group>"; };
+		534D38D71772FA6A00E24E96 /* LKDB+Mapping.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "LKDB+Mapping.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -177,8 +186,14 @@
 				53226E3D171BA16E00B1A490 /* LKDBHelper.m */,
 				53226E48171C1F0400B1A490 /* NSObject+LKModel.h */,
 				53226E49171C1F0400B1A490 /* NSObject+LKModel.m */,
+				5311E11A1762DEFE00ADBB7D /* NSObject+LKDBHelper.h */,
+				5311E11B1762DEFE00ADBB7D /* NSObject+LKDBHelper.m */,
 				53226E43171BA44100B1A490 /* LKDBUtils.h */,
 				53226E44171BA44100B1A490 /* LKDBUtils.m */,
+				534D38D31772FA5B00E24E96 /* LKDB+Manager.h */,
+				534D38D41772FA5B00E24E96 /* LKDB+Manager.m */,
+				534D38D61772FA6A00E24E96 /* LKDB+Mapping.h */,
+				534D38D71772FA6A00E24E96 /* LKDB+Mapping.m */,
 			);
 			path = Helper;
 			sourceTree = "<group>";
@@ -261,6 +276,9 @@
 				53226E3F171BA16E00B1A490 /* LKDBHelper.m in Sources */,
 				53226E45171BA44100B1A490 /* LKDBUtils.m in Sources */,
 				53226E4A171C1F0400B1A490 /* NSObject+LKModel.m in Sources */,
+				5311E11C1762DEFE00ADBB7D /* NSObject+LKDBHelper.m in Sources */,
+				534D38D51772FA5B00E24E96 /* LKDB+Manager.m in Sources */,
+				534D38D81772FA6A00E24E96 /* LKDB+Mapping.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,7 +320,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
@@ -325,7 +343,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -339,6 +357,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LKDBHelper/LKDBHelper-Prefix.pch";
 				INFOPLIST_FILE = "LKDBHelper/LKDBHelper-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -351,6 +370,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LKDBHelper/LKDBHelper-Prefix.pch";
 				INFOPLIST_FILE = "LKDBHelper/LKDBHelper-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};

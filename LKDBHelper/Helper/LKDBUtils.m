@@ -54,11 +54,12 @@
     {
         return YES;
     }
-    if([string isKindOfClass:[NSNull class]])
+    if([string isKindOfClass:[NSString class]] == NO)
     {
         return YES;
     }
-    return [[string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""];
+    
+    return [[string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] isEqualToString:@""];
 }
 
 +(NSDateFormatter*)getDBDateFormat

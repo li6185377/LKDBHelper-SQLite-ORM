@@ -9,34 +9,30 @@
 #import <Foundation/Foundation.h>
 #import "FMDatabaseQueue.h"
 #import "FMDatabase.h"
-#import "LKDBUtils.h"
-#import "NSObject+LKModel.h"
 
-/**
- 
- Description of parameters "where"
- For example: 
-        single:  @"rowid = 1"                         or      @{@"rowid":@1}
- 
-        more:    @"rowid = 1 and sex = 0"             or      @{@"rowid":@1,@"sex":@0}
-                   
-                    when where is "or" type , such as @"rowid = 1 or sex = 0"
-                    you only use NSString
- 
-        array:   @"rowid in (1,2,3)"                  or      @{@"rowid":@[@1,@2,@3]}
-            
-        composite:  @"rowid in (1,2,3) and sex=0 "      or      @{@"rowid":@[@1,@2,@3],@"sex":@0}
- 
-        If you want to be judged , only use NSString
-        For example: @"date >= '2013-04-01 00:00:00'"
-*/
+#import "LKDBUtils.h"
+
+#import "LKDB+Manager.h"
+#import "LKDB+Mapping.h"
+
+#import "NSObject+LKModel.h"
+#import "NSObject+LKDBHelper.h"
+
+#ifdef DEBUG
+#   define LKLog(fmt, ...) {NSLog((@"\n#LKDBHelper ERROR: %s [Line %d] \n" fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);}
+#else
+#   define LKLog(...)
+#endif
 
 @interface LKDBHelper : NSObject
+// you can use [LKDBHelper getUsingLKDBHelper]
+//+(LKDBHelper*)sharedDBHelper;
 
-+(LKDBHelper*)sharedDBHelper;
 -(id)initWithDBName:(NSString*)dbname;
 
-//change database , filepath the use of : "documents/db/" + fileName + ".db"
+/**
+ *	@brief  change database , filepath the use of : "documents/db/" + fileName + ".db"
+ */
 -(void)setDBName:(NSString*)fileName;
 
 /**
@@ -44,29 +40,25 @@
  */
 -(void)executeDB:(void (^)(FMDatabase *db))block;
 
-//get all by LKDBHelper create table name and version number
--(NSMutableDictionary*)getTableManager;
+-(BOOL)executeSQL:(NSString *)sql arguments:(NSArray *)args;
+-(NSString *)executeScalarWithSQL:(NSString *)sql arguments:(NSArray *)args;
 @end
 
 @interface LKDBHelper(DatabaseManager)
 
 //create table with entity class
--(void)createTableWithModelClass:(Class)model;
+-(BOOL)createTableWithModelClass:(Class)model;
 
 //drop all table
 -(void)dropAllTable;
 
 //drop table with entity class
--(void)dropTableWithClass:(Class)modelClass;
+-(BOOL)dropTableWithClass:(Class)modelClass;
 
-//Object-c type converted to SQLite type    把Object-c 类型 转换为sqlite 类型
-+(NSString*)toDBType:(NSString*)type;
+
 @end
 
 @interface LKDBHelper(DatabaseExecute)
-
-
-
 /**
  *	@brief	The number of rows query table
  *
@@ -93,8 +85,9 @@
  *	@return	query finished result is an array(model instance collection)
  */
 -(NSMutableArray*)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
--(void)search:( Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count callback:(void(^)(NSMutableArray* array))block;
-
+-(void)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count callback:(void(^)(NSMutableArray* array))block;
+//return first model or nil
+-(id)searchSingle:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy;
 
 /**
  *	@brief	insert table
@@ -178,41 +171,5 @@
  */
 +(void)clearNoneImage:(Class)modelClass columes:(NSArray*)columes;
 +(void)clearNoneData:(Class)modelClass columes:(NSArray*)columes;
+
 @end
-
-
-/*
-    usage look LKDBHelper similar name funcation
-    add entity class verification
-*/
-@interface NSObject(LKDBHelper)
-
-//return model use LKDBHelper , default return [LKDBHelper shareDBHelper];
-+(LKDBHelper*)modelUsingLKDBHelper;
-
-//callback delegate
-+(void)dbDidCreateTable:(LKDBHelper*)helper;
-
-+(void)dbWillInsert:(NSObject*)entity;
-+(void)dbDidInserted:(NSObject*)entity result:(BOOL)result;
-
-+(void)dbWillUpdate:(NSObject*)entity;
-+(void)dbDidUpdated:(NSObject*)entity result:(BOOL)result;
-
-+(void)dbWillDelete:(NSObject*)entity;
-+(void)dbDidIDeleted:(NSObject*)entity result:(BOOL)result;
-
-//only simplify synchronous function
-+(int)rowCountWithWhere:(id)where;
-+(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
-+(BOOL)insertToDB:(NSObject*)model;
-+(BOOL)insertWhenNotExists:(NSObject*)model;
-+(BOOL)updateToDB:(NSObject *)model where:(id)where;
-+(BOOL)updateToDBWithSet:(NSString*)sets where:(id)where;
-+(BOOL)deleteToDB:(NSObject*)model;
-+(BOOL)deleteWithWhere:(id)where;
-
-- (void)saveToDB;
-- (void)deleteToDB;
-@end
-
