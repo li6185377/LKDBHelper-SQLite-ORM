@@ -99,8 +99,8 @@ Basic usage
         
      
 ```
- Description of parameters "where"
- 
+6. Description of parameters "where"
+
 ```
  For example: 
         single:  @"rowid = 1"                         or      @{@"rowid":@1}
@@ -117,6 +117,12 @@ Basic usage
         If you want to be judged , only use NSString
         For example: @"date >= '2013-04-01 00:00:00'"
 ```
+
+demo screenshot:
+
+(https://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_8.png)
+(https://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_6.png)
+(https://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_7.png)
 
 ----------
 Change-log
