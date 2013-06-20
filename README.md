@@ -16,6 +16,7 @@ Basic usage
 ====================================
 
 1. Create a new Objective-C class for your data model
+
 ```
 @interface LKTest : NSObject
 @property(copy,nonatomic)NSString* name;
@@ -40,7 +41,6 @@ Basic usage
     return @"LKTestTable";
 }
 ```
-
 3. In your app start function
 
 ```
@@ -49,7 +49,6 @@ Basic usage
     //create table need to manually call! will check the version number of the table
     [globalHelper createTableWithModelClass:[LKTest class]];
 ```
-
 4. Initialize your model with data and insert to database
 
 ```
@@ -68,7 +67,6 @@ Basic usage
     [globalHelper insertToDB:test];
     
 ```
-
 5. select 、 delete 、 update 、 isExists 、 rowCount ...
 
 ```
@@ -119,9 +117,9 @@ Basic usage
 
 demo screenshot:
 
-(http://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_8.png)
-(http://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_6.png)
-(http://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_7.png)
+(https://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_8.png?raw=true)
+(https://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_6.png?raw=true)
+(https://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_7.png?raw=true)
 
 ----------
 Change-log
