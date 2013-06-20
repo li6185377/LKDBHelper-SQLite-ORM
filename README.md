@@ -2,7 +2,7 @@ LKDBHelper
 ====================================
 this is sqlite ORM (an automatic database operation) <br>
 thread-safe and not afraid of recursive deadlock
-
+ 
 ------------------------------------
 Requirements
 ====================================
