@@ -11,6 +11,66 @@ Requirements
 * ARC only
 * FMDB(https://github.com/ccgus/fmdb)
 
+------------------------------------
+Basic usage
+====================================
+1. Create a new Objective-C class for your data model
+```objective-c
+@interface LKTest : NSObject
+@property(copy,nonatomic)NSString* name;
+@property int  age;
+@property BOOL isGirl;
+
+@property(strong,nonatomic)LKTestForeign* address;
+
+@property char like;
+@property(strong,nonatomic) UIImage* img;
+@property(strong,nonatomic) NSDate* date;
+
+@property(copy,nonatomic)NSString* error;
+@property(copy,nonatomic)UIColor* color;
+@end
+```
+2. in the *.m file, overwirte getTableName function
+```objective-c
++(NSString *)getTableName
+{
+    return @"LKTestTable";
+}
+```
+
+3. In your app start function
+```objective-c
+
+    LKDBHelper* globalHelper = [LKDBHelper getUsingLKDBHelper];
+   
+    //create table need to manually call! will check the version number of the table
+    [globalHelper createTableWithModelClass:[LKTest class]];
+    
+```
+
+4. Initialize your model with data and insert to database
+
+```objective-c
+
+    LKTest* test = [[LKTest alloc]init];
+    test.name = @"zhan san";
+    test.age = 16;
+    
+    test.address = foreign;
+    
+    test.isGirl = YES;
+    test.like = 'I';
+    test.img = [UIImage imageNamed:@"41.png"];
+    test.date = [NSDate date];
+    test.color = [UIColor orangeColor];
+    
+    [globalHelper insertToDB:test];
+    
+```
+
+
+
 ----------
 Change-log
 ==========
