@@ -14,8 +14,8 @@ Requirements
 ------------------------------------
 Basic usage
 ====================================
-1. Create a new Objective-C class for your data model
 
+1. Create a new Objective-C class for your data model
 ```
 @interface LKTest : NSObject
 @property(copy,nonatomic)NSString* name;
@@ -32,7 +32,6 @@ Basic usage
 @property(copy,nonatomic)UIColor* color;
 @end
 ```
-
 2. in the *.m file, overwirte getTableName function
 
 ```
@@ -120,9 +119,9 @@ Basic usage
 
 demo screenshot:
 
-(https://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_8.png)
-(https://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_6.png)
-(https://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_7.png)
+(http://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_8.png)
+(http://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_6.png)
+(http://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_7.png)
 
 ----------
 Change-log
