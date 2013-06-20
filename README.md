@@ -11,6 +11,9 @@ Requirements
 * ARC only
 * FMDB(https://github.com/ccgus/fmdb)
 
+----------
+Change-log
+==========
 
 **Version 1.1** @ 2012-6-20
 
@@ -33,3 +36,25 @@ Requirements
 **Version 0.0.1** @ 2012-10-1
 
 - Initial release with LKDAOBase
+
+
+-------
+License
+=======
+
+This code is distributed under the terms and conditions of the MIT license. 
+
+-------
+Contribution guidelines
+=======
+
+* if you are fixing a bug you discovered, please add also a unit test so I know how exactly to reproduce the bug before merging
+
+-------
+Contributors
+=======
+
+Author: Jianghuai Li
+
+Contributors: waiting for you to join
+
