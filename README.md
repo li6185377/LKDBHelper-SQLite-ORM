@@ -2,7 +2,30 @@ LKDBHelper
 ====================================
 this is sqlite ORM (an automatic database operation) <br>
 thread-safe and not afraid of recursive deadlock
- 
+
+#v1.1
+* 支持 `列名` 和 `属性` 之间的绑定。<br>
+* 你也可以 选择那些属性 插入到数据库中。<br>
+* 当你列 映射 使用 `LKSQLUserCalculate` 值  。 就重载下面两个方法,由你决定插入到数据库中的数据<br>
+`-(id)userGetValueForModel:(LKDBProperty *)property`<br>
+`-(void)userSetValueForModel:(LKDBProperty *)property value:(id)value`<br>
+
+* 还增加了两个添加列的方法,方便在表版本升级的时候调用。<br>
+* 为了 支持多数据库 取消了 `shareDBHelper` 这个方法, <br>
+改成 `[modelClass getUsingDBHelper]`  这样每个model 可以重载 , 选择要使用的数据库<br>
+可以看 `NSObject+LKDBHelper` 里面 的方法<br>
+#v1.1
+* Support `column` name `and` binding between attributes. <br>
+* You can also select those properties into the database. <br>
+* When you use `LKSQLUserCalculate` column mapping value. To override the following two methods you decide to insert data in the database <br>
+`- (id) userGetValueForModel: (LKDBProperty *) property` <br>
+`- (void) userSetValueForModel: (LKDBProperty *) property value: (id) value` <br>
+
+* Also added two ways to add columns for easy upgrades in the table when called. <br>
+* In order to support multiple databases canceled `shareDBHelper` this method, <br>
+Changed to `[modelClass getUsingDBHelper]` so that each model can be overloaded, select the database you want to use <br>
+You can see `NSObject LKDBHelper` method inside <br>
+
 ------------------------------------
 Requirements
 ====================================
@@ -11,13 +34,11 @@ Requirements
 * ARC only
 * FMDB(https://github.com/ccgus/fmdb)
 
-------------------------------------
-Basic usage
-====================================
+##Basic usage
 
-1. Create a new Objective-C class for your data model
+1 . Create a new Objective-C class for your data model
 
-```
+```objective-c
 @interface LKTest : NSObject
 @property(copy,nonatomic)NSString* name;
 @property int  age;
@@ -33,25 +54,25 @@ Basic usage
 @property(copy,nonatomic)UIColor* color;
 @end
 ```
-2. in the *.m file, overwirte getTableName function
+2 . in the *.m file, overwirte getTableName function
 
-```
+```objective-c
 +(NSString *)getTableName
 {
     return @"LKTestTable";
 }
 ```
-3. In your app start function
+3 . In your app start function
 
-```
+```objective-c
     LKDBHelper* globalHelper = [LKDBHelper getUsingLKDBHelper];
    
     //create table need to manually call! will check the version number of the table
     [globalHelper createTableWithModelClass:[LKTest class]];
 ```
-4. Initialize your model with data and insert to database
+4 . Initialize your model with data and insert to database
 
-```
+```objective-c
     LKTest* test = [[LKTest alloc]init];
     test.name = @"zhan san";
     test.age = 16;
@@ -67,9 +88,9 @@ Basic usage
     [globalHelper insertToDB:test];
     
 ```
-5. select 、 delete 、 update 、 isExists 、 rowCount ...
+5 . select 、 delete 、 update 、 isExists 、 rowCount ...
 
-```
+```objective-c
     select:
         
         NSMutableArray* array = [globalHelper search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
@@ -96,9 +117,9 @@ Basic usage
         
      
 ```
-6. Description of parameters "where"
+6 . Description of parameters "where"
 
-```
+```objective-c
  For example: 
         single:  @"rowid = 1"                         or      @{@"rowid":@1}
  
@@ -115,11 +136,50 @@ Basic usage
         For example: @"date >= '2013-04-01 00:00:00'"
 ```
 
-demo screenshot:
+##table mapping
 
-(https://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_8.png?raw=true)
-(https://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_6.png?raw=true)
-(https://github.com/li6185377/LKDBHelper-SQLite-ORM/blob/master/screenshot/Snip20130620_7.png?raw=true)
+overwirte getTableMapping Function
+
+```objective-c
++(NSDictionary *)getTableMapping
+{
+    //return nil 
+    return @{@"name":LKSQLInherit,
+             @"MyAge":@"age",
+             @"img":LKSQLInherit,
+             @"MyDate":@"date",
+             @"color":LKSQLInherit,
+             @"address":LKSQLUserCalculate};
+}
+```
+
+##table update
+
+
+```objective-c
++(LKTableUpdateType)tableUpdateForOldVersion:(int)oldVersion newVersion:(int)newVersion
+{
+    switch (oldVersion) {
+        case 1:
+        {
+            [self tableUpdateAddColumeWithPN:@"color"];
+        }
+        case 2:
+        {
+            [self tableUpdateAddColumeWithName:@"address" sqliteType:LKSQLText];
+        }
+            break;
+    }
+    return LKTableUpdateTypeCustom;
+}
+```
+
+##demo screenshot
+![demo screenshot](https://github.com/li6185377/LKDBHelper-SQLite-ORM/raw/master/screenshot/Snip20130620_8.png)
+<br>table test data<br>
+![](https://github.com/li6185377/LKDBHelper-SQLite-ORM/raw/master/screenshot/Snip20130620_6.png)
+<br>foreign key data<br>
+![](https://github.com/li6185377/LKDBHelper-SQLite-ORM/raw/master/screenshot/Snip20130620_7.png)
 
 ----------
 Change-log
