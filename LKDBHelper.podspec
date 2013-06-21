@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
-  s.name         = "LKDBHelper-SQLite-ORM"
-  s.version      = "1.0.1"
+  s.name         = "LKDBHelper"
+  s.version      = "1.1"
   s.summary      = "this is sqlite ORM (an automatic database operation) 
 thread-safe and not afraid of recursive deadlock."
 
