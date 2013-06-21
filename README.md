@@ -15,7 +15,7 @@ thread-safe and not afraid of recursive deadlock
 改成 `[modelClass getUsingDBHelper]`  这样每个model 可以重载 , 选择要使用的数据库<br>
 可以看 `NSObject+LKDBHelper` 里面 的方法<br>
 #v1.1
-* Support `column` name `and` binding between attributes. <br>
+* Support `column name`  binding  `attributes`. <br>
 * You can also set the properties of the column. <br>
 * When you use `LKSQLUserCalculate` column mapping value. To override the following two methods you decide to insert data in the database <br>
 `- (id) userGetValueForModel: (LKDBProperty *) property` <br>
