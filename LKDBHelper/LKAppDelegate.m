@@ -66,7 +66,7 @@
     foreign.address = @":asdasdasdsadasdsdas";
     foreign.postcode  = 123341;
     foreign.addid = 213214;
-
+    
     //插入数据    insert table row
     LKTest* test = [[LKTest alloc]init];
     test.name = @"zhan san";
@@ -83,7 +83,7 @@
     
     //异步 插入第一条 数据   Insert the first
     
-    [[LKDBHelper getUsingLKDBHelper] insertToDB:test];
+    [globalHelper insertToDB:test];
     
     addText(@"同步插入 完成!  Insert completed synchronization");
     sleep(1);
@@ -91,7 +91,7 @@
     
     //改个 主键 插入第2条数据   update primary colume value  Insert the second
     test.name = @"li si";
-    [[LKDBHelper getUsingLKDBHelper] insertToDB:test callback:^(BOOL isInsert) {
+    [globalHelper insertToDB:test callback:^(BOOL isInsert) {
         addText(@"asynchronization insert complete: %@",isInsert>0?@"YES":@"NO");
     }];
     
@@ -106,39 +106,40 @@
     sleep(2);
     addText(@"休息2秒 结束 \n rest for 2 seconds at the end");
     //异步
-    [[LKDBHelper getUsingLKDBHelper] search:[LKTest class] where:nil orderBy:nil offset:0 count:100 callback:^(NSMutableArray *array) {
+    [globalHelper search:[LKTest class] where:nil orderBy:nil offset:0 count:100 callback:^(NSMutableArray *array) {
         
         addText(@"异步搜索 结束,  async search end");
         for (NSObject* obj in array) {
             addText(@"%@",[obj printAllPropertys]);
         }
         sleep(1);
-        
+
         //修改    update
         LKTest* test2 = [array objectAtIndex:0];
         test2.name = @"wang wu";
-        [[LKDBHelper getUsingLKDBHelper] updateToDB:test2 where:nil];
+
+        [globalHelper updateToDB:test2 where:nil];
         
         addText(@"修改完成 , update completed ");
         
-        array =  [[LKDBHelper getUsingLKDBHelper] search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
+        array =  [globalHelper search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
         for (NSObject* obj in array) {
             addText(@"%@",[obj printAllPropertys]);
         }
         
         test2.rowid = 0;
         
-        BOOL ishas = [[LKDBHelper getUsingLKDBHelper] isExistsModel:test2];
+        BOOL ishas = [globalHelper isExistsModel:test2];
         if(ishas)
         {
             //删除    delete
-            [[LKDBHelper getUsingLKDBHelper] deleteToDB:test2];
+            [globalHelper deleteToDB:test2];
         }
         
         addText(@"删除完成, delete completed");
         sleep(1);
         
-        array =  [[LKDBHelper getUsingLKDBHelper] search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
+        array =  [globalHelper search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
         for (NSObject* obj in array) {
             addText(@"%@",[obj printAllPropertys]);
         }
@@ -186,6 +187,19 @@
             self.address = [array objectAtIndex:0];
     }
 }
++(void)columeAttributeWithProperty:(LKDBProperty *)property
+{
+    if([property.sqlColumeName isEqualToString:@"MyAge"])
+    {
+        property.defaultValue = @"15";
+    }
+    else if([property.propertyName isEqualToString:@"date"])
+    {
+        property.isUnique = YES;
+        property.checkValue = @"MyDate > '2000-01-01 00:00:00'";
+        property.length = 30;
+    }
+}
 +(NSDictionary *)getTableMapping
 {
     //return nil 
@@ -204,7 +218,7 @@
 }
 +(NSString *)getTableName
 {
-    return @"LKTextTable";
+    return @"LKTestTable";
 }
 +(int)getTableVersion
 {
