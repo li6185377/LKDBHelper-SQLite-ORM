@@ -5,7 +5,7 @@ thread-safe and not afraid of recursive deadlock
 
 #v1.1
 * 支持 `列名` 和 `属性` 之间的绑定。<br>
-* 你也可以 选择那些属性 插入到数据库中。<br>
+* 你也可以 设置 列 的属性。<br>
 * 当你列 映射 使用 `LKSQLUserCalculate` 值  。 就重载下面两个方法,由你决定插入到数据库中的数据<br>
 `-(id)userGetValueForModel:(LKDBProperty *)property`<br>
 `-(void)userSetValueForModel:(LKDBProperty *)property value:(id)value`<br>
@@ -16,7 +16,7 @@ thread-safe and not afraid of recursive deadlock
 可以看 `NSObject+LKDBHelper` 里面 的方法<br>
 #v1.1
 * Support `column` name `and` binding between attributes. <br>
-* You can also select those properties into the database. <br>
+* You can also set the properties of the column. <br>
 * When you use `LKSQLUserCalculate` column mapping value. To override the following two methods you decide to insert data in the database <br>
 `- (id) userGetValueForModel: (LKDBProperty *) property` <br>
 `- (void) userSetValueForModel: (LKDBProperty *) property value: (id) value` <br>
@@ -155,7 +155,6 @@ overwirte getTableMapping Function
 
 ##table update
 
-
 ```objective-c
 +(LKTableUpdateType)tableUpdateForOldVersion:(int)oldVersion newVersion:(int)newVersion
 {
@@ -171,6 +170,23 @@ overwirte getTableMapping Function
             break;
     }
     return LKTableUpdateTypeCustom;
+}
+```
+## set colume attribute
+
+```objective-c
++(void)columeAttributeWithProperty:(LKDBProperty *)property
+{
+    if([property.sqlColumeName isEqualToString:@"MyAge"])
+    {
+        property.defaultValue = @"15";
+    }
+    if([property.propertyName isEqualToString:@"date"])
+    {
+        property.isUnique = YES;
+        property.checkValue = @"MyDate > '2000-01-01 00:00:00'";
+        property.length = 30;
+    }
 }
 ```
 
