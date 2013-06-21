@@ -34,6 +34,13 @@ Requirements
 * ARC only
 * FMDB(https://github.com/ccgus/fmdb)
 
+##Adding to your project
+
+If you are using CocoaPods, then, just add this line to your PodFile
+`pod 'LKDBHelper', :git => 'https://github.com/li6185377/LKDBHelper-SQLite-ORM.git'`
+
+
+
 ##Basic usage
 
 1 . Create a new Objective-C class for your data model
