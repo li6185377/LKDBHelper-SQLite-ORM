@@ -160,11 +160,11 @@
 @implementation LKTest
 +(void)dbWillInsert:(NSObject *)entity
 {
-    NSLog(@"will insert : %@",NSStringFromClass(self));
+    LKLog(@"will insert : %@",NSStringFromClass(self));
 }
 +(void)dbDidInserted:(NSObject *)entity result:(BOOL)result
 {
-    NSLog(@"did insert : %@",NSStringFromClass(self));
+    LKLog(@"did insert : %@",NSStringFromClass(self));
 }
 -(id)userGetValueForModel:(LKDBProperty *)property
 {
