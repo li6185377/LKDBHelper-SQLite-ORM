@@ -8,7 +8,6 @@
 
 
 #import "LKDBHelper.h"
-#import "LKTableManager.h"
 
 #define checkClassIsInvalid(modelClass)if([LKDBUtils checkStringIsEmpty:[modelClass getTableName]]){\
 LKLog(@"model class name %@ table name is invalid!",NSStringFromClass(modelClass));\
