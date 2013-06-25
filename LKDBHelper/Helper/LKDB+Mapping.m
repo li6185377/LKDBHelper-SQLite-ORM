@@ -44,12 +44,6 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
 @end
 @implementation LKDBProperty
 
-//@synthesize type= _type;
-//@synthesize sqlColumeName=_sqlColumeName;
-//@synthesize sqlColumeType = _sqlColumeType;
-//@synthesize propertyName=_propertyName;
-//@synthesize propertyType=_propertyType;
-
 -(id)initWithType:(NSString *)type cname:(NSString *)cname ctype:(NSString *)ctype pname:(NSString *)pname ptype:(NSString *)ptype
 {
     self = [super init];

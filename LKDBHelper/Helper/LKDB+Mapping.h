@@ -57,8 +57,8 @@ extern inline NSString* LKSQLTypeFromObjcType(NSString *objcType);
 //创建表的时候 使用
 @property BOOL isUnique;
 @property BOOL isNotNull;
-@property NSString* defaultValue;
-@property NSString* checkValue;
+@property(strong,nonatomic) NSString* defaultValue;
+@property(strong,nonatomic) NSString* checkValue;
 @property int length;
 
 
