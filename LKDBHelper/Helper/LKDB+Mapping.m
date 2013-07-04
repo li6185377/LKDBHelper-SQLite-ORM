@@ -7,7 +7,7 @@
 //
 
 #import "LKDB+Mapping.h"
-
+#import "NSObject+LKModel.h"
 inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
 {
     if([LKSQLIntType rangeOfString:objcType].location != NSNotFound){
@@ -22,14 +22,7 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
     
     return LKSQLText;
 }
-
-@implementation NSObject(TableMapping)
-+(NSDictionary *)getTableMapping
-{
-    return nil;
-}
-@end
-
+#pragma mark- LKDBProperty
 @interface LKDBProperty()
 {
     __strong NSString* _type;
@@ -57,12 +50,29 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
     }
     return self;
 }
+-(void)enableUserCalculate
+{
+    _type = LKSQLUserCalculate;
+}
 -(BOOL)isUserCalculate
 {
-    return (!_propertyName || [_propertyName isEqualToString:LKSQLUserCalculate]);
+    return ([_type isEqualToString:LKSQLUserCalculate] || _propertyName == nil || [_propertyName isEqualToString:LKSQLUserCalculate]);
+}
+@end
+#pragma mark- NSObject - TableMapping
+@implementation NSObject(TableMapping)
++(NSDictionary *)getTableMapping
+{
+    return nil;
+}
++(void)setUserCalculateForCN:(NSString *)columename
+{
+    LKDBProperty* property = [[self getModelInfos] objectWithSqlColumeName:columename];
+    [property enableUserCalculate];
 }
 @end
 
+#pragma mark- LKModelInfos
 @interface LKModelInfos()
 {
     __strong NSMutableDictionary* _proNameDic;
