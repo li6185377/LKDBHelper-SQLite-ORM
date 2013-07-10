@@ -43,7 +43,10 @@ extern inline NSString* LKSQLTypeFromObjcType(NSString *objcType);
 +(NSDictionary*)getTableMapping;
 
 //simple set a colume as "LKSQLUserCalculate"
+//colume name
 +(void)setUserCalculateForCN:(NSString*)columename;
+//property type name
++(void)setUserCalculateForPTN:(NSString*)columename;
 @end
 
 @interface LKDBProperty:NSObject

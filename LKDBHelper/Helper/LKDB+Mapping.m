@@ -70,6 +70,17 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
     LKDBProperty* property = [[self getModelInfos] objectWithSqlColumeName:columename];
     [property enableUserCalculate];
 }
++(void)setUserCalculateForPTN:(NSString *)propertyTypeName
+{
+    LKModelInfos* infos = [self getModelInfos];
+    for (int i=0; i<infos.count; i++) {
+        LKDBProperty* property = [infos objectWithIndex:i];
+        if([property.propertyType isEqualToString:propertyTypeName])
+        {
+            [property enableUserCalculate];
+        }
+    }
+}
 @end
 
 #pragma mark- LKModelInfos
