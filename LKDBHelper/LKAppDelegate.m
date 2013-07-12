@@ -58,9 +58,13 @@
     //创建表  会根据表的版本号  来判断具体的操作 . create table need to manually call
     [globalHelper createTableWithModelClass:[LKTest class]];
     [globalHelper createTableWithModelClass:[LKTestForeign class]];
+
+    addText(@"LKTest create table sql :\n%@\n",[LKTest getCreateTableSQL]);
+    addText(@"LKTestForeign create table sql :\n%@\n",[LKTestForeign getCreateTableSQL]);
     
     //清空表数据   clear table data
     [LKDBHelper clearTableData:[LKTest class]];
+    
     
     LKTestForeign* foreign = [[LKTestForeign alloc]init];
     foreign.address = @":asdasdasdsadasdsdas";
@@ -72,7 +76,7 @@
     test.name = @"zhan san";
     test.age = 16;
     
-    //外键
+    //外键 foreign key
     test.address = foreign;
     
     test.isGirl = YES;
@@ -80,31 +84,40 @@
     test.img = [UIImage imageNamed:@"41.png"];
     test.date = [NSDate date];
     test.color = [UIColor orangeColor];
+    test.error = @"nil";
     
     //异步 插入第一条 数据   Insert the first
-    
     [globalHelper insertToDB:test];
     
     addText(@"同步插入 完成!  Insert completed synchronization");
+    
     sleep(1);
     
     
     //改个 主键 插入第2条数据   update primary colume value  Insert the second
     test.name = @"li si";
+    
     [globalHelper insertToDB:test callback:^(BOOL isInsert) {
         addText(@"asynchronization insert complete: %@",isInsert>0?@"YES":@"NO");
     }];
     
+    
+    
     //查询   search
     addText(@"同步搜索    sync search");
+    
     NSMutableArray* array = [LKTest searchWithWhere:nil orderBy:nil offset:0 count:100];
     for (NSObject* obj in array) {
         addText(@"%@",[obj printAllPropertys]);
     }
     
-    addText(@"休息2秒 开始  为了说明 是异步插入的\n rest for 2 seconds to start is asynchronous inserted to illustrate");
+    addText(@"休息2秒 开始  为了说明 是异步插入的\n"
+            "rest for 2 seconds to start is asynchronous inserted to illustrate");
+    
     sleep(2);
+    
     addText(@"休息2秒 结束 \n rest for 2 seconds at the end");
+    
     //异步
     [globalHelper search:[LKTest class] where:nil orderBy:nil offset:0 count:100 callback:^(NSMutableArray *array) {
         
@@ -112,6 +125,7 @@
         for (NSObject* obj in array) {
             addText(@"%@",[obj printAllPropertys]);
         }
+        
         sleep(1);
 
         //修改    update
@@ -146,7 +160,7 @@
         
         addText(@"示例 结束  example finished\n\n");
         
-        
+
         
         //Expansion: Delete the picture is no longer stored in the database record
         addText(@"扩展:  删除已不再数据库中保存的 图片记录 \n expansion: Delete the picture is no longer stored in the database record");
@@ -157,101 +171,3 @@
 }
 @end
 
-@implementation LKTest
-+(void)dbWillInsert:(NSObject *)entity
-{
-    LKLog(@"will insert : %@",NSStringFromClass(self));
-}
-+(void)dbDidInserted:(NSObject *)entity result:(BOOL)result
-{
-    LKLog(@"did insert : %@",NSStringFromClass(self));
-}
--(id)userGetValueForModel:(LKDBProperty *)property
-{
-    if([property.sqlColumeName isEqualToString:@"address"])
-    {
-        [LKTestForeign insertToDB:self.address];
-        return @(self.address.addid);
-    }
-    return nil;
-}
--(void)userSetValueForModel:(LKDBProperty *)property value:(id)value
-{
-    if([property.sqlColumeName isEqualToString:@"address"])
-    {
-        self.address = nil;
-        
-        NSMutableArray* array  = [LKTestForeign searchWithWhere:[NSString stringWithFormat:@"addid = %d",[value intValue]] orderBy:nil offset:0 count:1];
-
-        if(array.count>0)
-            self.address = [array objectAtIndex:0];
-    }
-}
-+(void)columeAttributeWithProperty:(LKDBProperty *)property
-{
-    if([property.sqlColumeName isEqualToString:@"MyAge"])
-    {
-        property.defaultValue = @"15";
-    }
-    else if([property.propertyName isEqualToString:@"date"])
-    {
-        property.isUnique = YES;
-        property.checkValue = @"MyDate > '2000-01-01 00:00:00'";
-        property.length = 30;
-    }
-}
-+(NSDictionary *)getTableMapping
-{
-    //return nil 
-    return @{@"name":LKSQLInherit,
-             @"MyAge":@"age",
-             @"img":LKSQLInherit,
-             @"MyDate":@"date",
-             // version 2 after add
-             @"color":LKSQLInherit,
-             //version 3 after add
-             @"address":LKSQLUserCalculate};
-}
-+(NSString *)getPrimaryKey
-{
-    return @"name";
-}
-+(NSString *)getTableName
-{
-    return @"LKTestTable";
-}
-+(int)getTableVersion
-{
-    return 3;
-}
-+(LKTableUpdateType)tableUpdateForOldVersion:(int)oldVersion newVersion:(int)newVersion
-{
-    switch (oldVersion) {
-        case 1:
-        {
-            [self tableUpdateAddColumeWithPN:@"color"];
-        }
-        case 2:
-        {
-            [self tableUpdateAddColumeWithName:@"address" sqliteType:LKSQLText];
-        }
-            break;
-    }
-    return LKTableUpdateTypeCustom;
-}
-@end
-
-@implementation LKTestForeign
-+(NSString *)getPrimaryKey
-{
-    return @"addid";
-}
-+(NSString *)getTableName
-{
-    return @"LKTestAddress";
-}
-+(int)getTableVersion
-{
-    return 1;
-}
-@end

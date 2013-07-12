@@ -22,7 +22,7 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
     
     return LKSQLText;
 }
-#pragma mark- LKDBProperty
+#pragma mark- 声明
 @interface LKDBProperty()
 {
     __strong NSString* _type;
@@ -35,6 +35,16 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
 }
 -(id)initWithType:(NSString*)type cname:(NSString*)cname ctype:(NSString*)ctype pname:(NSString*)pname ptype:(NSString*)ptype;
 @end
+
+@interface LKModelInfos()
+{
+    __strong NSMutableDictionary* _proNameDic;
+    __strong NSMutableDictionary* _sqlNameDic;
+}
+-(void)removeWithColumeName:(NSString*)columeName;
+@end
+
+#pragma mark- LKDBProperty
 @implementation LKDBProperty
 
 -(id)initWithType:(NSString *)type cname:(NSString *)cname ctype:(NSString *)ctype pname:(NSString *)pname ptype:(NSString *)ptype
@@ -81,15 +91,13 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
         }
     }
 }
++(void)removePropertyWithColumeName:(NSString *)columename
+{
+    [[self getModelInfos] removeWithColumeName:columename];
+}
 @end
 
 #pragma mark- LKModelInfos
-@interface LKModelInfos()
-{
-    __strong NSMutableDictionary* _proNameDic;
-    __strong NSMutableDictionary* _sqlNameDic;
-}
-@end
 
 @implementation LKModelInfos
 - (id)initWithKeyMapping:(NSDictionary *)keyMapping propertyNames:(NSArray *)propertyNames propertyType:(NSArray *)propertyType
@@ -199,5 +207,17 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
 -(LKDBProperty *)objectWithSqlColumeName:(NSString *)columeName
 {
     return [_sqlNameDic objectForKey:columeName];
+}
+-(void)removeWithColumeName:(NSString*)columeName
+{
+    if(columeName == nil)
+        return;
+    
+    LKDBProperty* property =  [_sqlNameDic objectForKey:columeName];
+    if(property.propertyName)
+    {
+        [_proNameDic removeObjectForKey:property.propertyName];
+    }
+    [_sqlNameDic removeObjectForKey:columeName];
 }
 @end

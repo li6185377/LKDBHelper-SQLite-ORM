@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5303B79B178FEFB5007731A0 /* LKTestModels.m in Sources */ = {isa = PBXBuildFile; fileRef = 5303B79A178FEFB5007731A0 /* LKTestModels.m */; };
 		5311E11C1762DEFE00ADBB7D /* NSObject+LKDBHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 5311E11B1762DEFE00ADBB7D /* NSObject+LKDBHelper.m */; };
 		53226E01171B9E5A00B1A490 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53226E00171B9E5A00B1A490 /* UIKit.framework */; };
 		53226E03171B9E5A00B1A490 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53226E02171B9E5A00B1A490 /* Foundation.framework */; };
@@ -33,6 +34,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5303B799178FEFB5007731A0 /* LKTestModels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKTestModels.h; sourceTree = "<group>"; };
+		5303B79A178FEFB5007731A0 /* LKTestModels.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKTestModels.m; sourceTree = "<group>"; };
 		5311E11A1762DEFE00ADBB7D /* NSObject+LKDBHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+LKDBHelper.h"; sourceTree = "<group>"; };
 		5311E11B1762DEFE00ADBB7D /* NSObject+LKDBHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+LKDBHelper.m"; sourceTree = "<group>"; };
 		53226DFD171B9E5A00B1A490 /* LKDBHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LKDBHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -123,6 +126,8 @@
 				53226E4B171C207F00B1A490 /* 41.png */,
 				53226E39171BA10800B1A490 /* Helper */,
 				53226E23171BA09F00B1A490 /* FMDB */,
+				5303B799178FEFB5007731A0 /* LKTestModels.h */,
+				5303B79A178FEFB5007731A0 /* LKTestModels.m */,
 				53226E0F171B9E5B00B1A490 /* LKAppDelegate.h */,
 				53226E10171B9E5B00B1A490 /* LKAppDelegate.m */,
 				53226E07171B9E5B00B1A490 /* Supporting Files */,
@@ -279,6 +284,7 @@
 				5311E11C1762DEFE00ADBB7D /* NSObject+LKDBHelper.m in Sources */,
 				534D38D51772FA5B00E24E96 /* LKDB+Manager.m in Sources */,
 				534D38D81772FA6A00E24E96 /* LKDB+Mapping.m in Sources */,
+				5303B79B178FEFB5007731A0 /* LKTestModels.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
