@@ -265,11 +265,16 @@ static char LKModelBase_Key_RowID;
     for (i = 0; i < outCount; i++) {
         objc_property_t property = properties[i];
         NSString *propertyName = [NSString stringWithCString:property_getName(property) encoding:NSUTF8StringEncoding];
-        if([propertyName isEqualToString:@"rowid"])
+
+        //取消rowid 的插入 //子类 已重载的属性 取消插入
+        if([propertyName isEqualToString:@"rowid"] ||
+           [pronames indexOfObject:propertyName] != NSNotFound)
         {
             continue;
         }
+        
         [pronames addObject:propertyName];
+        
         NSString *propertyType = [NSString stringWithCString: property_getAttributes(property) encoding:NSUTF8StringEncoding];
         /*
          c char

@@ -25,7 +25,7 @@
 #pragma mark - simplify synchronous function
 +(BOOL)checkModelClass:(NSObject*)model
 {
-    if([model isKindOfClass:self])
+    if([model isMemberOfClass:self])
         return YES;
     
     NSLog(@"%@ can not use %@",NSStringFromClass(self),NSStringFromClass(model.class));
