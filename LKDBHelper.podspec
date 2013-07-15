@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name         = "LKDBHelper"
   s.version      = "1.1"
-  s.summary      = "this is sqlite ORM。数据库的全自动操作,支持 列->实体属性 映射,列属性设置,表版本升级... Database automatic operation, support columns -> entity attribute mapping, the column attribute is set, the table version upgrade ..."
+  s.summary      = "this is sqlite ORM。数据库的全自动操作,支持 列->实体属性 映射,列属性设置,表版本升级... support columns -> entity attribute mapping, the column attribute is set, the table version upgrade ..."
 
   s.homepage     = "https://github.com/li6185377/LKDBHelper-SQLite-ORM.git"
   s.license      = 'MIT'
