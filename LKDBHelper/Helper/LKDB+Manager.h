@@ -29,7 +29,9 @@ typedef enum {
 
 
 #pragma mark- DEPRECATED
+/*
 +(LKTableUpdateType)tableUpdateWithDBHelper:(LKDBHelper *)helper oldVersion:(int)oldVersion newVersion:(int)newVersion DEPRECATED_ATTRIBUTE;
+ */
 #pragma mark-
 @end
 

@@ -32,7 +32,9 @@
 
 // you can use [LKDBHelper getUsingLKDBHelper]
 #pragma mark- deprecated
+/*
 +(LKDBHelper*)sharedDBHelper DEPRECATED_ATTRIBUTE;
+ */
 #pragma mark-
 
 
