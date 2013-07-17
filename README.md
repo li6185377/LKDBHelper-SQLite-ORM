@@ -36,8 +36,11 @@ Requirements
 
 ##Adding to your project
 
-If you are using CocoaPods, then, just add this line to your PodFile
-`pod 'LKDBHelper', :head`
+If you are using CocoaPods, then, just add this line to your PodFile<br>
+
+```objective-c
+pod 'LKDBHelper', :head
+```
 
 
 
