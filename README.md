@@ -37,7 +37,7 @@ Requirements
 ##Adding to your project
 
 If you are using CocoaPods, then, just add this line to your PodFile
-`pod 'LKDBHelper', :git => 'https://github.com/li6185377/LKDBHelper-SQLite-ORM.git'`
+`pod 'LKDBHelper', :head`
 
 
 
