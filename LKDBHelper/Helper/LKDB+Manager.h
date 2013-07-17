@@ -26,6 +26,11 @@ typedef enum {
 
 +(void)tableUpdateAddColumeWithPN:(NSString*)propertyName;
 +(void)tableUpdateAddColumeWithName:(NSString*)columeName sqliteType:(NSString*)sqliteType;
+
+
+#pragma mark- DEPRECATED
++(LKTableUpdateType)tableUpdateWithDBHelper:(LKDBHelper *)helper oldVersion:(int)oldVersion newVersion:(int)newVersion DEPRECATED_ATTRIBUTE;
+#pragma mark-
 @end
 
 

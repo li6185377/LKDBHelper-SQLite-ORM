@@ -26,6 +26,11 @@ return NO;}
 
 @implementation LKDBHelper
 
+#pragma mark- deprecated
++(LKDBHelper *)sharedDBHelper
+{return [LKDBHelper getUsingLKDBHelper];}
+#pragma mark-
+
 -(id)initWithDBName:(NSString *)dbname
 {
     self = [super init];

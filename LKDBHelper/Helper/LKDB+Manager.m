@@ -36,6 +36,9 @@
     }];
 }
 
+#pragma mark- DEPRECATED
++(LKTableUpdateType)tableUpdateWithDBHelper:(LKDBHelper *)helper oldVersion:(int)oldVersion newVersion:(int)newVersion{return 0;}
+#pragma mark-
 @end
 
 @interface LKTableManager()

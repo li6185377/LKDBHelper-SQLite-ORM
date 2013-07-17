@@ -29,8 +29,12 @@
 #endif
 
 @interface LKDBHelper : NSObject
+
 // you can use [LKDBHelper getUsingLKDBHelper]
-//+(LKDBHelper*)sharedDBHelper;
+#pragma mark- deprecated
++(LKDBHelper*)sharedDBHelper DEPRECATED_ATTRIBUTE;
+#pragma mark-
+
 
 -(id)initWithDBName:(NSString*)dbname;
 
