@@ -49,7 +49,7 @@ extern inline NSString* LKSQLTypeFromObjcType(NSString *objcType);
 +(void)setUserCalculateForPTN:(NSString*)propertyTypeName;
 
 //remove unwanted binding property
-+(void)removePropertyWithColumeName:(NSString*)columename;
++(void)removePropertyWithColumeName:(NSString*)columnName;
 @end
 
 @interface LKDBProperty:NSObject

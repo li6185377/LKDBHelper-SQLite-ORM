@@ -251,8 +251,21 @@ return NO;}
     }
     else if(oldVersion == newVersion)
     {
-        //已创建表 就跳过
-        return YES;
+        __block BOOL isTableCreated = NO;
+        [self executeDB:^(FMDatabase *db) {
+            FMResultSet* set = [db executeQuery:@"select count(name) from sqlite_master where type='table' and name=?",tableName];
+            [set next];
+            if([set intForColumnIndex:0]>0)
+            {
+                isTableCreated = YES;
+            }
+            [set close];
+        }];
+        if(isTableCreated)
+        {
+            //已创建表 就跳过
+            return YES;
+        }
     }
     
     LKModelInfos* infos = [modelClass getModelInfos];

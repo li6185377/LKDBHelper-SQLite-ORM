@@ -39,6 +39,10 @@
 +(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count{
     return [[self getUsingLKDBHelper] search:self where:where orderBy:orderBy offset:offset count:count];
 }
++(id)searchSingleWithWhere:(id)where orderBy:(NSString *)orderBy
+{
+    return [[self getUsingLKDBHelper] searchSingle:self where:where orderBy:orderBy];
+}
 
 +(BOOL)insertToDB:(NSObject*)model{
     
