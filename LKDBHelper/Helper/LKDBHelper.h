@@ -20,9 +20,9 @@
 
 #ifdef DEBUG
     #ifdef NSLog
-        #define LKLog(fmt, ...) NSLog(@"#LKDBHelper ERROR:\n" fmt,##__VA_ARGS__);
+        #define LKLog(fmt, ...) NSLog(@"#LKDBHelper Message:\n" fmt,##__VA_ARGS__);
     #else
-        #define LKLog(fmt, ...) NSLog(@"\n#LKDBHelper ERROR: %s  [Line %d] \n" fmt, __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+        #define LKLog(fmt, ...) NSLog(@"\n#LKDBHelper Message: %s  [Line %d] \n" fmt, __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
     #endif
 #else
 #   define LKLog(...)

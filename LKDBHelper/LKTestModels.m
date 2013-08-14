@@ -43,6 +43,8 @@
 {
     if([property.sqlColumeName isEqualToString:@"address"])
     {
+        if(self.address == nil)
+            return @"";
         [LKTestForeign insertToDB:self.address];
         return @(self.address.addid);
     }
@@ -71,7 +73,8 @@
     }
     else if([property.propertyName isEqualToString:@"date"])
     {
-        property.isUnique = YES;
+        // if you use unique,this property will also become the primary key
+//        property.isUnique = YES;
         property.checkValue = @"MyDate > '2000-01-01 00:00:00'";
         property.length = 30;
     }

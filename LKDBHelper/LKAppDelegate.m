@@ -85,9 +85,31 @@
     test.date = [NSDate date];
     test.color = [UIColor orangeColor];
     test.error = @"nil";
-    
+
     //异步 插入第一条 数据   Insert the first
     [globalHelper insertToDB:test];
+    
+    [globalHelper executeDB:^(FMDatabase *db) {
+        
+        [db beginTransaction];
+        
+        test.name = @"1";
+        [globalHelper insertToDB:test];
+        test.name = @"2";
+        [globalHelper insertToDB:test];
+        
+        test.name = @"3";
+        test.rowid = 0;     //no new object,should set rowid:0
+        BOOL insertSucceed = [globalHelper insertWhenNotExists:test];
+
+        //insert fail
+        if(insertSucceed == NO)
+            [db rollback];
+        else
+            [db commit];
+        
+    }];
+
     
     addText(@"同步插入 完成!  Insert completed synchronization");
     
@@ -96,7 +118,6 @@
     
     //改个 主键 插入第2条数据   update primary colume value  Insert the second
     test.name = @"li si";
-    
     [globalHelper insertToDB:test callback:^(BOOL isInsert) {
         addText(@"asynchronization insert complete: %@",isInsert>0?@"YES":@"NO");
     }];
@@ -106,8 +127,8 @@
     //查询   search
     addText(@"同步搜索    sync search");
     
-    NSMutableArray* array = [LKTest searchWithWhere:nil orderBy:nil offset:0 count:100];
-    for (NSObject* obj in array) {
+    NSMutableArray* arraySync = [LKTest searchWithWhere:nil orderBy:nil offset:0 count:100];
+    for (NSObject* obj in arraySync) {
         addText(@"%@",[obj printAllPropertys]);
     }
     
