@@ -419,7 +419,11 @@ return NO;}
     {
         [sql appendFormat:@" order by %@",orderby];
     }
-    [sql appendFormat:@" limit %d offset %d",count,offset];
+    
+    // Add limit & offset only when count > 0
+    if (count > 0) {
+        [sql appendFormat:@" limit %d offset %d",count,offset];
+    }
 }
 - (NSMutableArray *)executeResult:(FMResultSet *)set Class:(Class)modelClass
 {
