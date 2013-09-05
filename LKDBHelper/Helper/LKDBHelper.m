@@ -26,6 +26,11 @@ return NO;}
 
 @implementation LKDBHelper
 
+#pragma mark- deprecated
++(LKDBHelper *)sharedDBHelper
+{return [LKDBHelper getUsingLKDBHelper];}
+#pragma mark-
+
 -(id)initWithDBName:(NSString *)dbname
 {
     self = [super init];
@@ -217,7 +222,7 @@ return NO;}
     NSString* dropTable = [NSString stringWithFormat:@"drop table %@",tableName];
     
     BOOL isDrop = [self executeSQL:dropTable arguments:nil];
-
+    
     if(isDrop)
         [_tableManager setTableName:tableName version:0];
     
@@ -260,7 +265,7 @@ return NO;}
                 isTableCreated = YES;
             }
             [set close];
-        }];
+         }];
         if(isTableCreated)
         {
             //已创建表 就跳过
@@ -364,7 +369,7 @@ return NO;}
     
     NSMutableArray* valuesarray = [self extractQuery:rowCountSql where:where];
     int result = [[self executeScalarWithSQL:rowCountSql arguments:valuesarray] intValue];
-
+    
     return result;
 }
 
@@ -387,7 +392,7 @@ return NO;}
 {
     [self asyncBlock:^{
         NSMutableArray* array = [self searchBase:modelClass where:where orderBy:orderBy offset:offset count:count];
-
+        
         if(block != nil)
             block(array);
     }];
@@ -440,7 +445,7 @@ return NO;}
             NSString* sqlValue = [set stringForColumnIndex:i];
             
             LKDBProperty* property = [infos objectWithSqlColumeName:sqlName];
-            if(property.propertyName && [property.propertyName isEqualToString:LKSQLUserCalculate] ==NO)
+            if(property.propertyName && [property.type isEqualToString:LKSQLUserCalculate] ==NO)
             {
                 [bindingModel modelSetValue:property value:sqlValue];
             }
@@ -494,7 +499,7 @@ return NO;}
     checkModelIsInvalid(model);
     
     Class modelClass = model.class;
-
+    
     //callback
     [modelClass dbWillInsert:model];
     
@@ -507,7 +512,8 @@ return NO;}
     NSMutableArray* insertValues = [NSMutableArray arrayWithCapacity:infos.count];
     for (int i=0; i<infos.count; i++) {
         LKDBProperty* property = [infos objectWithIndex:i];
-        
+        if([LKDBUtils checkStringIsEmpty:property.sqlColumeName])
+            continue;
         if(i>0)
         {
             [insertKey appendString:@","];
@@ -524,7 +530,7 @@ return NO;}
     
     //拼接insertSQL 语句  采用 replace 插入
     NSString* insertSQL = [NSString stringWithFormat:@"replace into %@(%@) values(%@)",[modelClass getTableName],insertKey,insertValuesString];
-    
+
     __block BOOL execute = NO;
     __block int lastInsertRowId = 0;
     
@@ -636,7 +642,7 @@ return NO;}
     NSMutableArray* updateValues = [self extractQuery:updateSQL where:where];
     
     BOOL execute = [self executeSQL:updateSQL arguments:updateValues];
-
+    
     if(execute == NO)
         LKLog(@"database update fail %@   ----->sql:%@",NSStringFromClass(modelClass),updateSQL);
     
@@ -716,7 +722,7 @@ return NO;}
     
     NSMutableString* deleteSQL = [NSMutableString stringWithFormat:@"delete from %@",[modelClass getTableName]];
     NSMutableArray* values = [self extractQuery:deleteSQL where:where];
-
+    
     BOOL result = [self executeSQL:deleteSQL arguments:values];
     return result;
 }
@@ -732,7 +738,7 @@ return NO;}
         
         NSString* primarykey = [modelClass getPrimaryKey];
         id primaryValue = [model getPrimaryValue];
-
+        
         if(primarykey&&primaryValue)
         {
             NSString* where = [NSString stringWithFormat:@"%@ = '%@'",primarykey,primaryValue];

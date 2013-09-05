@@ -91,9 +91,9 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
         }
     }
 }
-+(void)removePropertyWithColumeName:(NSString *)columnName
++(void)removePropertyWithColumeName:(NSString *)columename
 {
-    [[self getModelInfos] removeWithColumeName:columnName];
+    [[self getModelInfos] removeWithColumeName:columename];
 }
 @end
 
