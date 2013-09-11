@@ -52,11 +52,11 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
     self = [super init];
     if(self)
     {
-        _type = type;
-        _sqlColumeName = cname;
-        _sqlColumeType = ctype;
-        _propertyName = pname;
-        _propertyType = ptype;
+        _type = [type copy];
+        _sqlColumeName = [cname copy];
+        _sqlColumeType = [ctype copy];
+        _propertyName = [pname copy];
+        _propertyType = [ptype copy];
     }
     return self;
 }
