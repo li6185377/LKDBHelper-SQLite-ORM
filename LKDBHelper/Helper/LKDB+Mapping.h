@@ -76,9 +76,10 @@ extern inline NSString* LKSQLTypeFromObjcType(NSString *objcType);
 
 @interface LKModelInfos : NSObject
 
--(id)initWithKeyMapping:(NSDictionary*)keyMapping propertyNames:(NSArray*)propertyNames propertyType:(NSArray*)propertyType;
+-(id)initWithKeyMapping:(NSDictionary*)keyMapping propertyNames:(NSArray*)propertyNames propertyType:(NSArray*)propertyType primaryKeys:(NSArray*)primaryKeys;
 
 @property(readonly,nonatomic)int count;
+@property(readonly,nonatomic)NSArray* primaryKeys;
 
 -(LKDBProperty*)objectWithIndex:(int)index;
 -(LKDBProperty*)objectWithPropertyName:(NSString*)propertyName;

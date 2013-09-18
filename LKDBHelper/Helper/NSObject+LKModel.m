@@ -29,6 +29,11 @@ static char LKModelBase_Key_RowID;
 {
     return nil;
 }
++(NSArray *)getPrimaryKeyUnionArray
+{
+    return nil;
+}
+
 +(void)columeAttributeWithProperty:(LKDBProperty *)property
 {
     //overwrite
@@ -59,10 +64,10 @@ static char LKModelBase_Key_RowID;
 -(id)modelGetValue:(LKDBProperty *)property
 {
     id value = [self valueForKey:property.propertyName];
-    id returnValue = nil;
+    id returnValue = value;
     if(value == nil)
     {
-        returnValue = @"";
+        return nil;
     }
     else if([value isKindOfClass:[NSString class]])
     {
@@ -120,8 +125,6 @@ static char LKModelBase_Key_RowID;
         
         returnValue = filename;
     }
-    if(returnValue == nil)
-        returnValue = @"";
     
     return returnValue;
 }
@@ -204,7 +207,7 @@ static char LKModelBase_Key_RowID;
 -(void)userSetValueForModel:(LKDBProperty *)property value:(id)value{}
 -(id)userGetValueForModel:(LKDBProperty *)property
 {
-    return @"";
+    return nil;
 }
 
 -(id)getPrimaryValue
@@ -213,7 +216,11 @@ static char LKModelBase_Key_RowID;
     LKModelInfos* infos = [self.class getModelInfos];
     LKDBProperty* property = [infos objectWithSqlColumeName:primarykey];
     
-    if(primarykey&&property)
+    if(property && [property.type isEqualToString:LKSQLUserCalculate])
+    {
+        return [self userGetValueForModel:property];
+    }
+    else if(primarykey && property)
     {
         return [self modelGetValue:property];
     }
@@ -240,8 +247,18 @@ static char LKModelBase_Key_RowID;
             NSDictionary* keymapping = [self getTableMapping];
             [self getSelfPropertys:pronames protypes:protypes];
             
-            infos = [[LKModelInfos alloc]initWithKeyMapping:keymapping propertyNames:pronames propertyType:protypes];
+            NSArray* pkArray = [self getPrimaryKeyUnionArray];
+            if(pkArray.count == 0)
+            {
+                pkArray = nil;
+                NSString* pk = [self getPrimaryKey];
+                if([LKDBUtils checkStringIsEmpty:pk] == NO)
+                {
+                    pkArray = [NSArray arrayWithObject:pk];
+                }
+            }
             
+            infos = [[LKModelInfos alloc]initWithKeyMapping:keymapping propertyNames:pronames propertyType:protypes primaryKeys:pkArray];
             [oncePropertyDic setObject:infos forKey:NSStringFromClass(self)];
         }
     }

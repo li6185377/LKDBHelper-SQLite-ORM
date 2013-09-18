@@ -89,16 +89,23 @@
     //异步 插入第一条 数据   Insert the first
     [globalHelper insertToDB:test];
     
+    //多主键 的插入成功
+    test.age = 17;
+    [globalHelper insertToDB:test];
+    
+    //事物  transaction
     [globalHelper executeDB:^(FMDatabase *db) {
         
         [db beginTransaction];
         
         test.name = @"1";
         [globalHelper insertToDB:test];
+        
         test.name = @"2";
         [globalHelper insertToDB:test];
         
-        test.name = @"3";
+        //重复主键   duplicate primary key
+        test.name = @"1";
         test.rowid = 0;     //no new object,should set rowid:0
         BOOL insertSucceed = [globalHelper insertWhenNotExists:test];
 

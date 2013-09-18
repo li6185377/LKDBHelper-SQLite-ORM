@@ -29,6 +29,8 @@
             主键列名 如果rowid<0 则跟据此名称update 和delete
  */
 +(NSString*)getPrimaryKey;
+//return multi primary key    返回联合主键
++(NSArray*) getPrimaryKeyUnionArray;
 
 @property int rowid;
 

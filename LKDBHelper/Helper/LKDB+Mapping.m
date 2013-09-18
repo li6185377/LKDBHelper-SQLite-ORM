@@ -40,6 +40,7 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
 {
     __strong NSMutableDictionary* _proNameDic;
     __strong NSMutableDictionary* _sqlNameDic;
+    __strong NSMutableArray* _primaryKeys;
 }
 -(void)removeWithColumeName:(NSString*)columeName;
 @end
@@ -100,10 +101,12 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
 #pragma mark- LKModelInfos
 
 @implementation LKModelInfos
-- (id)initWithKeyMapping:(NSDictionary *)keyMapping propertyNames:(NSArray *)propertyNames propertyType:(NSArray *)propertyType
+- (id)initWithKeyMapping:(NSDictionary *)keyMapping propertyNames:(NSArray *)propertyNames propertyType:(NSArray *)propertyType primaryKeys:(NSArray *)primaryKeys
 {
     self = [super init];
     if (self) {
+        
+        _primaryKeys = [primaryKeys copy];
         
         _proNameDic = [[NSMutableDictionary alloc]init];
         _sqlNameDic = [[NSMutableDictionary alloc]init];
@@ -186,6 +189,10 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
     if(db_property.sqlColumeName){
         [_sqlNameDic setObject:db_property forKey:db_property.sqlColumeName];
     }
+}
+-(NSArray *)primaryKeys
+{
+    return _primaryKeys;
 }
 -(int)count
 {

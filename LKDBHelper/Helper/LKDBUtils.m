@@ -8,6 +8,28 @@
 
 #import "LKDBUtils.h"
 
+@interface LKDateFormatter : NSDateFormatter
+@property(strong,nonatomic)NSLock* lock;
+@end
+
+@implementation LKDateFormatter
+//防止在IOS5下 多线程 格式化时间时 崩溃
+-(NSDate *)dateFromString:(NSString *)string
+{
+    [_lock lock];
+    NSDate* date = [super dateFromString:string];
+    [_lock unlock];
+    return date;
+}
+-(NSString *)stringFromDate:(NSDate *)date
+{
+    [_lock lock];
+    NSString* string = [super stringFromDate:date];
+    [_lock unlock];
+    return string;
+}
+@end
+
 @implementation LKDBUtils
 +(NSString *)getDocumentPath
 {
@@ -40,7 +62,7 @@
 }
 +(BOOL)deleteWithFilepath:(NSString *)filepath
 {
-   return [[NSFileManager defaultManager] removeItemAtPath:filepath error:nil];
+    return [[NSFileManager defaultManager] removeItemAtPath:filepath error:nil];
 }
 +(NSArray*)getFilenamesWithDir:(NSString*)dir
 {
@@ -49,7 +71,7 @@
     return fileList;
 }
 +(BOOL)checkStringIsEmpty:(NSString *)string
-{ 
+{
     if(string == nil)
     {
         return YES;
@@ -67,7 +89,7 @@
     static NSDateFormatter* format;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        format = [[NSDateFormatter alloc]init];
+        format = [[LKDateFormatter alloc]init];
         format.dateFormat = @"yyyy-MM-dd HH:mm:ss";
     });
     return format;

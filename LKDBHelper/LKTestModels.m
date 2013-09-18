@@ -102,6 +102,10 @@
 {
     return @"name";
 }
++(NSArray *)getPrimaryKeyUnionArray
+{
+    return @[@"name",@"MyAge"];
+}
 //表名
 +(NSString *)getTableName
 {

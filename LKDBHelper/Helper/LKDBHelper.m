@@ -182,7 +182,49 @@ return NO;}
     }
     return wherekey;
 }
-
+//where sql statements about model primary keys
+-(NSMutableString*)primaryKeyWhereSQLWithModel:(NSObject*)model addPValues:(NSMutableArray*)addPValues
+{
+    LKModelInfos* infos = [model.class getModelInfos];
+    NSArray* primaryKeys = infos.primaryKeys;
+    NSMutableString* pwhere = [NSMutableString string];
+    if(primaryKeys.count>0)
+    {
+        for (int i=0; i<primaryKeys.count; i++) {
+            NSString* pk = [primaryKeys objectAtIndex:i];
+            if([LKDBUtils checkStringIsEmpty:pk] == NO)
+            {
+                LKDBProperty* property = [infos objectWithSqlColumeName:pk];
+                id pvalue = nil;
+                if(property && [property.type isEqualToString:LKSQLUserCalculate])
+                {
+                    pvalue = [model userGetValueForModel:property];
+                }
+                else if(pk && property)
+                {
+                    pvalue = [model modelGetValue:property];
+                }
+                
+                if(pvalue)
+                {
+                    if(pwhere.length>0)
+                        [pwhere appendString:@"and"];
+                    
+                    if(addPValues)
+                    {
+                        [pwhere appendFormat:@" %@=? ",pk];
+                        [addPValues addObject:pvalue];
+                    }
+                    else
+                    {
+                        [pwhere appendFormat:@" %@='%@' ",pk,pvalue];
+                    }
+                }
+            }
+        }
+    }
+    return pwhere;
+}
 #pragma mark- dealloc
 -(void)dealloc
 {
@@ -265,7 +307,7 @@ return NO;}
                 isTableCreated = YES;
             }
             [set close];
-         }];
+        }];
         if(isTableCreated)
         {
             //已创建表 就跳过
@@ -274,7 +316,8 @@ return NO;}
     }
     
     LKModelInfos* infos = [modelClass getModelInfos];
-    NSString* primaryKey = [modelClass getPrimaryKey];
+    NSArray* primaryKeys = infos.primaryKeys;
+    
     NSMutableString* table_pars = [NSMutableString string];
     for (int i=0; i<infos.count; i++) {
         
@@ -309,13 +352,21 @@ return NO;}
         {
             [table_pars appendFormat:@" %@ %@",LKSQLDefault,property.defaultValue];
         }
-        if(primaryKey && [property.sqlColumeName isEqualToString:primaryKey])
-        {
-            [table_pars appendFormat:@" %@",LKSQLPrimaryKey];
-        }
     }
-    NSString* createTableSQL = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@(%@)",tableName,table_pars];
-    
+    NSMutableString* pksb = [NSMutableString string];
+    if(primaryKeys.count>0)
+    {
+        pksb = [NSMutableString stringWithString:@",primary key("];
+        for (int i=0; i<primaryKeys.count; i++) {
+            NSString* pk = [primaryKeys objectAtIndex:i];
+            if(i>0)
+                [pksb appendString:@","];
+            
+            [pksb appendString:pk];
+        }
+        [pksb appendString:@")"];
+    }
+    NSString* createTableSQL = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@(%@%@)",tableName,table_pars,pksb];
     
     BOOL isCreated = [self executeSQL:createTableSQL arguments:nil];
     
@@ -424,9 +475,8 @@ return NO;}
     {
         [sql appendFormat:@" order by %@",orderby];
     }
-    
-    // Add limit & offset only when count > 0
-    if (count > 0) {
+    if(count>0)
+    {
         [sql appendFormat:@" limit %d offset %d",count,offset];
     }
 }
@@ -530,7 +580,7 @@ return NO;}
     
     //拼接insertSQL 语句  采用 replace 插入
     NSString* insertSQL = [NSString stringWithFormat:@"replace into %@(%@) values(%@)",[modelClass getTableName],insertKey,insertValuesString];
-
+    
     __block BOOL execute = NO;
     __block int lastInsertRowId = 0;
     
@@ -586,7 +636,7 @@ return NO;}
         [updateValues addObject:value];
     }
     
-    NSMutableString* updateSQL = [NSMutableString stringWithFormat:@"update %@ set %@ where",[modelClass getTableName],updateKey];
+    NSMutableString* updateSQL = [NSMutableString stringWithFormat:@"update %@ set %@ where ",[modelClass getTableName],updateKey];
     
     //添加where 语句
     if([where isKindOfClass:[NSString class]] && [LKDBUtils checkStringIsEmpty:where]== NO)
@@ -608,19 +658,13 @@ return NO;}
     else
     {
         //如果不通过 rowid 来 更新数据  那 primarykey 一定要有值
-        NSString* primaryKey = [modelClass  getPrimaryKey];
-        if([LKDBUtils checkStringIsEmpty:primaryKey] == NO)
+        NSString* pwhere = [self primaryKeyWhereSQLWithModel:model addPValues:updateValues];
+        if(pwhere.length ==0)
         {
-            LKDBProperty* property = [infos objectWithSqlColumeName:primaryKey];
-            if(property)
-            {
-                [updateSQL appendFormat:@" %@=?",property.sqlColumeName];
-                
-                id value = [self modelValueWithProperty:property model:model];
-                
-                [updateValues addObject:value];
-            }
+            LKLog(@"database update fail : %@ no find primary key!",NSStringFromClass(modelClass));
+            return NO;
         }
+        [updateSQL appendString:pwhere];
     }
     
     BOOL execute = [self executeSQL:updateSQL arguments:updateValues];
@@ -671,31 +715,26 @@ return NO;}
     [modelClass dbWillDelete:model];
     
     NSMutableString*  deleteSQL =[NSMutableString stringWithFormat:@"delete from %@ where ",[modelClass getTableName]];
-    id primaryValue = nil;
+    NSMutableArray* parsArray = [NSMutableArray array];
     if(model.rowid > 0)
     {
-        [deleteSQL appendFormat:@" rowid = %d",model.rowid];
+        [deleteSQL appendFormat:@"rowid = %d",model.rowid];
     }
     else
     {
-        primaryValue = [model getPrimaryValue];
-        if(primaryValue)
-        {
-            NSString* primarykey = [modelClass  getPrimaryKey];
-            [deleteSQL appendFormat:@" %@=? ",primarykey];
-        }
-        else
+        NSString* pwhere = [self primaryKeyWhereSQLWithModel:model addPValues:parsArray];
+        if(pwhere.length==0)
         {
             LKLog(@"delete fail : %@ primary value is nil",NSStringFromClass(modelClass));
             return NO;
         }
+        [deleteSQL appendString:pwhere];
     }
     
-    NSArray* array = nil;
-    if(primaryValue)
-        array = [NSArray arrayWithObject:primaryValue];
+    if(parsArray.count==0)
+        parsArray = nil;
     
-    BOOL execute = [self executeSQL:deleteSQL arguments:array];
+    BOOL execute = [self executeSQL:deleteSQL arguments:parsArray];
     
     //callback
     [modelClass dbDidIDeleted:model result:execute];
@@ -726,6 +765,7 @@ return NO;}
     BOOL result = [self executeSQL:deleteSQL arguments:values];
     return result;
 }
+
 #pragma mark - other operation
 -(BOOL)isExistsModel:(NSObject *)model
 {
@@ -734,19 +774,13 @@ return NO;}
         return YES;
     else
     {
-        Class modelClass = model.class;
-        
-        NSString* primarykey = [modelClass getPrimaryKey];
-        id primaryValue = [model getPrimaryValue];
-        
-        if(primarykey&&primaryValue)
+        NSMutableString* pwhere = [self primaryKeyWhereSQLWithModel:model addPValues:nil];
+        if(pwhere.length == 0)
         {
-            NSString* where = [NSString stringWithFormat:@"%@ = '%@'",primarykey,primaryValue];
-            return [self isExistsClass:modelClass where:where];
+            LKLog(@"exists model fail: primary key is nil or invalid");
+            return NO;
         }
-        
-        LKLog(@"exists model fail: primary key is nil or invalid");
-        return NO;
+        return [self isExistsClass:model.class where:pwhere];
     }
 }
 -(BOOL)isExistsClass:(Class)modelClass where:(id)where
