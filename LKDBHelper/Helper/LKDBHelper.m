@@ -356,15 +356,20 @@ return NO;}
     NSMutableString* pksb = [NSMutableString string];
     if(primaryKeys.count>0)
     {
-        pksb = [NSMutableString stringWithString:@",primary key("];
+        pksb = [NSMutableString string];
         for (int i=0; i<primaryKeys.count; i++) {
             NSString* pk = [primaryKeys objectAtIndex:i];
-            if(i>0)
+            
+            if(pksb.length>0)
                 [pksb appendString:@","];
             
             [pksb appendString:pk];
         }
-        [pksb appendString:@")"];
+        if(pksb.length>0)
+        {
+            [pksb insertString:@",primary key(" atIndex:0];
+            [pksb appendString:@")"];
+        }
     }
     NSString* createTableSQL = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@(%@%@)",tableName,table_pars,pksb];
     
@@ -558,13 +563,24 @@ return NO;}
     
     NSMutableString* insertKey = [NSMutableString stringWithCapacity:0];
     NSMutableString* insertValuesString = [NSMutableString stringWithCapacity:0];
-    
     NSMutableArray* insertValues = [NSMutableArray arrayWithCapacity:infos.count];
+    
+    
+    LKDBProperty* primaryProperty = [model singlePrimaryKeyProperty];
+    
     for (int i=0; i<infos.count; i++) {
+        
         LKDBProperty* property = [infos objectWithIndex:i];
         if([LKDBUtils checkStringIsEmpty:property.sqlColumeName])
             continue;
-        if(i>0)
+        
+        if([property isEqual:primaryProperty])
+        {
+            if([model singlePrimaryKeyValueIsEmpty])
+                continue;
+        }
+        
+        if(insertKey.length>0)
         {
             [insertKey appendString:@","];
             [insertValuesString appendString:@","];

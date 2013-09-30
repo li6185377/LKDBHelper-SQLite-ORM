@@ -27,7 +27,7 @@ static char LKModelBase_Key_RowID;
 }
 +(NSString *)getPrimaryKey
 {
-    return nil;
+    return @"rowid";
 }
 +(NSArray *)getPrimaryKeyUnionArray
 {
@@ -210,19 +210,65 @@ static char LKModelBase_Key_RowID;
     return nil;
 }
 
--(id)getPrimaryValue
+
+//主键值 是否为空
+-(BOOL)singlePrimaryKeyValueIsEmpty
 {
-    NSString* primarykey = [self.class getPrimaryKey];
-    LKModelInfos* infos = [self.class getModelInfos];
-    LKDBProperty* property = [infos objectWithSqlColumeName:primarykey];
-    
-    if(property && [property.type isEqualToString:LKSQLUserCalculate])
+    LKDBProperty* property = [self singlePrimaryKeyProperty];
+    if(property)
     {
-        return [self userGetValueForModel:property];
+        id pkvalue = [self singlePrimaryKeyValue];
+        if([property.sqlColumeType isEqualToString:LKSQLInt])
+        {
+            if([pkvalue isKindOfClass:[NSString class]])
+            {
+                if([LKDBUtils checkStringIsEmpty:pkvalue])
+                    return YES;
+                
+                if([pkvalue intValue] == 0)
+                    return YES;
+                
+                return NO;
+            }
+            if([pkvalue isKindOfClass:[NSNumber class]])
+            {
+                if([pkvalue intValue] == 0)
+                    return YES;
+                else
+                    return NO;
+            }
+            return YES;
+        }
+        else
+        {
+            return (pkvalue == nil);
+        }
     }
-    else if(primarykey && property)
+    return NO;
+}
+-(LKDBProperty *)singlePrimaryKeyProperty
+{
+    LKModelInfos* infos = [self.class getModelInfos];
+    if(infos.primaryKeys.count == 1)
     {
-        return [self modelGetValue:property];
+        NSString* name = [infos.primaryKeys objectAtIndex:0];
+        return [infos objectWithSqlColumeName:name];
+    }
+    return nil;
+}
+-(id)singlePrimaryKeyValue
+{
+    LKDBProperty* property = [self singlePrimaryKeyProperty];
+    if(property)
+    {
+        if([property.type isEqualToString:LKSQLUserCalculate])
+        {
+            return [self userGetValueForModel:property];
+        }
+        else
+        {
+            return [self modelGetValue:property];
+        }
     }
     return nil;
 }
@@ -282,7 +328,7 @@ static char LKModelBase_Key_RowID;
     for (i = 0; i < outCount; i++) {
         objc_property_t property = properties[i];
         NSString *propertyName = [NSString stringWithCString:property_getName(property) encoding:NSUTF8StringEncoding];
-
+        
         //取消rowid 的插入 //子类 已重载的属性 取消插入
         if([propertyName isEqualToString:@"rowid"] ||
            [pronames indexOfObject:propertyName] != NSNotFound)
@@ -352,22 +398,35 @@ static char LKModelBase_Key_RowID;
 #pragma mark - log all property
 -(NSString*)printAllPropertys
 {
+    return [self printAllPropertysIsContainParent:NO];
+}
+-(NSString *)printAllPropertysIsContainParent:(BOOL)containParent
+{
 #ifdef DEBUG
-    NSMutableString* sb = [NSMutableString stringWithFormat:@"<%@> \n", [self class]];
+    Class clazz = [self class];
+    NSMutableString* sb = [NSMutableString stringWithFormat:@"\n <%@> :\n", clazz];
+    [sb appendFormat:@"rowid : %d\n",self.rowid];
+    [NSObject mutableString:sb appendPropertyStringWithClass:clazz containParent:containParent];
+    NSLog(@"%@",sb);
+    return sb;
+#else
+    return @"";
+#endif
+}
++(void)mutableString:(NSMutableString*)sb appendPropertyStringWithClass:(Class)clazz containParent:(BOOL)containParent
+{
     unsigned int outCount, i;
-    objc_property_t *properties = class_copyPropertyList([self class], &outCount);
-    [sb appendFormat:@" %@ : %@ \n",@"rowid",[self valueForKey:@"rowid"]];
+    objc_property_t *properties = class_copyPropertyList(clazz, &outCount);
     for (i = 0; i < outCount; i++) {
         objc_property_t property = properties[i];
         NSString *propertyName = [NSString stringWithCString:property_getName(property) encoding:NSUTF8StringEncoding];
         [sb appendFormat:@" %@ : %@ \n",propertyName,[self valueForKey:propertyName]];
     }
     free(properties);
-    NSLog(@"%@",sb);
-    return sb;
-#else
-    return @"";
-#endif
+    if(containParent)
+    {
+        [self mutableString:sb appendPropertyStringWithClass:self.superclass containParent:containParent];
+    }
 }
 
 @end

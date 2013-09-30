@@ -10,13 +10,13 @@
 #import "NSObject+LKModel.h"
 inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
 {
-    if([LKSQLIntType rangeOfString:objcType].location != NSNotFound){
+    if([LKSQLIntType rangeOfString:objcType].length > 0){
         return LKSQLInt;
     }
-    if ([LKSQLFloatType rangeOfString:objcType].location != NSNotFound) {
+    if ([LKSQLFloatType rangeOfString:objcType].length > 0) {
         return LKSQLDouble;
     }
-    if ([LKSQLBlobType rangeOfString:objcType].location != NSNotFound) {
+    if ([LKSQLBlobType rangeOfString:objcType].length > 0) {
         return LKSQLBlob;
     }
     
@@ -173,6 +173,16 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
                 colume_type = LKSQLTypeFromObjcType(property_type);
                 
                 [self addDBPropertyWithType:type cname:colume_name ctype:colume_type pname:property_name ptype:property_type];
+            }
+        }
+        
+        for (NSString* pkname in _primaryKeys) {
+            if([pkname.lowercaseString isEqualToString:@"rowid"])
+            {
+                if([self objectWithSqlColumeName:pkname] == nil)
+                {
+                    [self addDBPropertyWithType:LKSQLInherit cname:pkname ctype:LKSQLInt pname:pkname ptype:@"int"];
+                }
             }
         }
     }
