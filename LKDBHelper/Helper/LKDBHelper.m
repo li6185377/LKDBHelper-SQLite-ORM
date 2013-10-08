@@ -270,6 +270,30 @@ return NO;}
     
     return isDrop;
 }
+-(void)fixSqlColumesWithClass:(Class)clazz
+{
+    NSString* tableName = [clazz getTableName];
+    LKModelInfos* infos = [clazz getModelInfos];
+    [self executeDB:^(FMDatabase *db) {
+        NSString* select = [NSString stringWithFormat:@"select * from %@ limit 0",tableName];
+        FMResultSet* set = [db executeQuery:select];
+        NSString* columeText = [set.columnNameToIndexMap.allKeys componentsJoinedByString:@","];
+        [set close];
+        for (int i=0; i<infos.count; i++) {
+            LKDBProperty* p = [infos objectWithIndex:i];
+            if([p.sqlColumeName.lowercaseString isEqualToString:@"rowid"])
+                continue;
+            
+            if([columeText rangeOfString:p.sqlColumeName.lowercaseString].length == 0)
+            {
+                if([clazz getAutoUpdateSqlColume])
+                    [clazz tableUpdateAddColumeWithName:p.sqlColumeName sqliteType:p.sqlColumeType];
+                else
+                    [clazz removePropertyWithColumeName:p.sqlColumeName];
+            }
+        }
+    }];
+}
 -(BOOL)createTableWithModelClass:(Class)modelClass
 {
     checkClassIsInvalid(modelClass);
@@ -289,9 +313,11 @@ return NO;}
                 break;
                 
             case LKTableUpdateTypeDefault:
+                [self fixSqlColumesWithClass:modelClass];
                 return NO;
                 
             case LKTableUpdateTypeCustom:
+                [self fixSqlColumesWithClass:modelClass];
                 [_tableManager setTableName:tableName version:newVersion];
                 return YES;
         }
@@ -311,6 +337,7 @@ return NO;}
         if(isTableCreated)
         {
             //已创建表 就跳过
+            [self fixSqlColumesWithClass:modelClass];
             return YES;
         }
     }

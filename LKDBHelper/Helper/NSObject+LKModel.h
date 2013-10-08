@@ -18,6 +18,7 @@
 
 // overwrite in your models, return # table name #
 +(NSString*)getTableName;
++(BOOL)getAutoUpdateSqlColume;
 
 // overwrite in your models, set colume attribute
 +(void)columeAttributeWithProperty:(LKDBProperty*)property;

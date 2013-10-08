@@ -23,7 +23,11 @@ static char LKModelBase_Key_RowID;
 #pragma mark Tabel Structure Function 表结构
 +(NSString *)getTableName
 {
-    return nil;
+    return NSStringFromClass(self);
+}
++(BOOL)getAutoUpdateSqlColume
+{
+    return YES;
 }
 +(NSString *)getPrimaryKey
 {
