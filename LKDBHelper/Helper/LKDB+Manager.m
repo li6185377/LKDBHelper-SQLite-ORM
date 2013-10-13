@@ -30,9 +30,15 @@
 }
 +(void)tableUpdateAddColumeWithName:(NSString*)columeName sqliteType:(NSString*)sqliteType
 {
-    NSString* alertSQL =[NSString stringWithFormat:@"alter table %@ add column %@ %@ ",[self getTableName],columeName,sqliteType];
+    NSString* alertSQL = [NSString stringWithFormat:@"alter table %@ add column %@ %@ ",[self getTableName],columeName,sqliteType];
+    NSString* initColumeValue = [NSString stringWithFormat:@"update %@ set %@=%@",[self getTableName],columeName,[sqliteType isEqualToString:LKSQLText]?@"''":@"0"];
+    
     [[self getUsingLKDBHelper] executeDB:^(FMDatabase *db) {
-        [db executeUpdate:alertSQL];
+        BOOL success = [db executeUpdate:alertSQL];
+        if(success)
+        {
+            [db executeUpdate:initColumeValue];
+        }
     }];
 }
 @end
