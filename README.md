@@ -3,6 +3,7 @@ LKDBHelper
 this is sqlite ORM (an automatic database operation) <br>
 thread-safe and not afraid of recursive deadlock
 
+新版 添加字段的时候  可以直接  定义属性就好了  不用再调用  [self tableUpdateAddColumeWithPN:@"color"]; 这种的方法了
 #v1.1
 * 支持 `列名` 和 `属性` 之间的绑定。<br>
 * 你也可以 设置 列 的属性。<br>
