@@ -408,16 +408,16 @@ static char LKModelBase_Key_RowID;
 {
 #ifdef DEBUG
     Class clazz = [self class];
-    NSMutableString* sb = [NSMutableString stringWithFormat:@"\n <%@> :\n", clazz];
+    NSMutableString* sb = [NSMutableString stringWithFormat:@"\n <%@> :\n", NSStringFromClass(clazz)];
     [sb appendFormat:@"rowid : %d\n",self.rowid];
-    [NSObject mutableString:sb appendPropertyStringWithClass:clazz containParent:containParent];
+    [self mutableString:sb appendPropertyStringWithClass:clazz containParent:containParent];
     NSLog(@"%@",sb);
     return sb;
 #else
     return @"";
 #endif
 }
-+(void)mutableString:(NSMutableString*)sb appendPropertyStringWithClass:(Class)clazz containParent:(BOOL)containParent
+-(void)mutableString:(NSMutableString*)sb appendPropertyStringWithClass:(Class)clazz containParent:(BOOL)containParent
 {
     unsigned int outCount, i;
     objc_property_t *properties = class_copyPropertyList(clazz, &outCount);
@@ -429,6 +429,7 @@ static char LKModelBase_Key_RowID;
     free(properties);
     if(containParent)
     {
+        
         [self mutableString:sb appendPropertyStringWithClass:self.superclass containParent:containParent];
     }
 }
