@@ -19,7 +19,7 @@
 
 @interface LKTest : NSObject
 @property(copy,nonatomic)NSString* name;
-@property int  age;
+@property NSUInteger  age;
 @property BOOL isGirl;
 
 @property(strong,nonatomic)LKTestForeign* address;

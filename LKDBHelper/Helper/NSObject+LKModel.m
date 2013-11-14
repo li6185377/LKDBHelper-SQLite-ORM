@@ -88,7 +88,7 @@ static char LKModelBase_Key_RowID;
     else if([value isKindOfClass:[UIColor class]])
     {
         UIColor* color = value;
-        float r,g,b,a;
+        CGFloat r,g,b,a;
         [color getRed:&r green:&g blue:&b alpha:&a];
         returnValue = [NSString stringWithFormat:@"%.3f,%.3f,%.3f,%.3f",r,g,b,a];
     }
@@ -369,7 +369,7 @@ static char LKModelBase_Key_RowID;
         else
         {
             propertyType = [propertyType lowercaseString];
-            if ([propertyType hasPrefix:@"ti"])
+            if ([propertyType hasPrefix:@"ti"] || [propertyType hasPrefix:@"tq"] || [propertyType hasPrefix:@"tb"])
             {
                 [protypes addObject:@"int"];
             }

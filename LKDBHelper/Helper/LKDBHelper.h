@@ -18,16 +18,6 @@
 #import "NSObject+LKModel.h"
 #import "NSObject+LKDBHelper.h"
 
-#ifdef DEBUG
-    #ifdef NSLog
-        #define LKLog(fmt, ...) NSLog(@"#LKDBHelper ERROR:\n" fmt,##__VA_ARGS__);
-    #else
-        #define LKLog(fmt, ...) NSLog(@"\n#LKDBHelper ERROR: %s  [Line %d] \n" fmt, __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
-    #endif
-#else
-#   define LKLog(...)
-#endif
-
 @interface LKDBHelper : NSObject
 
 // you can use [LKDBHelper getUsingLKDBHelper]

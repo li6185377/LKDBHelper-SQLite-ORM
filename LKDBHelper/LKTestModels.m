@@ -30,12 +30,12 @@
 // 将要插入数据库
 +(void)dbWillInsert:(NSObject *)entity
 {
-    LKLog(@"will insert : %@",NSStringFromClass(self));
+    LKErrorLog(@"will insert : %@",NSStringFromClass(self));
 }
 //已经插入数据库
 +(void)dbDidInserted:(NSObject *)entity result:(BOOL)result
 {
-    LKLog(@"did insert : %@",NSStringFromClass(self));
+    LKErrorLog(@"did insert : %@",NSStringFromClass(self));
 }
 
 // 重载    返回自己处理过的 要插入数据库的值

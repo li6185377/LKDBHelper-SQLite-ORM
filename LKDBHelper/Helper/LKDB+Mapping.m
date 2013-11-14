@@ -81,7 +81,7 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
 {
     if([LKDBUtils checkStringIsEmpty:columename])
     {
-        LKLog(@"columename is null");
+        LKErrorLog(@"columename is null");
         return;
     }
     
@@ -99,7 +99,7 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
 {
     if([LKDBUtils checkStringIsEmpty:propertyTypeName])
     {
-        LKLog(@"propertyTypeName is null");
+        LKErrorLog(@"propertyTypeName is null");
         return;
     }
     
@@ -169,7 +169,7 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
                         property_name = mappingValue;
                     }
                     
-                    int index = [propertyNames indexOfObject:property_name];
+                    NSUInteger index = [propertyNames indexOfObject:property_name];
                     
                     NSAssert(index != NSNotFound, @"#ERROR TableMapping SQL colume name %@ not fount %@ property name",colume_name,property_name);
                     
@@ -224,7 +224,7 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
 {
     return _primaryKeys;
 }
--(int)count
+-(NSUInteger)count
 {
     return _sqlNameDic.count;
 }

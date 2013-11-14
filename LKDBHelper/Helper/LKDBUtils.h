@@ -31,3 +31,13 @@
 //把String 转换成Date
 +(NSDate *)dateWithString:(NSString *)str;
 @end
+
+#ifdef DEBUG
+#ifdef NSLog
+#define LKErrorLog(fmt, ...) NSLog(@"#LKDBHelper ERROR:\n" fmt,##__VA_ARGS__);
+#else
+#define LKErrorLog(fmt, ...) NSLog(@"\n#LKDBHelper ERROR: %s  [Line %d] \n" fmt, __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+#endif
+#else
+#   define LKErrorLog(...)
+#endif

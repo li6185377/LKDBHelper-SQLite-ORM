@@ -10,10 +10,10 @@
 #import "LKDBHelper.h"
 
 #define checkClassIsInvalid(modelClass)if([LKDBUtils checkStringIsEmpty:[modelClass getTableName]]){\
-LKLog(@"model class name %@ table name is invalid!",NSStringFromClass(modelClass));\
+LKErrorLog(@"model class name %@ table name is invalid!",NSStringFromClass(modelClass));\
 return NO;}
 
-#define checkModelIsInvalid(model)if(model == nil){LKLog(@"model is nil");return NO;}checkClassIsInvalid(model.class)
+#define checkModelIsInvalid(model)if(model == nil){LKErrorLog(@"model is nil");return NO;}checkClassIsInvalid(model.class)
 
 @interface LKDBHelper()
 @property(unsafe_unretained,nonatomic)FMDatabase* usingdb;
@@ -629,16 +629,16 @@ return NO;}
     NSString* insertSQL = [NSString stringWithFormat:@"replace into %@(%@) values(%@)",[modelClass getTableName],insertKey,insertValuesString];
     
     __block BOOL execute = NO;
-    __block int lastInsertRowId = 0;
+    __block sqlite_int64 lastInsertRowId = 0;
     
     [self executeDB:^(FMDatabase *db) {
         execute = [db executeUpdate:insertSQL withArgumentsInArray:insertValues];
         lastInsertRowId= db.lastInsertRowId;
     }];
     
-    model.rowid = lastInsertRowId;
+    model.rowid = (int)lastInsertRowId;
     if(execute == NO)
-        LKLog(@"database insert fail %@, sql:%@",NSStringFromClass(modelClass),insertSQL);
+        LKErrorLog(@"database insert fail %@, sql:%@",NSStringFromClass(modelClass),insertSQL);
     
     //callback
     [modelClass dbDidInserted:model result:execute];
@@ -690,7 +690,7 @@ return NO;}
     {
         [updateSQL appendString:where];
     }
-    else if([where isKindOfClass:[NSDictionary class]] && [where count]>0)
+    else if([where isKindOfClass:[NSDictionary class]] && [(NSDictionary*)where count]>0)
     {
         NSMutableArray* valuearray = [NSMutableArray array];
         NSString* sqlwhere = [self dictionaryToSqlWhere:where andValues:valuearray];
@@ -708,7 +708,7 @@ return NO;}
         NSString* pwhere = [self primaryKeyWhereSQLWithModel:model addPValues:updateValues];
         if(pwhere.length ==0)
         {
-            LKLog(@"database update fail : %@ no find primary key!",NSStringFromClass(modelClass));
+            LKErrorLog(@"database update fail : %@ no find primary key!",NSStringFromClass(modelClass));
             return NO;
         }
         [updateSQL appendString:pwhere];
@@ -717,7 +717,7 @@ return NO;}
     BOOL execute = [self executeSQL:updateSQL arguments:updateValues];
     if(execute == NO)
     {
-        LKLog(@"database update fail : %@   -----> update sql: %@",NSStringFromClass(modelClass),updateSQL);
+        LKErrorLog(@"database update fail : %@   -----> update sql: %@",NSStringFromClass(modelClass),updateSQL);
     }
     
     //callback
@@ -735,7 +735,7 @@ return NO;}
     BOOL execute = [self executeSQL:updateSQL arguments:updateValues];
     
     if(execute == NO)
-        LKLog(@"database update fail %@   ----->sql:%@",NSStringFromClass(modelClass),updateSQL);
+        LKErrorLog(@"database update fail %@   ----->sql:%@",NSStringFromClass(modelClass),updateSQL);
     
     return execute;
 }
@@ -772,7 +772,7 @@ return NO;}
         NSString* pwhere = [self primaryKeyWhereSQLWithModel:model addPValues:parsArray];
         if(pwhere.length==0)
         {
-            LKLog(@"delete fail : %@ primary value is nil",NSStringFromClass(modelClass));
+            LKErrorLog(@"delete fail : %@ primary value is nil",NSStringFromClass(modelClass));
             return NO;
         }
         [deleteSQL appendString:pwhere];
@@ -824,7 +824,7 @@ return NO;}
         NSMutableString* pwhere = [self primaryKeyWhereSQLWithModel:model addPValues:nil];
         if(pwhere.length == 0)
         {
-            LKLog(@"exists model fail: primary key is nil or invalid");
+            LKErrorLog(@"exists model fail: primary key is nil or invalid");
             return NO;
         }
         return [self isExistsClass:model.class where:pwhere];
@@ -877,7 +877,7 @@ return NO;}
         
         NSString* dir  = [testpath stringByReplacingOccurrencesOfString:LKTestDirFilename withString:@""];
         
-        int count =  columes.count;
+        NSUInteger count =  columes.count;
         
         //获取该目录下所有文件名
         NSArray* files = [LKDBUtils getFilenamesWithDir:dir];
