@@ -140,6 +140,10 @@ static char LKModelBase_Key_RowID;
     {
         
     }
+    else if([columeType isEqualToString:@"NSNumber"])
+    {
+        modelValue = [NSNumber numberWithDouble:[value doubleValue]];
+    }
     else if([LKSQLFloatType rangeOfString:columeType].location != NSNotFound)
     {
         modelValue = [NSNumber numberWithFloat:[value floatValue]];
@@ -429,7 +433,6 @@ static char LKModelBase_Key_RowID;
     free(properties);
     if(containParent)
     {
-        
         [self mutableString:sb appendPropertyStringWithClass:self.superclass containParent:containParent];
     }
 }

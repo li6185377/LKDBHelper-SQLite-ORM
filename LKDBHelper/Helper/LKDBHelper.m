@@ -126,11 +126,15 @@ return NO;}
     {
         [query appendFormat:@" where %@",where];
     }
-    else if ([where isKindOfClass:[NSDictionary class]] && [where count] > 0)
+    else if ([where isKindOfClass:[NSDictionary class]])
     {
-        values = [NSMutableArray arrayWithCapacity:[where count]];
-        NSString* wherekey = [self dictionaryToSqlWhere:where andValues:values];
-        [query appendFormat:@" where %@",wherekey];
+        NSDictionary* dicWhere = where;
+        if(dicWhere.count > 0)
+        {
+            values = [NSMutableArray arrayWithCapacity:dicWhere.count];
+            NSString* wherekey = [self dictionaryToSqlWhere:where andValues:values];
+            [query appendFormat:@" where %@",wherekey];
+        }
     }
     return values;
 }

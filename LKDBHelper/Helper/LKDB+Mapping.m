@@ -43,6 +43,7 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
     __strong NSMutableArray* _primaryKeys;
 }
 -(void)removeWithColumeName:(NSString*)columeName;
+-(void)addColumeWithName:(NSString*)colueName;
 @end
 
 #pragma mark- LKDBProperty
@@ -78,11 +79,30 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
 }
 +(void)setUserCalculateForCN:(NSString *)columename
 {
+    if([LKDBUtils checkStringIsEmpty:columename])
+    {
+        LKLog(@"columename is null");
+        return;
+    }
+    
     LKDBProperty* property = [[self getModelInfos] objectWithSqlColumeName:columename];
-    [property enableUserCalculate];
+    if(property)
+    {
+        [property enableUserCalculate];
+    }
+    else
+    {
+        [[self getModelInfos] addColumeWithName:columename];
+    }
 }
 +(void)setUserCalculateForPTN:(NSString *)propertyTypeName
 {
+    if([LKDBUtils checkStringIsEmpty:propertyTypeName])
+    {
+        LKLog(@"propertyTypeName is null");
+        return;
+    }
+    
     LKModelInfos* infos = [self getModelInfos];
     for (int i=0; i<infos.count; i++) {
         LKDBProperty* property = [infos objectWithIndex:i];
@@ -224,6 +244,10 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
 -(LKDBProperty *)objectWithSqlColumeName:(NSString *)columeName
 {
     return [_sqlNameDic objectForKey:columeName];
+}
+-(void)addColumeWithName:(NSString *)colueName
+{
+    [self addDBPropertyWithType:LKSQLUserCalculate cname:colueName ctype:LKSQLText pname:colueName ptype:@"NSString"];
 }
 -(void)removeWithColumeName:(NSString*)columeName
 {
