@@ -150,7 +150,7 @@ static char LKModelBase_Key_RowID;
     }
     else if([LKSQLIntType rangeOfString:columeType].location != NSNotFound)
     {
-        modelValue = [NSNumber numberWithFloat:[value intValue]];
+        modelValue = [NSNumber numberWithInteger:[value intValue]];
     }
     else if([columeType isEqualToString:@"NSDate"])
     {
