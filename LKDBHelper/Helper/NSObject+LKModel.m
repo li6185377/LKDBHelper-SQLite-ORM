@@ -89,8 +89,7 @@ static char LKModelBase_Key_RowID;
     }
     else if([value isKindOfClass:[NSNumber class]])
     {
-        NSNumberFormatter* formatter = [NSObject getNumberFormatter];
-        returnValue = [formatter stringFromNumber:value];
+        returnValue = [value stringValue];
     }
     else if([value isKindOfClass:[NSDate class]])
     {
@@ -157,8 +156,7 @@ static char LKModelBase_Key_RowID;
     }
     else if([LKSQL_Convert_FloatType rangeOfString:columnType].location != NSNotFound)
     {
-        NSNumberFormatter* formatter = [NSObject getNumberFormatter];
-        modelValue = [formatter numberFromString:value];
+        modelValue = [NSNumber numberWithDouble:[value doubleValue]];
     }
     else if([LKSQL_Convert_IntType rangeOfString:columnType].location != NSNotFound)
     {
