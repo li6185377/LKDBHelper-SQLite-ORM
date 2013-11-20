@@ -90,7 +90,7 @@ static char LKModelBase_Key_RowID;
     else if([value isKindOfClass:[NSNumber class]])
     {
         NSNumberFormatter* formatter = [NSObject getNumberFormatter];
-        [formatter stringFromNumber:value];
+        returnValue = [formatter stringFromNumber:value];
     }
     else if([value isKindOfClass:[NSDate class]])
     {
