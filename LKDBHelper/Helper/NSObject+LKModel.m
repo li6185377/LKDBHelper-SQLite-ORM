@@ -25,7 +25,7 @@ static char LKModelBase_Key_RowID;
 {
     return NSStringFromClass(self);
 }
-+(BOOL)getAutoUpdateSqlColume
++(BOOL)getAutoUpdateSqlColumn
 {
     return YES;
 }
@@ -38,7 +38,7 @@ static char LKModelBase_Key_RowID;
     return nil;
 }
 
-+(void)columeAttributeWithProperty:(LKDBProperty *)property
++(void)columnAttributeWithProperty:(LKDBProperty *)property
 {
     //overwrite
 }
@@ -65,6 +65,16 @@ static char LKModelBase_Key_RowID;
     return nil;
 }
 #pragma mark- Table Data Function 表数据
++(NSNumberFormatter*)getNumberFormatter
+{
+    static NSNumberFormatter* format;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        format = [[NSNumberFormatter alloc]init];
+        [format setNumberStyle:NSNumberFormatterDecimalStyle];
+    });
+    return format;
+}
 -(id)modelGetValue:(LKDBProperty *)property
 {
     id value = [self valueForKey:property.propertyName];
@@ -79,7 +89,8 @@ static char LKModelBase_Key_RowID;
     }
     else if([value isKindOfClass:[NSNumber class]])
     {
-        returnValue = [value stringValue];
+        NSNumberFormatter* formatter = [NSObject getNumberFormatter];
+        [formatter stringFromNumber:value];
     }
     else if([value isKindOfClass:[NSDate class]])
     {
@@ -94,16 +105,16 @@ static char LKModelBase_Key_RowID;
     }
     else if([value isKindOfClass:[NSValue class]])
     {
-        NSString* columeType = property.propertyType;
-        if([columeType isEqualToString:@"CGRect"])
+        NSString* columnType = property.propertyType;
+        if([columnType isEqualToString:@"CGRect"])
         {
             returnValue = NSStringFromCGRect([value CGRectValue]);
         }
-        else if([columeType isEqualToString:@"CGPoint"])
+        else if([columnType isEqualToString:@"CGPoint"])
         {
             returnValue = NSStringFromCGPoint([value CGPointValue]);
         }
-        else if([columeType isEqualToString:@"CGSize"])
+        else if([columnType isEqualToString:@"CGSize"])
         {
             returnValue = NSStringFromCGSize([value CGSizeValue]);
         }
@@ -135,29 +146,30 @@ static char LKModelBase_Key_RowID;
 -(void)modelSetValue:(LKDBProperty *)property value:(id)value
 {
     id modelValue = value;
-    NSString* columeType = property.propertyType;
-    if([columeType isEqualToString:@"NSString"])
+    NSString* columnType = property.propertyType;
+    if([columnType isEqualToString:@"NSString"])
     {
         
     }
-    else if([columeType isEqualToString:@"NSNumber"])
+    else if([columnType isEqualToString:@"NSNumber"])
     {
         modelValue = [NSNumber numberWithDouble:[value doubleValue]];
     }
-    else if([LKSQLFloatType rangeOfString:columeType].location != NSNotFound)
+    else if([LKSQL_Convert_FloatType rangeOfString:columnType].location != NSNotFound)
     {
-        modelValue = [NSNumber numberWithFloat:[value floatValue]];
+        NSNumberFormatter* formatter = [NSObject getNumberFormatter];
+        modelValue = [formatter numberFromString:value];
     }
-    else if([LKSQLIntType rangeOfString:columeType].location != NSNotFound)
+    else if([LKSQL_Convert_IntType rangeOfString:columnType].location != NSNotFound)
     {
         modelValue = [NSNumber numberWithInteger:[value intValue]];
     }
-    else if([columeType isEqualToString:@"NSDate"])
+    else if([columnType isEqualToString:@"NSDate"])
     {
         NSString* datestr = value;
         modelValue = [LKDBUtils dateWithString:datestr];
     }
-    else if([columeType isEqualToString:@"UIColor"])
+    else if([columnType isEqualToString:@"UIColor"])
     {
         NSString* color = value;
         NSArray* array = [color componentsSeparatedByString:@","];
@@ -169,19 +181,19 @@ static char LKModelBase_Key_RowID;
         
         modelValue = [UIColor colorWithRed:r green:g blue:b alpha:a];
     }
-    else if([columeType isEqualToString:@"CGRect"])
+    else if([columnType isEqualToString:@"CGRect"])
     {
         modelValue = [NSValue valueWithCGRect:CGRectFromString(value)];
     }
-    else if([columeType isEqualToString:@"CGPoint"])
+    else if([columnType isEqualToString:@"CGPoint"])
     {
         modelValue = [NSValue valueWithCGPoint:CGPointFromString(value)];
     }
-    else if([columeType isEqualToString:@"CGSize"])
+    else if([columnType isEqualToString:@"CGSize"])
     {
         modelValue = [NSValue valueWithCGSize:CGSizeFromString(value)];
     }
-    else if([columeType isEqualToString:@"UIImage"])
+    else if([columnType isEqualToString:@"UIImage"])
     {
         NSString* filename = value;
         NSString* filepath = [self.class getDBImagePathWithName:filename];
@@ -195,7 +207,7 @@ static char LKModelBase_Key_RowID;
             modelValue = nil;
         }
     }
-    else if([columeType isEqualToString:@"NSData"])
+    else if([columnType isEqualToString:@"NSData"])
     {
         NSString* filename = value;
         NSString* filepath = [self.class getDBDataPathWithName:filename];
@@ -226,7 +238,7 @@ static char LKModelBase_Key_RowID;
     if(property)
     {
         id pkvalue = [self singlePrimaryKeyValue];
-        if([property.sqlColumeType isEqualToString:LKSQLInt])
+        if([property.sqlColumnType isEqualToString:LKSQL_Type_Int])
         {
             if([pkvalue isKindOfClass:[NSString class]])
             {
@@ -260,7 +272,7 @@ static char LKModelBase_Key_RowID;
     if(infos.primaryKeys.count == 1)
     {
         NSString* name = [infos.primaryKeys objectAtIndex:0];
-        return [infos objectWithSqlColumeName:name];
+        return [infos objectWithSqlColumnName:name];
     }
     return nil;
 }
@@ -269,7 +281,7 @@ static char LKModelBase_Key_RowID;
     LKDBProperty* property = [self singlePrimaryKeyProperty];
     if(property)
     {
-        if([property.type isEqualToString:LKSQLUserCalculate])
+        if([property.type isEqualToString:LKSQL_Mapping_UserCalculate])
         {
             return [self userGetValueForModel:property];
         }

@@ -30,6 +30,9 @@
 
 @property(copy,nonatomic)NSString* error;
 @property(copy,nonatomic)UIColor* color;
+
+//new add
+@property double score;
 @end
 
 

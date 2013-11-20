@@ -14,13 +14,18 @@
 +(void)dbDidCreateTable:(LKDBHelper *)helper{}
 
 +(void)dbDidIDeleted:(NSObject *)entity result:(BOOL)result{}
-+(void)dbWillDelete:(NSObject *)entity{}
-
 +(void)dbDidInserted:(NSObject *)entity result:(BOOL)result{}
-+(void)dbWillInsert:(NSObject *)entity{}
-
 +(void)dbDidUpdated:(NSObject *)entity result:(BOOL)result{}
-+(void)dbWillUpdate:(NSObject *)entity{}
+
++(BOOL)dbWillDelete:(NSObject *)entity{
+    return YES;
+}
++(BOOL)dbWillInsert:(NSObject *)entity{
+    return YES;
+}
++(BOOL)dbWillUpdate:(NSObject *)entity{
+    return YES;
+}
 
 #pragma mark - simplify synchronous function
 +(BOOL)checkModelClass:(NSObject*)model
@@ -35,7 +40,10 @@
 +(int)rowCountWithWhere:(id)where{
     return [[self getUsingLKDBHelper] rowCount:self where:where];
 }
-
++(NSMutableArray *)searchColumn:(NSString *)column where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
+{
+    return [[self getUsingLKDBHelper] search:self column:column where:where orderBy:orderBy offset:offset count:count];
+}
 +(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count{
     return [[self getUsingLKDBHelper] search:self where:where orderBy:orderBy offset:offset count:count];
 }

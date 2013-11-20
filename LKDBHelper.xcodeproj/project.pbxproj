@@ -230,7 +230,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = LK;
-				LastUpgradeCheck = 0460;
+				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = ljh;
 			};
 			buildConfigurationList = 53226DF8171B9E5A00B1A490 /* Build configuration list for PBXProject "LKDBHelper" */;
@@ -359,7 +359,6 @@
 		53226E21171B9E5B00B1A490 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LKDBHelper/LKDBHelper-Prefix.pch";
@@ -374,7 +373,6 @@
 		53226E22171B9E5B00B1A490 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LKDBHelper/LKDBHelper-Prefix.pch";

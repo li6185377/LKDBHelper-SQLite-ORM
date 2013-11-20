@@ -24,8 +24,8 @@ typedef enum {
  */
 +(LKTableUpdateType)tableUpdateForOldVersion:(int)oldVersion newVersion:(int)newVersion;
 
-+(void)tableUpdateAddColumeWithPN:(NSString*)propertyName;
-+(void)tableUpdateAddColumeWithName:(NSString*)columeName sqliteType:(NSString*)sqliteType;
++(void)tableUpdateAddColumnWithPN:(NSString*)propertyName;
++(void)tableUpdateAddColumnWithName:(NSString*)columnName sqliteType:(NSString*)sqliteType;
 
 
 #pragma mark- DEPRECATED

@@ -18,14 +18,14 @@
 
 // overwrite in your models, return # table name #
 +(NSString*)getTableName;
-+(BOOL)getAutoUpdateSqlColume;
++(BOOL)getAutoUpdateSqlColumn;
 
-// overwrite in your models, set colume attribute
-+(void)columeAttributeWithProperty:(LKDBProperty*)property;
+// overwrite in your models, set column attribute
++(void)columnAttributeWithProperty:(LKDBProperty*)property;
 
 /**
  *	@brief	overwrite in your models, if your table has primary key
-            return # colume name  #
+            return # column name  #
  
             主键列名 如果rowid<0 则跟据此名称update 和delete
  */

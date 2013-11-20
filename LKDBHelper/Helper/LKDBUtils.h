@@ -41,3 +41,29 @@
 #else
 #   define LKErrorLog(...)
 #endif
+
+
+static NSString* const LKSQL_Type_Text        =   @"text";
+static NSString* const LKSQL_Type_Int         =   @"integer";
+static NSString* const LKSQL_Type_Double      =   @"double";
+static NSString* const LKSQL_Type_Blob        =   @"blob";
+
+static NSString* const LKSQL_Attribute_NotNull     =   @"NOT NULL";
+static NSString* const LKSQL_Attribute_PrimaryKey  =   @"PRIMARY KEY";
+static NSString* const LKSQL_Attribute_Default     =   @"DEFAULT";
+static NSString* const LKSQL_Attribute_Unique      =   @"UNIQUE";
+static NSString* const LKSQL_Attribute_Check       =   @"CHECK";
+static NSString* const LKSQL_Attribute_ForeignKey  =   @"FOREIGN KEY";
+
+static NSString* const LKSQL_Convert_FloatType   =   @"float_double_decimal";
+static NSString* const LKSQL_Convert_IntType     =   @"int_char_short_long";
+static NSString* const LKSQL_Convert_BlobType    =   @"";
+
+static NSString* const LKSQL_Mapping_Inherit          =   @"LKDBInherit";
+static NSString* const LKSQL_Mapping_Binding          =   @"LKDBBinding";
+static NSString* const LKSQL_Mapping_UserCalculate    =   @"LKDBUserCalculate";
+
+//Object-c type converted to SQLite type  把Object-c 类型 转换为sqlite 类型
+extern inline NSString* LKSQLTypeFromObjcType(NSString *objcType);
+
+

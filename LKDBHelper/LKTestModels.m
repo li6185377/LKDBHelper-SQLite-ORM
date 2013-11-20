@@ -15,22 +15,33 @@
 {
     //remove unwant property
     //比如 getTableMapping 返回nil 的时候   会取全部属性  这时候 就可以 用这个方法  移除掉 不要的属性
-    [self removePropertyWithColumeName:@"error"];
+    [self removePropertyWithColumnName:@"error"];
     
     
-    //simple set a colume as "LKSQLUserCalculate"
+    //simple set a column as "LKSQL_Mapping_UserCalculate"
     //根据 属性名  来启用自己计算
     //[self setUserCalculateForCN:@"error"];
     
     
     //根据 属性类型  来启用自己计算
     //[self setUserCalculateForPTN:@"NSDictionary"];
+    
+    //enable own calculations
+    [self setUserCalculateForCN:@"address"];
+    
+    //enable the column binding property name
+    [self setTableColumnName:@"MyAge" bindingPropertyName:@"age"];
+    [self setTableColumnName:@"MyDate" bindingPropertyName:@"date"];
+    
+    //You can create a table here
+    //[[self getUsingLKDBHelper] createTableWithModelClass:self];
 }
 
 // 将要插入数据库
-+(void)dbWillInsert:(NSObject *)entity
++(BOOL)dbWillInsert:(NSObject *)entity
 {
     LKErrorLog(@"will insert : %@",NSStringFromClass(self));
+    return YES;
 }
 //已经插入数据库
 +(void)dbDidInserted:(NSObject *)entity result:(BOOL)result
@@ -41,7 +52,7 @@
 // 重载    返回自己处理过的 要插入数据库的值
 -(id)userGetValueForModel:(LKDBProperty *)property
 {
-    if([property.sqlColumeName isEqualToString:@"address"])
+    if([property.sqlColumnName isEqualToString:@"address"])
     {
         if(self.address == nil)
             return @"";
@@ -53,7 +64,7 @@
 // 重载    从数据库中  获取的值   经过自己处理 再保存
 -(void)userSetValueForModel:(LKDBProperty *)property value:(id)value
 {
-    if([property.sqlColumeName isEqualToString:@"address"])
+    if([property.sqlColumnName isEqualToString:@"address"])
     {
         self.address = nil;
         
@@ -65,9 +76,9 @@
 }
 
 //列属性
-+(void)columeAttributeWithProperty:(LKDBProperty *)property
++(void)columnAttributeWithProperty:(LKDBProperty *)property
 {
-    if([property.sqlColumeName isEqualToString:@"MyAge"])
+    if([property.sqlColumnName isEqualToString:@"MyAge"])
     {
         property.defaultValue = @"15";
     }
@@ -83,19 +94,19 @@
 //手动 绑定sql列
 +(NSDictionary *)getTableMapping
 {
-    //return nil
-    return @{@"name":LKSQLInherit,
-             @"MyAge":@"age",
-             @"img":LKSQLInherit,
-             @"MyDate":@"date",
-             
-             // version 2 after add
-             @"color":LKSQLInherit,
-             
-             //version 3 after add
-             @"address":LKSQLUserCalculate,
-             @"error":LKSQLInherit
-             };
+    return nil;
+//    return @{@"name":LKSQL_Mapping_Inherit,
+//             @"MyAge":@"age",
+//             @"img":LKSQL_Mapping_Inherit,
+//             @"MyDate":@"date",
+//             
+//             // version 2 after add
+//             @"color":LKSQL_Mapping_Inherit,
+//             
+//             //version 3 after add
+//             @"address":LKSQL_Mapping_UserCalculate,
+//             @"error":LKSQL_Mapping_Inherit
+//             };
 }
 //主键
 +(NSString *)getPrimaryKey
@@ -122,11 +133,11 @@
     switch (oldVersion) {
         case 1:
         {
-            [self tableUpdateAddColumeWithPN:@"color"];
+            [self tableUpdateAddColumnWithPN:@"color"];
         }
         case 2:
         {
-            [self tableUpdateAddColumeWithName:@"address" sqliteType:LKSQLText];
+            [self tableUpdateAddColumnWithName:@"address" sqliteType:LKSQL_Type_Text];
             //@"error" is removed
         }
             break;
@@ -168,11 +179,11 @@
             [table_pars appendString:@","];
         
         LKDBProperty* property =  [infos objectWithIndex:i];
-        [self columeAttributeWithProperty:property];
+        [self columnAttributeWithProperty:property];
         
-        [table_pars appendFormat:@"%@ %@",property.sqlColumeName,property.sqlColumeType];
+        [table_pars appendFormat:@"%@ %@",property.sqlColumnName,property.sqlColumnType];
         
-        if([property.sqlColumeType isEqualToString:LKSQLText])
+        if([property.sqlColumnType isEqualToString:LKSQL_Type_Text])
         {
             if(property.length>0)
             {
@@ -181,23 +192,23 @@
         }
         if(property.isNotNull)
         {
-            [table_pars appendFormat:@" %@",LKSQLNotNull];
+            [table_pars appendFormat:@" %@",LKSQL_Attribute_NotNull];
         }
         if(property.isUnique)
         {
-            [table_pars appendFormat:@" %@",LKSQLUnique];
+            [table_pars appendFormat:@" %@",LKSQL_Attribute_Unique];
         }
         if(property.checkValue)
         {
-            [table_pars appendFormat:@" %@(%@)",LKSQLCheck,property.checkValue];
+            [table_pars appendFormat:@" %@(%@)",LKSQL_Attribute_Check,property.checkValue];
         }
         if(property.defaultValue)
         {
-            [table_pars appendFormat:@" %@ %@",LKSQLDefault,property.defaultValue];
+            [table_pars appendFormat:@" %@ %@",LKSQL_Attribute_Default,property.defaultValue];
         }
-        if(primaryKey && [property.sqlColumeName isEqualToString:primaryKey])
+        if(primaryKey && [property.sqlColumnName isEqualToString:primaryKey])
         {
-            [table_pars appendFormat:@" %@",LKSQLPrimaryKey];
+            [table_pars appendFormat:@" %@",LKSQL_Attribute_PrimaryKey];
         }
     }
     NSString* createTableSQL = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@(%@)",[self getTableName],table_pars];

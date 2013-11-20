@@ -107,3 +107,19 @@
     return date;
 }
 @end
+
+
+inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
+{
+    if([LKSQL_Convert_IntType rangeOfString:objcType].length > 0){
+        return LKSQL_Type_Int;
+    }
+    if ([LKSQL_Convert_FloatType rangeOfString:objcType].length > 0) {
+        return LKSQL_Type_Double;
+    }
+    if ([LKSQL_Convert_BlobType rangeOfString:objcType].length > 0) {
+        return LKSQL_Type_Blob;
+    }
+    
+    return LKSQL_Type_Text;
+}

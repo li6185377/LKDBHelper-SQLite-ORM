@@ -15,18 +15,20 @@
 //callback delegate
 +(void)dbDidCreateTable:(LKDBHelper*)helper;
 
-+(void)dbWillInsert:(NSObject*)entity;
++(BOOL)dbWillInsert:(NSObject*)entity;
 +(void)dbDidInserted:(NSObject*)entity result:(BOOL)result;
 
-+(void)dbWillUpdate:(NSObject*)entity;
++(BOOL)dbWillUpdate:(NSObject*)entity;
 +(void)dbDidUpdated:(NSObject*)entity result:(BOOL)result;
 
-+(void)dbWillDelete:(NSObject*)entity;
++(BOOL)dbWillDelete:(NSObject*)entity;
 +(void)dbDidIDeleted:(NSObject*)entity result:(BOOL)result;
 
 
 //only simplify synchronous function
 +(int)rowCountWithWhere:(id)where;
+
++(NSMutableArray*)searchColumn:(NSString*)column where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
 +(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
 +(id)searchSingleWithWhere:(id)where orderBy:(NSString*)orderBy;
 

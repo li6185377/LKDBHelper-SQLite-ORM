@@ -1,6 +1,6 @@
 //
 //  FMDatabaseAdditions.m
-//  fmkit
+//  fmdb
 //
 //  Created by August Mueller on 10/30/05.
 //  Copyright 2005 Flying Meat Inc.. All rights reserved.
@@ -8,6 +8,7 @@
 
 #import "FMDatabase.h"
 #import "FMDatabaseAdditions.h"
+#import "TargetConditionals.h"
 
 @interface FMDatabase (PrivateStuff)
 - (FMResultSet *)executeQuery:(NSString *)sql withArgumentsInArray:(NSArray*)arrayArgs orDictionary:(NSDictionary *)dictionaryArgs orVAList:(va_list)args;
@@ -117,6 +118,59 @@ return ret;
     return returnBool;
 }
 
+
+#if SQLITE_VERSION_NUMBER >= 3007017
+
+- (uint32_t)applicationID {
+    
+    uint32_t r = 0;
+    
+    FMResultSet *rs = [self executeQuery:@"pragma application_id"];
+    
+    if ([rs next]) {
+        r = (uint32_t)[rs longLongIntForColumnIndex:0];
+    }
+    
+    [rs close];
+    
+    return r;
+}
+
+- (void)setApplicationID:(uint32_t)appID {
+    NSString *query = [NSString stringWithFormat:@"PRAGMA application_id=%d", appID];
+    FMResultSet *rs = [self executeQuery:query];
+    [rs next];
+    [rs close];
+}
+
+
+#if TARGET_OS_MAC && !TARGET_OS_IPHONE
+- (NSString*)applicationIDString {
+    NSString *s = NSFileTypeForHFSTypeCode([self applicationID]);
+    
+    assert([s length] == 6);
+    
+    s = [s substringWithRange:NSMakeRange(1, 4)];
+    
+    
+    return s;
+    
+}
+
+- (void)setApplicationIDString:(NSString*)s {
+    
+    if ([s length] != 4) {
+        NSLog(@"setApplicationIDString: string passed is not exactly 4 chars long. (was %ld)", [s length]);
+    }
+    
+    [self setApplicationID:NSHFSTypeCodeFromFileType([NSString stringWithFormat:@"'%@'", s])];
+}
+
+
+#endif
+
+#endif
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-implementations"
 
@@ -137,7 +191,7 @@ return ret;
         int rc = sqlite3_prepare_v2(_db, [sql UTF8String], -1, &pStmt, 0);
         if (rc == SQLITE_BUSY || rc == SQLITE_LOCKED) {
             keepTrying = YES;
-            usleep(20);
+            usleep(FMDatabaseSQLiteBusyMicrosecondsTimeout);
             
             if (_busyRetryTimeout && (numberOfRetries++ > _busyRetryTimeout)) {
                 NSLog(@"%s:%d Database busy (%@)", __FUNCTION__, __LINE__, [self databasePath]);

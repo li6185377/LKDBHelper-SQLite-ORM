@@ -83,6 +83,10 @@
  */
 -(NSMutableArray*)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
 -(void)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count callback:(void(^)(NSMutableArray* array))block;
+
+//return    column result array
+-(NSMutableArray*)search:(Class)modelClass column:(NSString*)column where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
+
 //return first model or nil
 -(id)searchSingle:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy;
 
@@ -111,7 +115,7 @@
  *
  *	@param 	model 	you want to update the entity
  *	@param 	where 	can use NSString or NSDictionary or nil
-                    when "where" is nil : update the value based on rowid colume or primary key colume
+                    when "where" is nil : update the value based on rowid column or primary key column
  *
  *	@return	the updated was successful
  */
@@ -142,7 +146,7 @@
 
 /**
  *	@brief   entity exists?
- *           for primary key colume 
+ *           for primary key column
             （if rowid > 0 would certainly exist so we do not rowid judgment）
  *	@param 	model 	entity
  *
@@ -164,9 +168,9 @@
             if you property has UIImage or NSData, will save their data in the (documents dir)
  *
  *	@param 	modelClass      entity class
- *	@param 	columes         UIImage or NSData Colume Name
+ *	@param 	columns         UIImage or NSData Column Name
  */
-+(void)clearNoneImage:(Class)modelClass columes:(NSArray*)columes;
-+(void)clearNoneData:(Class)modelClass columes:(NSArray*)columes;
++(void)clearNoneImage:(Class)modelClass columns:(NSArray*)columns;
++(void)clearNoneData:(Class)modelClass columns:(NSArray*)columns;
 
 @end

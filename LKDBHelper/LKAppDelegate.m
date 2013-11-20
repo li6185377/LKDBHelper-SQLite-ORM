@@ -85,6 +85,8 @@
     test.date = [NSDate date];
     test.color = [UIColor orangeColor];
     test.error = @"nil";
+    
+    test.score = 83.99989989989898989898989;
 
     //异步 插入第一条 数据   Insert the first
     [globalHelper insertToDB:test];
@@ -123,13 +125,11 @@
     sleep(1);
     
     
-    //改个 主键 插入第2条数据   update primary colume value  Insert the second
+    //改个 主键 插入第2条数据   update primary column value  Insert the second
     test.name = @"li si";
     [globalHelper insertToDB:test callback:^(BOOL isInsert) {
         addText(@"asynchronization insert complete: %@",isInsert>0?@"YES":@"NO");
     }];
-    
-    
     
     //查询   search
     addText(@"同步搜索    sync search");
@@ -138,6 +138,11 @@
     for (NSObject* obj in arraySync) {
         addText(@"%@",[obj printAllPropertys]);
     }
+    
+    //查询 单个 列   search single column
+    addText(@"只获取name那列的值   search with column 'name' results");
+    NSArray* nameArray = [LKTest searchColumn:@"name" where:nil orderBy:nil offset:0 count:0];
+    addText(@"%@",[nameArray componentsJoinedByString:@","]);
     
     addText(@"休息2秒 开始  为了说明 是异步插入的\n"
             "rest for 2 seconds to start is asynchronous inserted to illustrate");
@@ -194,7 +199,7 @@
         addText(@"扩展:  删除已不再数据库中保存的 图片记录 \n expansion: Delete the picture is no longer stored in the database record");
         //目前 已合并到LKDBHelper 中  就先写出来 给大家参考下
         
-        [LKDBHelper clearNoneImage:[LKTest class] columes:[NSArray arrayWithObjects:@"img",nil]];
+        [LKDBHelper clearNoneImage:[LKTest class] columns:[NSArray arrayWithObjects:@"img",nil]];
     }];
 }
 @end

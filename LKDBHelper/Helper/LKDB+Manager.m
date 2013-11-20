@@ -19,25 +19,25 @@
     return LKTableUpdateTypeDefault;
 }
 
-+(void)tableUpdateAddColumeWithPN:(NSString*)propertyName
++(void)tableUpdateAddColumnWithPN:(NSString*)propertyName
 {
     LKModelInfos* infos = [self getModelInfos];
     LKDBProperty* property = [infos objectWithPropertyName:propertyName];
     
-    NSAssert(property, @"#error %@ add colume name, not exists property name %@",NSStringFromClass(self),propertyName);
+    NSAssert(property, @"#error %@ add column name, not exists property name %@",NSStringFromClass(self),propertyName);
     
-    [self tableUpdateAddColumeWithName:property.sqlColumeName sqliteType:property.sqlColumeType];
+    [self tableUpdateAddColumnWithName:property.sqlColumnName sqliteType:property.sqlColumnType];
 }
-+(void)tableUpdateAddColumeWithName:(NSString*)columeName sqliteType:(NSString*)sqliteType
++(void)tableUpdateAddColumnWithName:(NSString*)columnName sqliteType:(NSString*)sqliteType
 {
-    NSString* alertSQL = [NSString stringWithFormat:@"alter table %@ add column %@ %@ ",[self getTableName],columeName,sqliteType];
-    NSString* initColumeValue = [NSString stringWithFormat:@"update %@ set %@=%@",[self getTableName],columeName,[sqliteType isEqualToString:LKSQLText]?@"''":@"0"];
+    NSString* alertSQL = [NSString stringWithFormat:@"alter table %@ add column %@ %@ ",[self getTableName],columnName,sqliteType];
+    NSString* initColumnValue = [NSString stringWithFormat:@"update %@ set %@=%@",[self getTableName],columnName,[sqliteType isEqualToString:LKSQL_Type_Text]?@"''":@"0"];
     
     [[self getUsingLKDBHelper] executeDB:^(FMDatabase *db) {
         BOOL success = [db executeUpdate:alertSQL];
         if(success)
         {
-            [db executeUpdate:initColumeValue];
+            [db executeUpdate:initColumnValue];
         }
     }];
 }
