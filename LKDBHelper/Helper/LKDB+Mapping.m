@@ -56,6 +56,14 @@
     }
     return self;
 }
+-(NSString *)sqlColumnType
+{
+    if([_sqlColumnType isEqualToString:LKSQL_Type_Double])
+    {
+        return LKSQL_Type_Text;
+    }
+    return _sqlColumnType;
+}
 -(void)enableUserCalculate
 {
     _type = LKSQL_Mapping_UserCalculate;

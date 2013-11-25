@@ -65,16 +65,6 @@ static char LKModelBase_Key_RowID;
     return nil;
 }
 #pragma mark- Table Data Function 表数据
-+(NSNumberFormatter*)getNumberFormatter
-{
-    static NSNumberFormatter* format;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        format = [[NSNumberFormatter alloc]init];
-        [format setNumberStyle:NSNumberFormatterDecimalStyle];
-    });
-    return format;
-}
 -(id)modelGetValue:(LKDBProperty *)property
 {
     id value = [self valueForKey:property.propertyName];

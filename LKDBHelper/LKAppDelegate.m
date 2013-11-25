@@ -86,8 +86,8 @@
     test.color = [UIColor orangeColor];
     test.error = @"nil";
     
-    test.score = 83.99989989989898989898989;
-
+    test.score = [[NSDate date] timeIntervalSince1970];
+    addText(@"%f",test.score);
     //异步 插入第一条 数据   Insert the first
     [globalHelper insertToDB:test];
     
@@ -135,7 +135,7 @@
     addText(@"同步搜索    sync search");
     
     NSMutableArray* arraySync = [LKTest searchWithWhere:nil orderBy:nil offset:0 count:100];
-    for (NSObject* obj in arraySync) {
+    for (id obj in arraySync) {
         addText(@"%@",[obj printAllPropertys]);
     }
     
