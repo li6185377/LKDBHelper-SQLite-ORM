@@ -98,13 +98,16 @@
     return NO;
 }
 
-- (void)saveToDB
+- (BOOL)saveToDB
 {
-    [self.class insertToDB:self];
+   return [self.class insertToDB:self];
 }
-
-- (void)deleteToDB
+- (BOOL)deleteToDB
 {
-    [self.class deleteToDB:self];
+   return [self.class deleteToDB:self];
+}
+-(BOOL)isExistsFromDB
+{
+    return [self.class isExistsWithModel:self];
 }
 @end

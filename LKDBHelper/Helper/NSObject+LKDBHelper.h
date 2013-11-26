@@ -40,6 +40,7 @@
 +(BOOL)deleteWithWhere:(id)where;
 +(BOOL)isExistsWithModel:(NSObject*)model;
 
-- (void)saveToDB;
-- (void)deleteToDB;
+- (BOOL)saveToDB;
+- (BOOL)deleteToDB;
+- (BOOL)isExistsFromDB;
 @end
