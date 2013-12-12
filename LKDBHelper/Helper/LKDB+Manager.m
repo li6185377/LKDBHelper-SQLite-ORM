@@ -18,7 +18,7 @@
 {
     return LKTableUpdateTypeDefault;
 }
-
++(void)tableDidCreatedOrUpdated{}
 +(void)tableUpdateAddColumnWithPN:(NSString*)propertyName
 {
     LKModelInfos* infos = [self getModelInfos];

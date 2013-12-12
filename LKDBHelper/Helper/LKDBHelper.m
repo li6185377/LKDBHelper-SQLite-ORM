@@ -294,6 +294,8 @@ return NO;}
                     [clazz tableUpdateAddColumnWithName:p.sqlColumnName sqliteType:p.sqlColumnType];
                 else
                     [clazz removePropertyWithColumnName:p.sqlColumnName];
+                
+                [clazz tableDidCreatedOrUpdated];
             }
         }
     }];
@@ -411,7 +413,10 @@ return NO;}
     BOOL isCreated = [self executeSQL:createTableSQL arguments:nil];
     
     if(isCreated)
+    {
         [_tableManager setTableName:tableName version:newVersion];
+        [modelClass tableDidCreatedOrUpdated];
+    }
     
     return isCreated;
 }

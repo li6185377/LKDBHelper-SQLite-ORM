@@ -23,6 +23,7 @@ typedef enum {
  *	@brief	overwrite in your models, operating table update
  */
 +(LKTableUpdateType)tableUpdateForOldVersion:(int)oldVersion newVersion:(int)newVersion;
++(void)tableDidCreatedOrUpdated;
 
 +(void)tableUpdateAddColumnWithPN:(NSString*)propertyName;
 +(void)tableUpdateAddColumnWithName:(NSString*)columnName sqliteType:(NSString*)sqliteType;
