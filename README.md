@@ -3,7 +3,7 @@ LKDBHelper
 this is sqlite ORM (an automatic database operation) <br>
 thread-safe and not afraid of recursive deadlock
 
-新版 添加字段的时候  可以直接  定义属性就好了  不用再调用  [self tableUpdateAddColumeWithPN:@"color"]; 这种的方法了
+新版 添加字段的时候  可以直接  定义属性就好了  不用再调用  [self tableUpdateAddColumnWithPN:@"color"]; 这种的方法了
 #v1.1
 * 支持 `列名` 和 `属性` 之间的绑定。<br>
 * 你也可以 设置 列 的属性。<br>
@@ -172,23 +172,23 @@ overwirte getTableMapping Function
     switch (oldVersion) {
         case 1:
         {
-            [self tableUpdateAddColumeWithPN:@"color"];
+            [self tableUpdateAddColumnWithPN:@"color"];
         }
         case 2:
         {
-            [self tableUpdateAddColumeWithName:@"address" sqliteType:LKSQLText];
+            [self tableUpdateAddColumnWithName:@"address" sqliteType:LKSQLText];
         }
             break;
     }
     return LKTableUpdateTypeCustom;
 }
 ```
-## set colume attribute
+## set column attribute
 
 ```objective-c
-+(void)columeAttributeWithProperty:(LKDBProperty *)property
++(void)columnAttributeWithProperty:(LKDBProperty *)property
 {
-    if([property.sqlColumeName isEqualToString:@"MyAge"])
+    if([property.sqlColumnName isEqualToString:@"MyAge"])
     {
         property.defaultValue = @"15";
     }
@@ -216,8 +216,8 @@ Change-log
 
 - automatic table mapping
 - support optional columns
-- support colume attribute settings
-- you can return colume content
+- support column attribute settings
+- you can return column content
 
 **Version 1.0** @ 2013-5-19
 
