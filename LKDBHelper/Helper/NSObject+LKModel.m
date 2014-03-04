@@ -65,6 +65,9 @@ static char LKModelBase_Key_RowID;
     return nil;
 }
 #pragma mark- Table Data Function 表数据
++(NSDateFormatter*)getModelDateFormatter{
+    return nil;
+}
 -(id)modelGetValue:(LKDBProperty *)property
 {
     id value = [self valueForKey:property.propertyName];
@@ -83,7 +86,13 @@ static char LKModelBase_Key_RowID;
     }
     else if([value isKindOfClass:[NSDate class]])
     {
-        returnValue = [LKDBUtils stringWithDate:value];
+        NSDateFormatter* formatter = [self.class getModelDateFormatter];
+        if(formatter){
+            returnValue = [formatter stringFromDate:value];
+        }
+        else{
+            returnValue = [LKDBUtils stringWithDate:value];
+        }
     }
     else if([value isKindOfClass:[UIColor class]])
     {

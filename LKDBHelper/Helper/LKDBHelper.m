@@ -542,6 +542,10 @@ return NO;}
     {
         [sql appendFormat:@" limit %d offset %d",count,offset];
     }
+    else if(offset > 0)
+    {
+        [sql appendFormat:@" limit %d offset %d",INT_MAX,offset];
+    }
 }
 - (NSMutableArray *)executeOneColumnResult:(FMResultSet *)set
 {

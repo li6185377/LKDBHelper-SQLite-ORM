@@ -13,6 +13,17 @@
 @end
 
 @implementation LKDateFormatter
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        self.lock = [[NSLock alloc]init];
+        self.generatesCalendarDates = YES;
+        self.dateStyle = NSDateFormatterNoStyle;
+        self.timeStyle = NSDateFormatterNoStyle;
+    }
+    return self;
+}
 //防止在IOS5下 多线程 格式化时间时 崩溃
 -(NSDate *)dateFromString:(NSString *)string
 {
@@ -98,6 +109,9 @@
 {
     NSDateFormatter* formatter = [self getDBDateFormat];
     NSString* datestr = [formatter stringFromDate:date];
+    if(datestr.length > 19){
+        datestr = [datestr substringToIndex:19];
+    }
     return datestr;
 }
 +(NSDate *)dateWithString:(NSString *)str

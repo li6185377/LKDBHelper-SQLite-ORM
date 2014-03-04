@@ -66,7 +66,7 @@
  */
 -(void)userSetValueForModel:(LKDBProperty*)property value:(id)value;
 
-
++(NSDateFormatter*)getModelDateFormatter;
 //lkdbhelper use
 -(id)modelGetValue:(LKDBProperty*)property;
 -(void)modelSetValue:(LKDBProperty*)property value:(id)value;
