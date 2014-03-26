@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => 'https://github.com/li6185377/LKDBHelper-SQLite-ORM.git', :tag => '1.4'}
 
   s.ios.deployment_target = '4.3'
-  s.osx.deployment_target = '10.7'
+  s.osx.deployment_target = '10.6'
 
   s.source_files = 'LKDBHelper/Helper/*.{h,m}'
   s.requires_arc = true
