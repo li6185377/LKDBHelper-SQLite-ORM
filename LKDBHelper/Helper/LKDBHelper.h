@@ -44,6 +44,9 @@
 
 @interface LKDBHelper(DatabaseManager)
 
+//get table has created
+-(BOOL)getTableCreatedWithClass:(Class)model;
+
 //create table with entity class
 -(BOOL)createTableWithModelClass:(Class)model;
 

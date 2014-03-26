@@ -13,7 +13,7 @@
 
 +(void)dbDidCreateTable:(LKDBHelper *)helper{}
 
-+(void)dbDidIDeleted:(NSObject *)entity result:(BOOL)result{}
++(void)dbDidDeleted:(NSObject *)entity result:(BOOL)result{}
 +(void)dbDidInserted:(NSObject *)entity result:(BOOL)result{}
 +(void)dbDidUpdated:(NSObject *)entity result:(BOOL)result{}
 

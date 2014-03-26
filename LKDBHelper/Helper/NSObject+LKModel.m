@@ -93,6 +93,7 @@ static char LKModelBase_Key_RowID;
         else{
             returnValue = [LKDBUtils stringWithDate:value];
         }
+        returnValue = [returnValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     }
     else if([value isKindOfClass:[UIColor class]])
     {
@@ -185,8 +186,14 @@ static char LKModelBase_Key_RowID;
     }
     else if([columnType isEqualToString:@"NSDate"])
     {
-        NSString* datestr = value;
+        NSString* datestr = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        NSDateFormatter* formatter = [self.class getModelDateFormatter];
+        if(formatter){
+            modelValue = [formatter dateFromString:datestr];
+        }
+        else{
         modelValue = [LKDBUtils dateWithString:datestr];
+        }
     }
     else if([columnType isEqualToString:NSStringFromClass([UIColor class])])
     {

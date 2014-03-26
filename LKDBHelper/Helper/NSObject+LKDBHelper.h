@@ -22,7 +22,7 @@
 +(void)dbDidUpdated:(NSObject*)entity result:(BOOL)result;
 
 +(BOOL)dbWillDelete:(NSObject*)entity;
-+(void)dbDidIDeleted:(NSObject*)entity result:(BOOL)result;
++(void)dbDidDeleted:(NSObject*)entity result:(BOOL)result;
 
 
 //only simplify synchronous function

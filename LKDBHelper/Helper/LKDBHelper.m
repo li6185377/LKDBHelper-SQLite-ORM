@@ -330,17 +330,7 @@ return NO;}
     }
     else if(oldVersion == newVersion)
     {
-        __block BOOL isTableCreated = NO;
-        [self executeDB:^(FMDatabase *db) {
-            FMResultSet* set = [db executeQuery:@"select count(name) from sqlite_master where type='table' and name=?",tableName];
-            [set next];
-            if([set intForColumnIndex:0]>0)
-            {
-                isTableCreated = YES;
-            }
-            [set close];
-        }];
-        if(isTableCreated)
+        if([self getTableCreatedWithClass:modelClass])
         {
             //已创建表 就跳过
             [self fixSqlColumnsWithClass:modelClass];
@@ -350,7 +340,11 @@ return NO;}
     
     LKModelInfos* infos = [modelClass getModelInfos];
     NSArray* primaryKeys = infos.primaryKeys;
-    
+    BOOL isAutoinc = NO;
+    if(primaryKeys.count == 1 && [[primaryKeys lastObject] isEqual:@"rowid"])
+    {
+        isAutoinc = YES;
+    }
     NSMutableString* table_pars = [NSMutableString string];
     for (int i=0; i<infos.count; i++) {
         
@@ -389,23 +383,33 @@ return NO;}
         {
             [table_pars appendFormat:@" %@ %@",LKSQL_Attribute_Default,property.defaultValue];
         }
+        if(isAutoinc)
+        {
+            if([property.sqlColumnName isEqualToString:@"rowid"])
+            {
+                [table_pars appendString:@" primary key autoincrement"];
+            }
+        }
     }
     NSMutableString* pksb = [NSMutableString string];
-    if(primaryKeys.count>0)
+    if(isAutoinc == NO)
     {
-        pksb = [NSMutableString string];
-        for (int i=0; i<primaryKeys.count; i++) {
-            NSString* pk = [primaryKeys objectAtIndex:i];
-            
-            if(pksb.length>0)
-                [pksb appendString:@","];
-            
-            [pksb appendString:pk];
-        }
-        if(pksb.length>0)
+        if(primaryKeys.count>0)
         {
-            [pksb insertString:@",primary key(" atIndex:0];
-            [pksb appendString:@")"];
+            pksb = [NSMutableString string];
+            for (int i=0; i<primaryKeys.count; i++) {
+                NSString* pk = [primaryKeys objectAtIndex:i];
+                
+                if(pksb.length>0)
+                    [pksb appendString:@","];
+                
+                [pksb appendString:pk];
+            }
+            if(pksb.length>0)
+            {
+                [pksb insertString:@",primary key(" atIndex:0];
+                [pksb appendString:@")"];
+            }
         }
     }
     NSString* createTableSQL = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@(%@%@)",tableName,table_pars,pksb];
@@ -419,6 +423,20 @@ return NO;}
     }
     
     return isCreated;
+}
+-(BOOL)getTableCreatedWithClass:(Class)modelClass
+{
+    __block BOOL isTableCreated = NO;
+    [self executeDB:^(FMDatabase *db) {
+        FMResultSet* set = [db executeQuery:@"select count(name) from sqlite_master where type='table' and name=?",[modelClass getTableName]];
+        [set next];
+        if([set intForColumnIndex:0]>0)
+        {
+            isTableCreated = YES;
+        }
+        [set close];
+    }];
+    return isTableCreated;
 }
 @end
 
@@ -709,7 +727,7 @@ return NO;}
     checkModelIsInvalid(model);
     
     Class modelClass = model.class;
-
+    
     //callback
     if([modelClass dbWillUpdate:model]==NO)
     {
@@ -810,7 +828,7 @@ return NO;}
     checkModelIsInvalid(model);
     
     Class modelClass = model.class;
-
+    
     //callback
     if([modelClass dbWillDelete:model] == NO)
     {
@@ -841,7 +859,7 @@ return NO;}
     BOOL execute = [self executeSQL:deleteSQL arguments:parsArray];
     
     //callback
-    [modelClass dbDidIDeleted:model result:execute];
+    [modelClass dbDidDeleted:model result:execute];
     
     return execute;
 }
