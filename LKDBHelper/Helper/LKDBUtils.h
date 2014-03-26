@@ -32,7 +32,7 @@
 +(NSDate *)dateWithString:(NSString *)str;
 @end
 
-#if TARGET_OS_MAC
+#ifdef __MAC_OS_X_VERSION_MIN_REQUIRED
 #define UIImage NSImage
 #define UIColor NSColor
 #endif

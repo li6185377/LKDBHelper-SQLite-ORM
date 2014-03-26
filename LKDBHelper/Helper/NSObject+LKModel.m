@@ -105,7 +105,7 @@ static char LKModelBase_Key_RowID;
     else if([value isKindOfClass:[NSValue class]])
     {
         NSString* columnType = property.propertyType;
-#if TARGET_OS_IPHONE
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
         if([columnType isEqualToString:@"CGRect"])
         {
             returnValue = NSStringFromCGRect([value CGRectValue]);
@@ -139,7 +139,7 @@ static char LKModelBase_Key_RowID;
         long date = [[NSDate date] timeIntervalSince1970];
         NSString* filename = [NSString stringWithFormat:@"img%ld%ld",date&0xFFFFF,random&0xFFF];
         
-#if TARGET_OS_IPHONE
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
         NSData* datas = UIImageJPEGRepresentation(value, 1);
 #else
         [value lockFocus];
@@ -207,7 +207,7 @@ static char LKModelBase_Key_RowID;
         
         modelValue = [UIColor colorWithRed:r green:g blue:b alpha:a];
     }
-#if TARGET_OS_IPHONE
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
     else if([columnType isEqualToString:@"CGRect"])
     {
         modelValue = [NSValue valueWithCGRect:CGRectFromString(value)];

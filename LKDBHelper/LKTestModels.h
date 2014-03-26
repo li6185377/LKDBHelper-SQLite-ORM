@@ -37,7 +37,7 @@
 @property(strong,nonatomic)NSData* data;
 
 @property CGRect frame;
-#if TARGET_OS_MAC
+#ifdef __MAC_OS_X_VERSION_MIN_REQUIRED
 @property NSRect frame1;
 #else
 @property CGRect frame1;
