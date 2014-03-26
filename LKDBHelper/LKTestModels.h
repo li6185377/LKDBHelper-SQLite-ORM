@@ -33,6 +33,18 @@
 
 //new add
 @property double score;
+
+@property(strong,nonatomic)NSData* data;
+
+@property CGRect frame;
+#if TARGET_OS_MAC
+@property NSRect frame1;
+#else
+@property CGRect frame1;
+#endif
+
+@property CGRect size;
+@property CGPoint point;
 @end
 
 

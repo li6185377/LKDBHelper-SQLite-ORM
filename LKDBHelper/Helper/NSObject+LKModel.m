@@ -104,6 +104,7 @@ static char LKModelBase_Key_RowID;
     else if([value isKindOfClass:[NSValue class]])
     {
         NSString* columnType = property.propertyType;
+#if TARGET_OS_IPHONE
         if([columnType isEqualToString:@"CGRect"])
         {
             returnValue = NSStringFromCGRect([value CGRectValue]);
@@ -116,6 +117,20 @@ static char LKModelBase_Key_RowID;
         {
             returnValue = NSStringFromCGSize([value CGSizeValue]);
         }
+#else
+        if([columnType hasSuffix:@"Rect"])
+        {
+            returnValue = NSStringFromRect([value rectValue]);
+        }
+        else if([columnType hasSuffix:@"Point"])
+        {
+            returnValue = NSStringFromPoint([value pointValue]);
+        }
+        else if([columnType hasSuffix:@"Size"])
+        {
+            returnValue = NSStringFromSize([value sizeValue]);
+        }
+#endif
     }
     else if([value isKindOfClass:[UIImage class]])
     {
@@ -123,7 +138,14 @@ static char LKModelBase_Key_RowID;
         long date = [[NSDate date] timeIntervalSince1970];
         NSString* filename = [NSString stringWithFormat:@"img%ld%ld",date&0xFFFFF,random&0xFFF];
         
+#if TARGET_OS_IPHONE
         NSData* datas = UIImageJPEGRepresentation(value, 1);
+#else
+        [value lockFocus];
+        NSBitmapImageRep *srcImageRep = [NSBitmapImageRep imageRepWithData:[value TIFFRepresentation]];
+        NSData* datas = [srcImageRep representationUsingType:NSJPEGFileType properties:nil];
+        [value unlockFocus];
+#endif
         [datas writeToFile:[self.class getDBImagePathWithName:filename] atomically:YES];
         
         returnValue = filename;
@@ -166,7 +188,7 @@ static char LKModelBase_Key_RowID;
         NSString* datestr = value;
         modelValue = [LKDBUtils dateWithString:datestr];
     }
-    else if([columnType isEqualToString:@"UIColor"])
+    else if([columnType isEqualToString:NSStringFromClass([UIColor class])])
     {
         NSString* color = value;
         NSArray* array = [color componentsSeparatedByString:@","];
@@ -178,6 +200,7 @@ static char LKModelBase_Key_RowID;
         
         modelValue = [UIColor colorWithRed:r green:g blue:b alpha:a];
     }
+#if TARGET_OS_IPHONE
     else if([columnType isEqualToString:@"CGRect"])
     {
         modelValue = [NSValue valueWithCGRect:CGRectFromString(value)];
@@ -190,13 +213,27 @@ static char LKModelBase_Key_RowID;
     {
         modelValue = [NSValue valueWithCGSize:CGSizeFromString(value)];
     }
-    else if([columnType isEqualToString:@"UIImage"])
+#else
+    else if([columnType hasSuffix:@"Rect"])
+    {
+        modelValue = [NSValue valueWithRect:NSRectFromString(value)];
+    }
+    else if([columnType hasSuffix:@"Point"])
+    {
+        modelValue = [NSValue valueWithPoint:NSPointFromString(value)];
+    }
+    else if([columnType hasSuffix:@"Size"])
+    {
+        modelValue = [NSValue valueWithSize:NSSizeFromString(value)];
+    }
+#endif
+    else if([columnType isEqualToString:NSStringFromClass([UIImage class])])
     {
         NSString* filename = value;
         NSString* filepath = [self.class getDBImagePathWithName:filename];
         if([LKDBUtils isFileExists:filepath])
         {
-            UIImage* img = [UIImage imageWithContentsOfFile:filepath];
+            UIImage* img = [[UIImage alloc] initWithContentsOfFile:filepath];
             modelValue = img;
         }
         else

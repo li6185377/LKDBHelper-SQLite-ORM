@@ -1,23 +1,23 @@
 //
 //  LKAppDelegate.m
-//  LKDBHelper
+//  LKDB-Demo
 //
-//  Created by upin on 13-4-15.
-//  Copyright (c) 2013年 ljh. All rights reserved.
+//  Created by ljh on 14-3-26.
+//  Copyright (c) 2014年 LJH. All rights reserved.
 //
 
 #import "LKAppDelegate.h"
+#import "LKDBHelper.h"
+#import "LKTestModels.h"
 
-@interface LKAppDelegate()<UITextViewDelegate>
+@interface LKAppDelegate()
 @property(strong,nonatomic)NSMutableString* ms;
-@property(unsafe_unretained,nonatomic)UITextView* tv;
-@end
 
+@end
 @implementation LKAppDelegate
--(void)scrollViewDidScroll:(UIScrollView *)scrollView
-{
-    [self.window endEditing:YES];
-}
+
+
+
 -(void)add:(NSString*)txt
 {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -25,28 +25,18 @@
         [_ms appendString:txt];
         [_ms appendString:@"\n"];
         
-        self.tv.text = _ms;
+        self.textView.string = _ms;
     });
 }
 #define addText(fmt, ...) [self add:[NSString stringWithFormat:fmt,##__VA_ARGS__]]
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    // Override point for customization after application launch.
+    NSLog(@"%@",NSHomeDirectory());
     self.ms = [NSMutableString string];
-    UITextView* textview = [[UITextView alloc]init];
-    textview.frame = CGRectMake(0, 20, 320, self.window.bounds.size.height);
-    textview.textColor = [UIColor blackColor];
-    textview.delegate =self;
-    [self.window addSubview:textview];
-    self.tv = textview;
-    [self.window makeKeyAndVisible];
-    
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         [self test];
     });
-    return YES;
 }
 -(void)test
 {
@@ -59,7 +49,7 @@
     //创建表  会根据表的版本号  来判断具体的操作 . create table need to manually call
     [globalHelper createTableWithModelClass:[LKTest class]];
     [globalHelper createTableWithModelClass:[LKTestForeign class]];
-
+    
     addText(@"LKTest create table sql :\n%@\n",[LKTest getCreateTableSQL]);
     addText(@"LKTestForeign create table sql :\n%@\n",[LKTestForeign getCreateTableSQL]);
     
@@ -74,6 +64,9 @@
     
     //插入数据    insert table row
     LKTest* test = [[LKTest alloc]init];
+    test.frame = CGRectMake(1, 2, 3, 4);
+    test.frame1 = CGRectMake(5, 6, 7, 8);
+    
     test.name = @"zhan san";
     test.age = 16;
     
@@ -82,9 +75,9 @@
     
     test.isGirl = YES;
     test.like = 'I';
-    test.img = [UIImage imageNamed:@"41.png"];
+    test.img = [NSImage imageNamed:@"41.png"];
     test.date = [NSDate date];
-    test.color = [UIColor orangeColor];
+    test.color = [NSColor orangeColor];
     test.error = @"nil";
     
     test.score = [[NSDate date] timeIntervalSince1970];
@@ -114,7 +107,7 @@
         test.name = @"1";
         test.rowid = 0;     //no new object,should set rowid:0
         BOOL insertSucceed = [globalHelper insertWhenNotExists:test];
-
+        
         //insert fail
         if(insertSucceed == NO)
             [db rollback];
@@ -122,7 +115,7 @@
             [db commit];
         
     }];
-
+    
     
     addText(@"同步插入 完成!  Insert completed synchronization");
     
@@ -164,11 +157,11 @@
         }
         
         sleep(1);
-
+        
         //修改    update
         LKTest* test2 = [array objectAtIndex:0];
         test2.name = @"wang wu";
-
+        
         [globalHelper updateToDB:test2 where:nil];
         
         addText(@"修改完成 , update completed ");
@@ -197,7 +190,7 @@
         
         addText(@"示例 结束  example finished\n\n");
         
-
+        
         
         //Expansion: Delete the picture is no longer stored in the database record
         addText(@"扩展:  删除已不再数据库中保存的 图片记录 \n expansion: Delete the picture is no longer stored in the database record");
@@ -206,5 +199,6 @@
         [LKDBHelper clearNoneImage:[LKTest class] columns:[NSArray arrayWithObjects:@"img",nil]];
     }];
 }
-@end
 
+
+@end

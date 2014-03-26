@@ -91,7 +91,7 @@
     }
 }
 
-//手动 绑定sql列
+//手动or自动 绑定sql列
 +(NSDictionary *)getTableMapping
 {
     return nil;

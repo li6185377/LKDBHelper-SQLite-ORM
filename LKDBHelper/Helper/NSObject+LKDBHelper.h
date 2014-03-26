@@ -43,4 +43,5 @@
 - (BOOL)saveToDB;
 - (BOOL)deleteToDB;
 - (BOOL)isExistsFromDB;
+
 @end

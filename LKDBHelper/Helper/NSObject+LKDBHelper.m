@@ -100,11 +100,11 @@
 
 - (BOOL)saveToDB
 {
-   return [self.class insertToDB:self];
+    return [self.class insertToDB:self];
 }
 - (BOOL)deleteToDB
 {
-   return [self.class deleteToDB:self];
+  return [self.class deleteToDB:self];
 }
 -(BOOL)isExistsFromDB
 {

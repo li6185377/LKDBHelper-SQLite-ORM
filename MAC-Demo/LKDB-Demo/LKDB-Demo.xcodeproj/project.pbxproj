@@ -1,0 +1,615 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		C541086F18E27786009D0644 /* libsqlite3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C541086E18E27786009D0644 /* libsqlite3.0.dylib */; };
+		C5549E5E18E2675D00F92DED /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C5549E5D18E2675D00F92DED /* Cocoa.framework */; };
+		C5549E6818E2675D00F92DED /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C5549E6618E2675D00F92DED /* InfoPlist.strings */; };
+		C5549E6A18E2675D00F92DED /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549E6918E2675D00F92DED /* main.m */; };
+		C5549E6E18E2675D00F92DED /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = C5549E6C18E2675D00F92DED /* Credits.rtf */; };
+		C5549E7118E2675D00F92DED /* LKAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549E7018E2675D00F92DED /* LKAppDelegate.m */; };
+		C5549E7418E2675D00F92DED /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C5549E7218E2675D00F92DED /* MainMenu.xib */; };
+		C5549E7618E2675D00F92DED /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C5549E7518E2675D00F92DED /* Images.xcassets */; };
+		C5549E7D18E2675D00F92DED /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C5549E7C18E2675D00F92DED /* XCTest.framework */; };
+		C5549E7E18E2675D00F92DED /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C5549E5D18E2675D00F92DED /* Cocoa.framework */; };
+		C5549E8618E2675D00F92DED /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C5549E8418E2675D00F92DED /* InfoPlist.strings */; };
+		C5549E8818E2675D00F92DED /* LKDB_DemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549E8718E2675D00F92DED /* LKDB_DemoTests.m */; };
+		C5549EC018E267B300F92DED /* FMDatabase+InMemoryOnDiskIO.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549E9B18E267B300F92DED /* FMDatabase+InMemoryOnDiskIO.m */; };
+		C5549EC118E267B300F92DED /* FMDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549E9E18E267B300F92DED /* FMDatabase.m */; };
+		C5549EC218E267B300F92DED /* FMDatabaseAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EA018E267B300F92DED /* FMDatabaseAdditions.m */; };
+		C5549EC318E267B300F92DED /* FMDatabasePool.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EA218E267B300F92DED /* FMDatabasePool.m */; };
+		C5549EC418E267B300F92DED /* FMDatabaseQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EA418E267B300F92DED /* FMDatabaseQueue.m */; };
+		C5549EC518E267B300F92DED /* FMResultSet.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EA618E267B300F92DED /* FMResultSet.m */; };
+		C5549EC618E267B300F92DED /* LKDB+Manager.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EA918E267B300F92DED /* LKDB+Manager.m */; };
+		C5549EC718E267B300F92DED /* LKDB+Mapping.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EAB18E267B300F92DED /* LKDB+Mapping.m */; };
+		C5549EC818E267B300F92DED /* LKDBHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EAD18E267B300F92DED /* LKDBHelper.m */; };
+		C5549EC918E267B300F92DED /* LKDBUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EAF18E267B300F92DED /* LKDBUtils.m */; };
+		C5549ECA18E267B300F92DED /* NSObject+LKDBHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EB118E267B300F92DED /* NSObject+LKDBHelper.m */; };
+		C5549ECB18E267B300F92DED /* NSObject+LKModel.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EB318E267B300F92DED /* NSObject+LKModel.m */; };
+		C5549ECE18E267B300F92DED /* LKTestModels.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EB918E267B300F92DED /* LKTestModels.m */; };
+		C5549ED118E26A8800F92DED /* 41.png in Resources */ = {isa = PBXBuildFile; fileRef = C5549ED018E26A8800F92DED /* 41.png */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C5549E7F18E2675D00F92DED /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C5549E5218E2675D00F92DED /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C5549E5918E2675D00F92DED;
+			remoteInfo = "LKDB-Demo";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		C541086E18E27786009D0644 /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = usr/lib/libsqlite3.0.dylib; sourceTree = SDKROOT; };
+		C5549E5A18E2675D00F92DED /* LKDB-Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LKDB-Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C5549E5D18E2675D00F92DED /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		C5549E6018E2675D00F92DED /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		C5549E6118E2675D00F92DED /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		C5549E6218E2675D00F92DED /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		C5549E6518E2675D00F92DED /* LKDB-Demo-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "LKDB-Demo-Info.plist"; sourceTree = "<group>"; };
+		C5549E6718E2675D00F92DED /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C5549E6918E2675D00F92DED /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		C5549E6B18E2675D00F92DED /* LKDB-Demo-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "LKDB-Demo-Prefix.pch"; sourceTree = "<group>"; };
+		C5549E6D18E2675D00F92DED /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		C5549E6F18E2675D00F92DED /* LKAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LKAppDelegate.h; sourceTree = "<group>"; };
+		C5549E7018E2675D00F92DED /* LKAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LKAppDelegate.m; sourceTree = "<group>"; };
+		C5549E7318E2675D00F92DED /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		C5549E7518E2675D00F92DED /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		C5549E7B18E2675D00F92DED /* LKDB-DemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "LKDB-DemoTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C5549E7C18E2675D00F92DED /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		C5549E8318E2675D00F92DED /* LKDB-DemoTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "LKDB-DemoTests-Info.plist"; sourceTree = "<group>"; };
+		C5549E8518E2675D00F92DED /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C5549E8718E2675D00F92DED /* LKDB_DemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LKDB_DemoTests.m; sourceTree = "<group>"; };
+		C5549E9A18E267B300F92DED /* FMDatabase+InMemoryOnDiskIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FMDatabase+InMemoryOnDiskIO.h"; sourceTree = "<group>"; };
+		C5549E9B18E267B300F92DED /* FMDatabase+InMemoryOnDiskIO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FMDatabase+InMemoryOnDiskIO.m"; sourceTree = "<group>"; };
+		C5549E9D18E267B300F92DED /* FMDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabase.h; sourceTree = "<group>"; };
+		C5549E9E18E267B300F92DED /* FMDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabase.m; sourceTree = "<group>"; };
+		C5549E9F18E267B300F92DED /* FMDatabaseAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabaseAdditions.h; sourceTree = "<group>"; };
+		C5549EA018E267B300F92DED /* FMDatabaseAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabaseAdditions.m; sourceTree = "<group>"; };
+		C5549EA118E267B300F92DED /* FMDatabasePool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabasePool.h; sourceTree = "<group>"; };
+		C5549EA218E267B300F92DED /* FMDatabasePool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabasePool.m; sourceTree = "<group>"; };
+		C5549EA318E267B300F92DED /* FMDatabaseQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabaseQueue.h; sourceTree = "<group>"; };
+		C5549EA418E267B300F92DED /* FMDatabaseQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabaseQueue.m; sourceTree = "<group>"; };
+		C5549EA518E267B300F92DED /* FMResultSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMResultSet.h; sourceTree = "<group>"; };
+		C5549EA618E267B300F92DED /* FMResultSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMResultSet.m; sourceTree = "<group>"; };
+		C5549EA818E267B300F92DED /* LKDB+Manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "LKDB+Manager.h"; sourceTree = "<group>"; };
+		C5549EA918E267B300F92DED /* LKDB+Manager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "LKDB+Manager.m"; sourceTree = "<group>"; };
+		C5549EAA18E267B300F92DED /* LKDB+Mapping.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "LKDB+Mapping.h"; sourceTree = "<group>"; };
+		C5549EAB18E267B300F92DED /* LKDB+Mapping.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "LKDB+Mapping.m"; sourceTree = "<group>"; };
+		C5549EAC18E267B300F92DED /* LKDBHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKDBHelper.h; sourceTree = "<group>"; };
+		C5549EAD18E267B300F92DED /* LKDBHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKDBHelper.m; sourceTree = "<group>"; };
+		C5549EAE18E267B300F92DED /* LKDBUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKDBUtils.h; sourceTree = "<group>"; };
+		C5549EAF18E267B300F92DED /* LKDBUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKDBUtils.m; sourceTree = "<group>"; };
+		C5549EB018E267B300F92DED /* NSObject+LKDBHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+LKDBHelper.h"; sourceTree = "<group>"; };
+		C5549EB118E267B300F92DED /* NSObject+LKDBHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+LKDBHelper.m"; sourceTree = "<group>"; };
+		C5549EB218E267B300F92DED /* NSObject+LKModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+LKModel.h"; sourceTree = "<group>"; };
+		C5549EB318E267B300F92DED /* NSObject+LKModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+LKModel.m"; sourceTree = "<group>"; };
+		C5549EB818E267B300F92DED /* LKTestModels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKTestModels.h; sourceTree = "<group>"; };
+		C5549EB918E267B300F92DED /* LKTestModels.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKTestModels.m; sourceTree = "<group>"; };
+		C5549ED018E26A8800F92DED /* 41.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = 41.png; path = ../../../LKDBHelper/41.png; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C5549E5718E2675D00F92DED /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C541086F18E27786009D0644 /* libsqlite3.0.dylib in Frameworks */,
+				C5549E5E18E2675D00F92DED /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C5549E7818E2675D00F92DED /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C5549E7E18E2675D00F92DED /* Cocoa.framework in Frameworks */,
+				C5549E7D18E2675D00F92DED /* XCTest.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C5549E5118E2675D00F92DED = {
+			isa = PBXGroup;
+			children = (
+				C5549E6318E2675D00F92DED /* LKDB-Demo */,
+				C5549E8118E2675D00F92DED /* LKDB-DemoTests */,
+				C5549E5C18E2675D00F92DED /* Frameworks */,
+				C5549E5B18E2675D00F92DED /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		C5549E5B18E2675D00F92DED /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C5549E5A18E2675D00F92DED /* LKDB-Demo.app */,
+				C5549E7B18E2675D00F92DED /* LKDB-DemoTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C5549E5C18E2675D00F92DED /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C541086E18E27786009D0644 /* libsqlite3.0.dylib */,
+				C5549E5D18E2675D00F92DED /* Cocoa.framework */,
+				C5549E7C18E2675D00F92DED /* XCTest.framework */,
+				C5549E5F18E2675D00F92DED /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C5549E5F18E2675D00F92DED /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C5549E6018E2675D00F92DED /* AppKit.framework */,
+				C5549E6118E2675D00F92DED /* CoreData.framework */,
+				C5549E6218E2675D00F92DED /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		C5549E6318E2675D00F92DED /* LKDB-Demo */ = {
+			isa = PBXGroup;
+			children = (
+				C5549E9118E267B300F92DED /* LKDBHelper */,
+				C5549E6F18E2675D00F92DED /* LKAppDelegate.h */,
+				C5549E7018E2675D00F92DED /* LKAppDelegate.m */,
+				C5549E7218E2675D00F92DED /* MainMenu.xib */,
+				C5549E7518E2675D00F92DED /* Images.xcassets */,
+				C5549ED018E26A8800F92DED /* 41.png */,
+				C5549E6418E2675D00F92DED /* Supporting Files */,
+			);
+			path = "LKDB-Demo";
+			sourceTree = "<group>";
+		};
+		C5549E6418E2675D00F92DED /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				C5549E6518E2675D00F92DED /* LKDB-Demo-Info.plist */,
+				C5549E6618E2675D00F92DED /* InfoPlist.strings */,
+				C5549E6918E2675D00F92DED /* main.m */,
+				C5549E6B18E2675D00F92DED /* LKDB-Demo-Prefix.pch */,
+				C5549E6C18E2675D00F92DED /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		C5549E8118E2675D00F92DED /* LKDB-DemoTests */ = {
+			isa = PBXGroup;
+			children = (
+				C5549E8718E2675D00F92DED /* LKDB_DemoTests.m */,
+				C5549E8218E2675D00F92DED /* Supporting Files */,
+			);
+			path = "LKDB-DemoTests";
+			sourceTree = "<group>";
+		};
+		C5549E8218E2675D00F92DED /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				C5549E8318E2675D00F92DED /* LKDB-DemoTests-Info.plist */,
+				C5549E8418E2675D00F92DED /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		C5549E9118E267B300F92DED /* LKDBHelper */ = {
+			isa = PBXGroup;
+			children = (
+				C5549E9818E267B300F92DED /* FMDB */,
+				C5549EA718E267B300F92DED /* Helper */,
+				C5549EB818E267B300F92DED /* LKTestModels.h */,
+				C5549EB918E267B300F92DED /* LKTestModels.m */,
+			);
+			name = LKDBHelper;
+			path = ../../../LKDBHelper;
+			sourceTree = "<group>";
+		};
+		C5549E9818E267B300F92DED /* FMDB */ = {
+			isa = PBXGroup;
+			children = (
+				C5549E9918E267B300F92DED /* extra */,
+				C5549E9C18E267B300F92DED /* src */,
+			);
+			path = FMDB;
+			sourceTree = "<group>";
+		};
+		C5549E9918E267B300F92DED /* extra */ = {
+			isa = PBXGroup;
+			children = (
+				C5549E9A18E267B300F92DED /* FMDatabase+InMemoryOnDiskIO.h */,
+				C5549E9B18E267B300F92DED /* FMDatabase+InMemoryOnDiskIO.m */,
+			);
+			path = extra;
+			sourceTree = "<group>";
+		};
+		C5549E9C18E267B300F92DED /* src */ = {
+			isa = PBXGroup;
+			children = (
+				C5549E9D18E267B300F92DED /* FMDatabase.h */,
+				C5549E9E18E267B300F92DED /* FMDatabase.m */,
+				C5549E9F18E267B300F92DED /* FMDatabaseAdditions.h */,
+				C5549EA018E267B300F92DED /* FMDatabaseAdditions.m */,
+				C5549EA118E267B300F92DED /* FMDatabasePool.h */,
+				C5549EA218E267B300F92DED /* FMDatabasePool.m */,
+				C5549EA318E267B300F92DED /* FMDatabaseQueue.h */,
+				C5549EA418E267B300F92DED /* FMDatabaseQueue.m */,
+				C5549EA518E267B300F92DED /* FMResultSet.h */,
+				C5549EA618E267B300F92DED /* FMResultSet.m */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		C5549EA718E267B300F92DED /* Helper */ = {
+			isa = PBXGroup;
+			children = (
+				C5549EA818E267B300F92DED /* LKDB+Manager.h */,
+				C5549EA918E267B300F92DED /* LKDB+Manager.m */,
+				C5549EAA18E267B300F92DED /* LKDB+Mapping.h */,
+				C5549EAB18E267B300F92DED /* LKDB+Mapping.m */,
+				C5549EAC18E267B300F92DED /* LKDBHelper.h */,
+				C5549EAD18E267B300F92DED /* LKDBHelper.m */,
+				C5549EAE18E267B300F92DED /* LKDBUtils.h */,
+				C5549EAF18E267B300F92DED /* LKDBUtils.m */,
+				C5549EB018E267B300F92DED /* NSObject+LKDBHelper.h */,
+				C5549EB118E267B300F92DED /* NSObject+LKDBHelper.m */,
+				C5549EB218E267B300F92DED /* NSObject+LKModel.h */,
+				C5549EB318E267B300F92DED /* NSObject+LKModel.m */,
+			);
+			path = Helper;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C5549E5918E2675D00F92DED /* LKDB-Demo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C5549E8B18E2675D00F92DED /* Build configuration list for PBXNativeTarget "LKDB-Demo" */;
+			buildPhases = (
+				C5549E5618E2675D00F92DED /* Sources */,
+				C5549E5718E2675D00F92DED /* Frameworks */,
+				C5549E5818E2675D00F92DED /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "LKDB-Demo";
+			productName = "LKDB-Demo";
+			productReference = C5549E5A18E2675D00F92DED /* LKDB-Demo.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C5549E7A18E2675D00F92DED /* LKDB-DemoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C5549E8E18E2675D00F92DED /* Build configuration list for PBXNativeTarget "LKDB-DemoTests" */;
+			buildPhases = (
+				C5549E7718E2675D00F92DED /* Sources */,
+				C5549E7818E2675D00F92DED /* Frameworks */,
+				C5549E7918E2675D00F92DED /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C5549E8018E2675D00F92DED /* PBXTargetDependency */,
+			);
+			name = "LKDB-DemoTests";
+			productName = "LKDB-DemoTests";
+			productReference = C5549E7B18E2675D00F92DED /* LKDB-DemoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C5549E5218E2675D00F92DED /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = LK;
+				LastUpgradeCheck = 0510;
+				ORGANIZATIONNAME = LJH;
+				TargetAttributes = {
+					C5549E7A18E2675D00F92DED = {
+						TestTargetID = C5549E5918E2675D00F92DED;
+					};
+				};
+			};
+			buildConfigurationList = C5549E5518E2675D00F92DED /* Build configuration list for PBXProject "LKDB-Demo" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = C5549E5118E2675D00F92DED;
+			productRefGroup = C5549E5B18E2675D00F92DED /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C5549E5918E2675D00F92DED /* LKDB-Demo */,
+				C5549E7A18E2675D00F92DED /* LKDB-DemoTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C5549E5818E2675D00F92DED /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C5549ED118E26A8800F92DED /* 41.png in Resources */,
+				C5549E6818E2675D00F92DED /* InfoPlist.strings in Resources */,
+				C5549E7618E2675D00F92DED /* Images.xcassets in Resources */,
+				C5549E6E18E2675D00F92DED /* Credits.rtf in Resources */,
+				C5549E7418E2675D00F92DED /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C5549E7918E2675D00F92DED /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C5549E8618E2675D00F92DED /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C5549E5618E2675D00F92DED /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C5549E6A18E2675D00F92DED /* main.m in Sources */,
+				C5549ECA18E267B300F92DED /* NSObject+LKDBHelper.m in Sources */,
+				C5549EC718E267B300F92DED /* LKDB+Mapping.m in Sources */,
+				C5549EC318E267B300F92DED /* FMDatabasePool.m in Sources */,
+				C5549ECE18E267B300F92DED /* LKTestModels.m in Sources */,
+				C5549E7118E2675D00F92DED /* LKAppDelegate.m in Sources */,
+				C5549EC418E267B300F92DED /* FMDatabaseQueue.m in Sources */,
+				C5549EC618E267B300F92DED /* LKDB+Manager.m in Sources */,
+				C5549EC018E267B300F92DED /* FMDatabase+InMemoryOnDiskIO.m in Sources */,
+				C5549EC818E267B300F92DED /* LKDBHelper.m in Sources */,
+				C5549EC918E267B300F92DED /* LKDBUtils.m in Sources */,
+				C5549EC118E267B300F92DED /* FMDatabase.m in Sources */,
+				C5549EC518E267B300F92DED /* FMResultSet.m in Sources */,
+				C5549ECB18E267B300F92DED /* NSObject+LKModel.m in Sources */,
+				C5549EC218E267B300F92DED /* FMDatabaseAdditions.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C5549E7718E2675D00F92DED /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C5549E8818E2675D00F92DED /* LKDB_DemoTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C5549E8018E2675D00F92DED /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C5549E5918E2675D00F92DED /* LKDB-Demo */;
+			targetProxy = C5549E7F18E2675D00F92DED /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		C5549E6618E2675D00F92DED /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C5549E6718E2675D00F92DED /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		C5549E6C18E2675D00F92DED /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C5549E6D18E2675D00F92DED /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		C5549E7218E2675D00F92DED /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C5549E7318E2675D00F92DED /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		C5549E8418E2675D00F92DED /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C5549E8518E2675D00F92DED /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		C5549E8918E2675D00F92DED /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		C5549E8A18E2675D00F92DED /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		C5549E8C18E2675D00F92DED /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "LKDB-Demo/LKDB-Demo-Prefix.pch";
+				INFOPLIST_FILE = "LKDB-Demo/LKDB-Demo-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		C5549E8D18E2675D00F92DED /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "LKDB-Demo/LKDB-Demo-Prefix.pch";
+				INFOPLIST_FILE = "LKDB-Demo/LKDB-Demo-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		C5549E8F18E2675D00F92DED /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/LKDB-Demo.app/Contents/MacOS/LKDB-Demo";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "LKDB-Demo/LKDB-Demo-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "LKDB-DemoTests/LKDB-DemoTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		C5549E9018E2675D00F92DED /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/LKDB-Demo.app/Contents/MacOS/LKDB-Demo";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "LKDB-Demo/LKDB-Demo-Prefix.pch";
+				INFOPLIST_FILE = "LKDB-DemoTests/LKDB-DemoTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C5549E5518E2675D00F92DED /* Build configuration list for PBXProject "LKDB-Demo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C5549E8918E2675D00F92DED /* Debug */,
+				C5549E8A18E2675D00F92DED /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C5549E8B18E2675D00F92DED /* Build configuration list for PBXNativeTarget "LKDB-Demo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C5549E8C18E2675D00F92DED /* Debug */,
+				C5549E8D18E2675D00F92DED /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C5549E8E18E2675D00F92DED /* Build configuration list for PBXNativeTarget "LKDB-DemoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C5549E8F18E2675D00F92DED /* Debug */,
+				C5549E9018E2675D00F92DED /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C5549E5218E2675D00F92DED /* Project object */;
+}
