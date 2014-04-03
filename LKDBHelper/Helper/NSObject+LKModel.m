@@ -182,7 +182,14 @@ static char LKModelBase_Key_RowID;
     }
     else if([LKSQL_Convert_IntType rangeOfString:columnType].location != NSNotFound)
     {
-        modelValue = [NSNumber numberWithInteger:[value intValue]];
+        if([columnType isEqualToString:@"long"])
+        {
+            modelValue = [NSNumber numberWithLongLong:[value longLongValue]];
+        }
+        else
+        {
+            modelValue = [NSNumber numberWithInteger:[value intValue]];
+        }
     }
     else if([columnType isEqualToString:@"NSDate"])
     {
@@ -422,7 +429,7 @@ static char LKModelBase_Key_RowID;
         else
         {
             propertyType = [propertyType lowercaseString];
-            if ([propertyType hasPrefix:@"ti"] || [propertyType hasPrefix:@"tq"] || [propertyType hasPrefix:@"tb"])
+            if ([propertyType hasPrefix:@"ti"] || [propertyType hasPrefix:@"tb"])
             {
                 [protypes addObject:@"int"];
             }
@@ -433,7 +440,7 @@ static char LKModelBase_Key_RowID;
             else if([propertyType hasPrefix:@"td"]) {
                 [protypes addObject:@"double"];
             }
-            else if([propertyType hasPrefix:@"tl"])
+            else if([propertyType hasPrefix:@"tl"] || [propertyType hasPrefix:@"tq"])
             {
                 [protypes addObject:@"long"];
             }
