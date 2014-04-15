@@ -40,9 +40,9 @@
 +(int)rowCountWithWhere:(id)where{
     return [[self getUsingLKDBHelper] rowCount:self where:where];
 }
-+(NSMutableArray *)searchColumn:(NSString *)column where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
++(NSMutableArray *)searchColumn:(id)columns where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
 {
-    return [[self getUsingLKDBHelper] search:self column:column where:where orderBy:orderBy offset:offset count:count];
+    return [[self getUsingLKDBHelper] search:self column:columns where:where orderBy:orderBy offset:offset count:count];
 }
 +(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count{
     return [[self getUsingLKDBHelper] search:self where:where orderBy:orderBy offset:offset count:count];
@@ -104,7 +104,7 @@
 }
 - (BOOL)deleteToDB
 {
-  return [self.class deleteToDB:self];
+    return [self.class deleteToDB:self];
 }
 -(BOOL)isExistsFromDB
 {

@@ -9,6 +9,14 @@
 #import "NSObject+LKModel.h"
 #import "LKDBHelper.h"
 
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
+#define LKDBImage UIImage
+#define LKDBColor UIColor
+#else
+#define LKDBImage NSImage
+#define LKDBColor NSColor
+#endif
+
 static char LKModelBase_Key_RowID;
 @implementation NSObject (LKModel)
 +(LKDBHelper *)getUsingLKDBHelper
@@ -95,9 +103,9 @@ static char LKModelBase_Key_RowID;
         }
         returnValue = [returnValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     }
-    else if([value isKindOfClass:[UIColor class]])
+    else if([value isKindOfClass:[LKDBColor class]])
     {
-        UIColor* color = value;
+        LKDBColor* color = value;
         CGFloat r,g,b,a;
         [color getRed:&r green:&g blue:&b alpha:&a];
         returnValue = [NSString stringWithFormat:@"%.3f,%.3f,%.3f,%.3f",r,g,b,a];
@@ -133,7 +141,7 @@ static char LKModelBase_Key_RowID;
         }
 #endif
     }
-    else if([value isKindOfClass:[UIImage class]])
+    else if([value isKindOfClass:[LKDBImage class]])
     {
         long random = arc4random();
         long date = [[NSDate date] timeIntervalSince1970];
@@ -199,10 +207,10 @@ static char LKModelBase_Key_RowID;
             modelValue = [formatter dateFromString:datestr];
         }
         else{
-        modelValue = [LKDBUtils dateWithString:datestr];
+            modelValue = [LKDBUtils dateWithString:datestr];
         }
     }
-    else if([columnType isEqualToString:NSStringFromClass([UIColor class])])
+    else if([columnType isEqualToString:NSStringFromClass([LKDBColor class])])
     {
         NSString* color = value;
         NSArray* array = [color componentsSeparatedByString:@","];
@@ -212,7 +220,7 @@ static char LKModelBase_Key_RowID;
         b = [[array objectAtIndex:2] floatValue];
         a = [[array objectAtIndex:3] floatValue];
         
-        modelValue = [UIColor colorWithRed:r green:g blue:b alpha:a];
+        modelValue = [LKDBColor colorWithRed:r green:g blue:b alpha:a];
     }
 #ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
     else if([columnType isEqualToString:@"CGRect"])
@@ -241,13 +249,13 @@ static char LKModelBase_Key_RowID;
         modelValue = [NSValue valueWithSize:NSSizeFromString(value)];
     }
 #endif
-    else if([columnType isEqualToString:NSStringFromClass([UIImage class])])
+    else if([columnType isEqualToString:NSStringFromClass([LKDBImage class])])
     {
         NSString* filename = value;
         NSString* filepath = [self.class getDBImagePathWithName:filename];
         if([LKDBUtils isFileExists:filepath])
         {
-            UIImage* img = [[UIImage alloc] initWithContentsOfFile:filepath];
+            LKDBImage* img = [[LKDBImage alloc] initWithContentsOfFile:filepath];
             modelValue = img;
         }
         else

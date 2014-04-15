@@ -28,7 +28,7 @@
 //only simplify synchronous function
 +(int)rowCountWithWhere:(id)where;
 
-+(NSMutableArray*)searchColumn:(NSString*)column where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
++(NSMutableArray*)searchColumn:(id)columns where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
 +(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
 +(id)searchSingleWithWhere:(id)where orderBy:(NSString*)orderBy;
 

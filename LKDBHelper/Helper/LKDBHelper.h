@@ -86,9 +86,11 @@
  */
 -(NSMutableArray*)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
 -(void)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count callback:(void(^)(NSMutableArray* array))block;
-
-//return    column result array
--(NSMutableArray*)search:(Class)modelClass column:(NSString*)column where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
+/**
+    columns may NSArray or NSString   if query column count == 1  return single column string array
+    other return models entity array
+ */
+-(NSMutableArray*)search:(Class)modelClass column:(id)columns where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
 
 //return first model or nil
 -(id)searchSingle:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy;
@@ -165,7 +167,7 @@
  *	@param 	modelClass 	entity class
  */
 +(void)clearTableData:(Class)modelClass;
-   
+
 /**
  *	@brief	Clear Unused Data File
             if you property has UIImage or NSData, will save their data in the (documents dir)

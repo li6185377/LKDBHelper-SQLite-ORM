@@ -25,9 +25,9 @@
 
 /**
  *	@brief	overwrite in your models, if your table has primary key
-            return # column name  #
+ return # column name  #
  
-            主键列名 如果rowid<0 则跟据此名称update 和delete
+ 主键列名 如果rowid<0 则跟据此名称update 和delete
  */
 +(NSString*)getPrimaryKey;
 
@@ -39,7 +39,7 @@
 /**
  *	@brief   get saved pictures and data file path,can overwirte
  
-             获取保存的 图片和数据的文件路径
+ 获取保存的 图片和数据的文件路径
  */
 +(NSString*)getDBImagePathWithName:(NSString*)filename;
 +(NSString*)getDBDataPathWithName:(NSString*)filename;

@@ -490,15 +490,15 @@ return NO;}
 #pragma mark- search operation
 -(NSMutableArray *)search:(Class)modelClass where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
 {
-    return [self searchBase:modelClass column:nil where:where orderBy:orderBy offset:offset count:count];
+    return [self searchBase:modelClass columns:nil where:where orderBy:orderBy offset:offset count:count];
 }
--(NSMutableArray *)search:(Class)modelClass column:(NSString *)column where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
+-(NSMutableArray *)search:(Class)modelClass column:(id)columns where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
 {
-    return [self searchBase:modelClass column:column where:where orderBy:orderBy offset:offset count:count];
+    return [self searchBase:modelClass columns:columns where:where orderBy:orderBy offset:offset count:count];
 }
 -(id)searchSingle:(Class)modelClass where:(id)where orderBy:(NSString *)orderBy
 {
-    NSMutableArray* array = [self searchBase:modelClass column:nil where:where orderBy:orderBy offset:0 count:1];
+    NSMutableArray* array = [self searchBase:modelClass columns:nil where:where orderBy:orderBy offset:0 count:1];
     
     if(array.count>0)
         return [array objectAtIndex:0];
@@ -508,19 +508,39 @@ return NO;}
 -(void)search:(Class)modelClass where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count callback:(void (^)(NSMutableArray *))block
 {
     [self asyncBlock:^{
-        NSMutableArray* array = [self searchBase:modelClass column:nil where:where orderBy:orderBy offset:offset count:count];
+        NSMutableArray* array = [self searchBase:modelClass columns:nil where:where orderBy:orderBy offset:offset count:count];
         
         if(block != nil)
             block(array);
     }];
 }
 
--(NSMutableArray *)searchBase:(Class)modelClass column:(NSString*)column where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
+-(NSMutableArray *)searchBase:(Class)modelClass columns:(id)columns where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
 {
-    BOOL isNoColumnLimit = [LKDBUtils checkStringIsEmpty:column];
-    NSString* columnNames = isNoColumnLimit?@"rowid,*":column;
-    NSMutableString* query = [NSMutableString stringWithFormat:@"select %@ from %@",columnNames,[modelClass getTableName]];
+    NSString* columnsString = nil;
+    NSUInteger columnCount = 0;
+    if([columns isKindOfClass:[NSArray class]] && [columns count]>0){
+        
+        columnsString = [columns componentsJoinedByString:@","];
+        columnsString = [NSString stringWithFormat:@"rowid,%@",columnsString];
+        
+    }else if([LKDBUtils checkStringIsEmpty:columns]==NO){
+        
+        columnsString = columns;
+        NSArray* array = [columns componentsSeparatedByString:@","];
+        
+        columnCount = array.count;
+        if(columnCount>1)
+        {
+            columnsString = [NSString stringWithFormat:@"rowid,%@",columnsString];
+        }
+    }
     
+    if(columnCount==0){
+        columnsString = @"rowid,*";
+    }
+    
+    NSMutableString* query = [NSMutableString stringWithFormat:@"select %@ from %@",columnsString,[modelClass getTableName]];
     NSMutableArray * values = [self extractQuery:query where:where];
     
     [self sqlString:query AddOder:orderBy offset:offset count:count];
@@ -537,13 +557,13 @@ return NO;}
             set = [db executeQuery:query withArgumentsInArray:values];
         }
         
-        if(isNoColumnLimit)
+        if(columnCount == 1)
         {
-            results = [self executeResult:set Class:modelClass];
+            results = [self executeOneColumnResult:set];
         }
         else
         {
-            results = [self executeOneColumnResult:set];
+            results = [self executeResult:set Class:modelClass];
         }
         
         [set close];
@@ -892,18 +912,19 @@ return NO;}
 -(BOOL)isExistsModel:(NSObject *)model
 {
     checkModelIsInvalid(model);
-    if(model.rowid>0)
-        return YES;
-    else
-    {
-        NSMutableString* pwhere = [self primaryKeyWhereSQLWithModel:model addPValues:nil];
-        if(pwhere.length == 0)
-        {
-            LKErrorLog(@"exists model fail: primary key is nil or invalid");
-            return NO;
-        }
-        return [self isExistsClass:model.class where:pwhere];
+    NSString* pwhere = nil;
+    if(model.rowid>0){
+        pwhere = [NSString stringWithFormat:@"rowid=%d",model.rowid];
     }
+    else{
+        pwhere = [self primaryKeyWhereSQLWithModel:model addPValues:nil];
+    }
+    if(pwhere.length == 0)
+    {
+        LKErrorLog(@"exists model fail: primary key is nil or invalid");
+        return NO;
+    }
+    return [self isExistsClass:model.class where:pwhere];
 }
 -(BOOL)isExistsClass:(Class)modelClass where:(id)where
 {

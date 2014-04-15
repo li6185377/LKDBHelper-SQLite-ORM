@@ -32,11 +32,6 @@
 +(NSDate *)dateWithString:(NSString *)str;
 @end
 
-#ifdef __MAC_OS_X_VERSION_MIN_REQUIRED
-#define UIImage NSImage
-#define UIColor NSColor
-#endif
-
 #ifdef DEBUG
 #ifdef NSLog
 #define LKErrorLog(fmt, ...) NSLog(@"#LKDBHelper ERROR:\n" fmt,##__VA_ARGS__);

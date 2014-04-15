@@ -21,6 +21,12 @@
         self.generatesCalendarDates = YES;
         self.dateStyle = NSDateFormatterNoStyle;
         self.timeStyle = NSDateFormatterNoStyle;
+        self.AMSymbol = nil;
+        self.PMSymbol = nil;
+        NSLocale *locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+        if(locale){
+            [self setLocale:locale];
+        }
     }
     return self;
 }
@@ -44,9 +50,14 @@
 @implementation LKDBUtils
 +(NSString *)getDocumentPath
 {
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths objectAtIndex:0];
     return documentsDirectory;
+#else
+    NSString* homePath = [[NSBundle mainBundle] resourcePath];
+    return homePath;
+#endif
 }
 +(NSString *)getDirectoryForDocuments:(NSString *)dir
 {

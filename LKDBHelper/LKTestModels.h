@@ -25,11 +25,20 @@
 @property(strong,nonatomic)LKTestForeign* address;
 
 @property char like;
+
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
 @property(strong,nonatomic) UIImage* img;
+@property(strong,nonatomic)UIColor* color;
+@property CGRect frame1;
+#else
+@property(strong,nonatomic) NSImage* img;
+@property(strong,nonatomic) NSColor* color;
+@property NSRect frame1;
+#endif
+
 @property(strong,nonatomic) NSDate* date;
 
 @property(copy,nonatomic)NSString* error;
-@property(strong,nonatomic)UIColor* color;
 
 //new add
 @property double score;
@@ -37,11 +46,6 @@
 @property(strong,nonatomic)NSData* data;
 
 @property CGRect frame;
-#ifdef __MAC_OS_X_VERSION_MIN_REQUIRED
-@property NSRect frame1;
-#else
-@property CGRect frame1;
-#endif
 
 @property CGRect size;
 @property CGPoint point;
