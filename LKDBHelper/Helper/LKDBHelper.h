@@ -44,16 +44,16 @@
 
 @interface LKDBHelper(DatabaseManager)
 
-//get table has created
+///get table has created
 -(BOOL)getTableCreatedWithClass:(Class)model;
 
-//create table with entity class
+///create table with entity class
 -(BOOL)createTableWithModelClass:(Class)model;
 
-//drop all table
+///drop all table
 -(void)dropAllTable;
 
-//drop table with entity class
+///drop table with entity class
 -(BOOL)dropTableWithClass:(Class)modelClass;
 
 @end
@@ -85,6 +85,10 @@
  *	@return	query finished result is an array(model instance collection)
  */
 -(NSMutableArray*)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
+
+///query sql, query finished result is an array(model instance collection)
+-(NSMutableArray*)searchWithSQL:(NSString*)sql toClass:(Class)modelClass;
+
 -(void)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count callback:(void(^)(NSMutableArray* array))block;
 /**
     columns may NSArray or NSString   if query column count == 1  return single column string array
@@ -92,7 +96,7 @@
  */
 -(NSMutableArray*)search:(Class)modelClass column:(id)columns where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
 
-//return first model or nil
+///return first model or nil
 -(id)searchSingle:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy;
 
 /**

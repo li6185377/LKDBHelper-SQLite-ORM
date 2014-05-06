@@ -310,6 +310,7 @@ return NO;}
     
     if(oldVersion>0 && oldVersion != newVersion)
     {
+        [self fixSqlColumnsWithClass:modelClass];
         LKTableUpdateType userOperation = [modelClass tableUpdateForOldVersion:oldVersion newVersion:newVersion];
         switch (userOperation) {
             case LKTableUpdateTypeDeleteOld:
@@ -319,11 +320,9 @@ return NO;}
                 break;
                 
             case LKTableUpdateTypeDefault:
-                [self fixSqlColumnsWithClass:modelClass];
                 return NO;
                 
             case LKTableUpdateTypeCustom:
-                [self fixSqlColumnsWithClass:modelClass];
                 [_tableManager setTableName:tableName version:newVersion];
                 return YES;
         }
@@ -570,6 +569,17 @@ return NO;}
     }];
     return results;
 }
+-(NSMutableArray *)searchWithSQL:(NSString *)sql toClass:(Class)modelClass
+{
+    __block NSMutableArray* results = nil;
+    [self executeDB:^(FMDatabase *db) {
+        FMResultSet* set = [db executeQuery:sql];
+        results = [self executeResult:set Class:modelClass];
+        [set close];
+    }];
+    return results;
+}
+
 -(void)sqlString:(NSMutableString*)sql AddOder:(NSString*)orderby offset:(int)offset count:(int)count
 {
     if([LKDBUtils checkStringIsEmpty:orderby] == NO)
