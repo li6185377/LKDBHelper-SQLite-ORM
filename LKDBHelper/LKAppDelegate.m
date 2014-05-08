@@ -138,7 +138,15 @@
     //查询   search
     addText(@"同步搜索    sync search");
     
-    NSMutableArray* arraySync = [LKTest searchWithWhere:nil orderBy:nil offset:0 count:100];
+    NSMutableArray* arraySync = nil;
+    arraySync = [globalHelper searchWithSQL:@"select * from @t" toClass:[LKTest class]];
+    for (id obj in arraySync) {
+        addText(@"%@",[obj printAllPropertys]);
+    }
+    
+    //查询   search
+    addText(@"同步搜索    sync search 2");
+    arraySync = [LKTest searchWithWhere:nil orderBy:nil offset:0 count:100];
     for (id obj in arraySync) {
         addText(@"%@",[obj printAllPropertys]);
     }

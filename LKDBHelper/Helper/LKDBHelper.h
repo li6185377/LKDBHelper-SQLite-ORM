@@ -86,7 +86,13 @@
  */
 -(NSMutableArray*)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
 
-///query sql, query finished result is an array(model instance collection)
+/**
+ *  query sql, query finished result is an array(model instance collection)
+ *  you can use the "@t" replace Model TableName
+ *  example: 
+            NSMutableArray* array = [[LKDBHelper getUsingLKDBHelper] searchWithSQL:@"select * from @t where blah blah.." toClass:[ModelClass class]];
+ *
+ */
 -(NSMutableArray*)searchWithSQL:(NSString*)sql toClass:(Class)modelClass;
 
 -(void)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count callback:(void(^)(NSMutableArray* array))block;

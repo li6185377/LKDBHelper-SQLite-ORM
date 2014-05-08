@@ -26,6 +26,8 @@
 
 //检测字符串是否为空
 +(BOOL)checkStringIsEmpty:(NSString *)string;
++(NSString*)getTrimStringWithString:(NSString*)string;
+
 //把Date 转换成String
 +(NSString*)stringWithDate:(NSDate*)date;
 //把String 转换成Date

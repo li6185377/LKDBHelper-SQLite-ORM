@@ -539,10 +539,17 @@ return NO;}
         columnsString = @"rowid,*";
     }
     
-    NSMutableString* query = [NSMutableString stringWithFormat:@"select %@ from %@",columnsString,[modelClass getTableName]];
+    NSMutableString* query = [NSMutableString stringWithFormat:@"select %@ from @t",columnsString];
     NSMutableArray * values = [self extractQuery:query where:where];
     
     [self sqlString:query AddOder:orderBy offset:offset count:count];
+    
+    //replace @t to model table name
+    NSString* replaceTableName = [NSString stringWithFormat:@" %@ ",[modelClass getTableName]];
+    if([query hasSuffix:@" @t"]){
+        [query appendString:@" "];
+    }
+    [query replaceOccurrencesOfString:@" @t " withString:replaceTableName options:NSCaseInsensitiveSearch range:NSMakeRange(0, query.length)];
     
     __block NSMutableArray* results = nil;
     [self executeDB:^(FMDatabase *db) {
@@ -571,9 +578,16 @@ return NO;}
 }
 -(NSMutableArray *)searchWithSQL:(NSString *)sql toClass:(Class)modelClass
 {
+    //replace @t to model table name
+    NSString* tableName = [NSString stringWithFormat:@" %@ ",[modelClass getTableName]];
+    if([sql hasSuffix:@" @t"]){
+        sql = [sql stringByAppendingString:@" "];
+    }
+    NSString* executeSQL = [sql stringByReplacingOccurrencesOfString:@" @t " withString:tableName options:NSCaseInsensitiveSearch range:NSMakeRange(0, sql.length)];
+    
     __block NSMutableArray* results = nil;
     [self executeDB:^(FMDatabase *db) {
-        FMResultSet* set = [db executeQuery:sql];
+        FMResultSet* set = [db executeQuery:executeSQL];
         results = [self executeResult:set Class:modelClass];
         [set close];
     }];

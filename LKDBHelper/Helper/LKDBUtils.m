@@ -103,7 +103,11 @@
         return YES;
     }
     
-    return [[string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] isEqualToString:@""];
+    return [[self getTrimStringWithString:string] isEqualToString:@""];
+}
++(NSString *)getTrimStringWithString:(NSString *)string
+{
+    return [string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 }
 
 +(NSDateFormatter*)getDBDateFormat
