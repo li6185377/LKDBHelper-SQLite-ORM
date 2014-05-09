@@ -629,20 +629,28 @@ return NO;}
     while ([set next]) {
         
         NSObject* bindingModel = [[modelClass alloc]init];
-        bindingModel.rowid = [set intForColumnIndex:0];
         
-        for (int i=1; i<columnCount; i++) {
-            NSString* sqlName = [set columnNameForIndex:i];
-            NSString* sqlValue = [set stringForColumnIndex:i];
+        for (int i=0; i<columnCount; i++) {
             
+            NSString* sqlName = [set columnNameForIndex:i];
             LKDBProperty* property = [infos objectWithSqlColumnName:sqlName];
-            if(property.propertyName && [property.type isEqualToString:LKSQL_Mapping_UserCalculate] ==NO)
+            
+            BOOL isUserCalculate = [property.type isEqualToString:LKSQL_Mapping_UserCalculate];
+            if([sqlName isEqualToString:@"rowid"] && isUserCalculate==NO)
             {
-                [bindingModel modelSetValue:property value:sqlValue];
+                bindingModel.rowid = [set intForColumnIndex:i];
             }
             else
             {
-                [bindingModel userSetValueForModel:property value:sqlValue];
+                NSString* sqlValue = [set stringForColumnIndex:i];
+                if(property.propertyName && isUserCalculate == NO)
+                {
+                    [bindingModel modelSetValue:property value:sqlValue];
+                }
+                else
+                {
+                    [bindingModel userSetValueForModel:property value:sqlValue];
+                }
             }
         }
         [array addObject:bindingModel];
