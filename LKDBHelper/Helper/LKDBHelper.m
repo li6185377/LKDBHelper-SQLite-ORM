@@ -636,7 +636,7 @@ return NO;}
             LKDBProperty* property = [infos objectWithSqlColumnName:sqlName];
             
             BOOL isUserCalculate = [property.type isEqualToString:LKSQL_Mapping_UserCalculate];
-            if([sqlName isEqualToString:@"rowid"] && isUserCalculate==NO)
+            if([[sqlName lowercaseString] isEqualToString:@"rowid"] && isUserCalculate==NO)
             {
                 bindingModel.rowid = [set intForColumnIndex:i];
             }
