@@ -130,15 +130,15 @@
 //升级
 +(LKTableUpdateType)tableUpdateForOldVersion:(int)oldVersion newVersion:(int)newVersion
 {
+    //..... eh...  upgrade for table
     switch (oldVersion) {
         case 1:
         {
-            [self tableUpdateAddColumnWithPN:@"color"];
+//            [self updateToDBWithSet:@"blah blah" where:nil];
         }
         case 2:
         {
-            [self tableUpdateAddColumnWithName:@"address" sqliteType:LKSQL_Type_Text];
-            //@"error" is removed
+//            [self deleteWithWhere:@"blah blah"];
         }
             break;
     }
