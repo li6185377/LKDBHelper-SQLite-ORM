@@ -283,6 +283,7 @@ return NO;}
         FMResultSet* set = [db executeQuery:select];
         NSArray*  columnArray = set.columnNameToIndexMap.allKeys;
         [set close];
+        BOOL hasTableChanged = NO;
         for (int i=0; i<infos.count; i++) {
             LKDBProperty* p = [infos objectWithIndex:i];
             if([p.sqlColumnName.lowercaseString isEqualToString:@"rowid"])
@@ -291,12 +292,18 @@ return NO;}
             if([columnArray indexOfObject:p.sqlColumnName.lowercaseString] == NSNotFound)
             {
                 if([clazz getAutoUpdateSqlColumn])
+                {
                     [clazz tableUpdateAddColumnWithName:p.sqlColumnName sqliteType:p.sqlColumnType];
+                    hasTableChanged = YES;
+                }
                 else
+                {
                     [clazz removePropertyWithColumnName:p.sqlColumnName];
-                
-                [clazz tableDidCreatedOrUpdated];
+                }
             }
+        }
+        if (hasTableChanged) {
+            [clazz tableDidCreatedOrUpdated];
         }
     }];
 }
