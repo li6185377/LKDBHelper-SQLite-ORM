@@ -52,8 +52,11 @@
 {
     addText(@"示例 开始 example start \n\n");
     
+    NSString* dbpath = [NSHomeDirectory() stringByAppendingPathComponent:@"asd/asd.db"];
     //清空数据库
-    LKDBHelper* globalHelper = [LKDBHelper getUsingLKDBHelper];
+//  LKDBHelper* globalHelper = [LKDBHelper getUsingLKDBHelper];
+    
+    LKDBHelper* globalHelper = [[LKDBHelper alloc]initWithDBPath:dbpath];
     [globalHelper dropAllTable];
     
     //创建表  会根据表的版本号  来判断具体的操作 . create table need to manually call

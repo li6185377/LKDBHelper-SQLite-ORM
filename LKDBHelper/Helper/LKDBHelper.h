@@ -25,13 +25,19 @@
 +(LKDBHelper*)sharedDBHelper DEPRECATED_ATTRIBUTE;
 #pragma mark-
 
-
--(id)initWithDBName:(NSString*)dbname;
+/**
+ *	@brief  filepath the use of : "documents/db/" + fileName + ".db"
+ *  refer:  FMDatabase.h  + (instancetype)databaseWithPath:(NSString*)inPath;
+ */
+-(instancetype)initWithDBName:(NSString*)dbname;
+-(void)setDBName:(NSString*)fileName;
 
 /**
- *	@brief  change database , filepath the use of : "documents/db/" + fileName + ".db"
+ *	@brief  path of database file
+ *  refer:  FMDatabase.h  + (instancetype)databaseWithPath:(NSString*)inPath;
  */
--(void)setDBName:(NSString*)fileName;
+-(instancetype)initWithDBPath:(NSString*)filePath;
+-(void)setDBPath:(NSString*)filePath;
 
 /**
  *	@brief  execute database operations synchronously,not afraid of recursive deadlock  同步执行数据库操作 可递归调用

@@ -61,14 +61,16 @@
 }
 +(NSString *)getDirectoryForDocuments:(NSString *)dir
 {
-    NSError* error;
-    NSString* path = [[self getDocumentPath] stringByAppendingPathComponent:dir];
-    
-    if(![[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&error])
-    {
-        NSLog(@"create dir error: %@",error.debugDescription);
+    NSString* dirPath = [[self getDocumentPath] stringByAppendingPathComponent:dir];
+    BOOL isDir = NO;
+    BOOL isCreated = [[NSFileManager defaultManager] fileExistsAtPath:dirPath isDirectory:&isDir];
+    if ( isCreated == NO || isDir == NO ) {
+        NSError* error = nil;
+        BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:dirPath withIntermediateDirectories:YES attributes:nil error:&error];
+        if(success == NO)
+            NSLog(@"create dir error: %@",error.debugDescription);
     }
-    return path;
+    return dirPath;
 }
 + (NSString *)getPathForDocuments:(NSString *)filename
 {
