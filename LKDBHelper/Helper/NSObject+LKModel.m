@@ -428,7 +428,11 @@ static char LKModelBase_Key_RowID;
          */
         
         if ([propertyType hasPrefix:@"T@"]) {
-            [protypes addObject:[propertyType substringWithRange:NSMakeRange(3, [propertyType rangeOfString:@","].location-4)]];
+            NSString* propertyClassName = [propertyType substringWithRange:NSMakeRange(3, [propertyType rangeOfString:@","].location-4)];
+            if(propertyClassName==nil){
+                propertyClassName = @"NSString";
+            }
+            [protypes addObject:propertyClassName];
         }
         else if([propertyType hasPrefix:@"T{"])
         {
