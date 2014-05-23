@@ -36,9 +36,9 @@
 
 #ifdef DEBUG
 #ifdef NSLog
-#define LKErrorLog(fmt, ...) NSLog(@"#LKDBHelper ERROR:\n" fmt,##__VA_ARGS__);
+#define LKErrorLog(fmt, ...) NSLog(@"#LKDBHelper LOG: \n %@" fmt,##__VA_ARGS__,@"\n\n");
 #else
-#define LKErrorLog(fmt, ...) NSLog(@"\n#LKDBHelper ERROR: %s  [Line %d] \n" fmt, __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+#define LKErrorLog(fmt, ...) NSLog(@"#LKDBHelper LOG: \n %s  [Line %d] %@" fmt, __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__ ,@"\n\n");
 #endif
 #else
 #   define LKErrorLog(...)
