@@ -37,6 +37,19 @@
     //[[self getUsingLKDBHelper] createTableWithModelClass:self];
 }
 
+//重载可以选择 使用的LKDBHelper
++(LKDBHelper *)getUsingLKDBHelper
+{
+    static LKDBHelper* db;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSString* dbpath = [NSHomeDirectory() stringByAppendingPathComponent:@"asd/asd.db"];
+        db = [[LKDBHelper alloc]initWithDBPath:dbpath];
+    });
+    return db;
+}
+
+
 // 将要插入数据库
 +(BOOL)dbWillInsert:(NSObject *)entity
 {
@@ -148,6 +161,10 @@
 
 
 @implementation LKTestForeign
++(LKDBHelper *)getUsingLKDBHelper
+{
+    return [LKTest getUsingLKDBHelper];
+}
 +(NSString *)getPrimaryKey
 {
     return @"addid";
