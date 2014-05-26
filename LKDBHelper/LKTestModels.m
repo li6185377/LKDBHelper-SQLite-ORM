@@ -173,12 +173,18 @@
 {
     return @"LKTestAddress";
 }
++(BOOL)isContainParent
+{
+    return YES;
+}
 +(int)getTableVersion
 {
     return 1;
 }
 @end
 
+@implementation LKTestForeignSuper
+@end
 
 
 

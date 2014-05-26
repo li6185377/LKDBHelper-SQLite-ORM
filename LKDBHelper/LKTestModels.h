@@ -9,10 +9,13 @@
 #import <Foundation/Foundation.h>
 #import "LKDBHelper.h"
 
-@interface LKTestForeign : NSObject
-@property int addid;
+@interface LKTestForeignSuper : NSObject
 @property(copy,nonatomic)NSString* address;
 @property int postcode;
+@end
+
+@interface LKTestForeign : LKTestForeignSuper
+@property int addid;
 @end
 
 

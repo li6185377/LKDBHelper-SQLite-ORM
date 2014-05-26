@@ -353,37 +353,53 @@ static char LKModelBase_Key_RowID;
 +(LKModelInfos *)getModelInfos
 {
     static __strong NSMutableDictionary* oncePropertyDic;
+    static __strong NSRecursiveLock* lock;
+    
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
+        lock = [[NSRecursiveLock alloc]init];
         oncePropertyDic = [[NSMutableDictionary alloc]initWithCapacity:8];
     });
     
     LKModelInfos* infos;
-    @synchronized(self)
+    [lock lock];
+    
+    infos = [oncePropertyDic objectForKey:NSStringFromClass(self)];
+    if(infos == nil)
     {
-        infos = [oncePropertyDic objectForKey:NSStringFromClass(self)];
-        if(infos == nil)
+        NSMutableArray* pronames = [NSMutableArray array];
+        NSMutableArray* protypes = [NSMutableArray array];
+        NSDictionary* keymapping = [self getTableMapping];
+        [self getSelfPropertys:pronames protypes:protypes];
+        
+        NSArray* pkArray = [self getPrimaryKeyUnionArray];
+        if(pkArray.count == 0)
         {
-            NSMutableArray* pronames = [NSMutableArray array];
-            NSMutableArray* protypes = [NSMutableArray array];
-            NSDictionary* keymapping = [self getTableMapping];
-            [self getSelfPropertys:pronames protypes:protypes];
-            
-            NSArray* pkArray = [self getPrimaryKeyUnionArray];
-            if(pkArray.count == 0)
+            pkArray = nil;
+            NSString* pk = [self getPrimaryKey];
+            if([LKDBUtils checkStringIsEmpty:pk] == NO)
             {
-                pkArray = nil;
-                NSString* pk = [self getPrimaryKey];
-                if([LKDBUtils checkStringIsEmpty:pk] == NO)
+                pkArray = [NSArray arrayWithObject:pk];
+            }
+        }
+        if([self isContainParent] && [self superclass] != [NSObject class])
+        {
+            LKModelInfos* superInfos = [[self superclass] getModelInfos];
+            for (int i=0; i<superInfos.count; i++) {
+                LKDBProperty* db_p = [superInfos objectWithIndex:i];
+                if(db_p.propertyName && db_p.propertyType && [db_p.propertyName isEqualToString:@"rowid"]==NO)
                 {
-                    pkArray = [NSArray arrayWithObject:pk];
+                    [pronames addObject:db_p.propertyName];
+                    [protypes addObject:db_p.propertyType];
                 }
             }
-            
-            infos = [[LKModelInfos alloc]initWithKeyMapping:keymapping propertyNames:pronames propertyType:protypes primaryKeys:pkArray];
-            [oncePropertyDic setObject:infos forKey:NSStringFromClass(self)];
         }
+        
+        infos = [[LKModelInfos alloc]initWithKeyMapping:keymapping propertyNames:pronames propertyType:protypes primaryKeys:pkArray];
+        [oncePropertyDic setObject:infos forKey:NSStringFromClass(self)];
     }
+    
+    [lock unlock];
     return infos;
     
 }
@@ -469,10 +485,6 @@ static char LKModelBase_Key_RowID;
         }
     }
     free(properties);
-    if([self isContainParent] && [self superclass] != [NSObject class])
-    {
-        [[self superclass] getSelfPropertys:pronames protypes:protypes];
-    }
 }
 
 #pragma mark - log all property
