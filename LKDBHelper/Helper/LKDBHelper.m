@@ -15,6 +15,11 @@ return NO;}
 
 #define checkModelIsInvalid(model)if(model == nil){LKErrorLog(@"model is nil");return NO;}checkClassIsInvalid(model.class)
 
+@interface LKDBWeakObject : NSObject
+@property(unsafe_unretained,nonatomic)LKDBHelper* obj;
+@end
+
+
 @interface LKDBHelper()
 @property(unsafe_unretained,nonatomic)FMDatabase* usingdb;
 @property(strong,nonatomic)FMDatabaseQueue* bindingQueue;
@@ -25,71 +30,127 @@ return NO;}
 @end
 
 @implementation LKDBHelper
-
 #pragma mark- deprecated
 +(LKDBHelper *)sharedDBHelper
 {return [LKDBHelper getUsingLKDBHelper];}
 #pragma mark-
 
--(instancetype)initWithDBName:(NSString *)dbname
++(NSMutableArray*)dbHelperSingleArray
 {
-    self = [super init];
-    if (self) {
-        self.threadLock = [[NSRecursiveLock alloc]init];
-        [self setDBName:dbname];
-    }
-    return self;
+    static __strong NSMutableArray* dbArray;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        dbArray = [NSMutableArray array];
+    });
+    return dbArray;
 }
--(instancetype)initWithDBPath:(NSString *)filePath
++(LKDBHelper*)dbHelperWithPath:(NSString*)dbFilePath save:(LKDBHelper*)helper
 {
-    self = [super init];
-    if (self) {
-        self.threadLock = [[NSRecursiveLock alloc]init];
-        [self setDBPath:filePath];
+    NSMutableArray* dbArray = [self dbHelperSingleArray];
+    
+    if(helper)
+    {
+        LKDBWeakObject* weakObj = [LKDBWeakObject new];
+        weakObj.obj = helper;
+        [dbArray addObject:weakObj];
     }
-    return self;
+    else if(dbFilePath)
+    {
+        for (int i=0; i<dbArray.count;)
+        {
+            LKDBWeakObject* weakObj = [dbArray objectAtIndex:i];
+            if(weakObj.obj == nil)
+            {
+                [dbArray removeObject:weakObj];
+                continue;
+            }
+            else if([weakObj.obj.dbPath isEqualToString:dbFilePath])
+            {
+                return weakObj.obj;
+            }
+            i++;
+        }
+    }
+    return nil;
 }
+
 - (instancetype)init
 {
     return [self initWithDBName:@"LKDB"];
 }
-
--(void)setDBName:(NSString *)fileName
+-(instancetype)initWithDBName:(NSString *)dbname
 {
-    NSString* dbname = nil;
-    if([fileName hasSuffix:@".db"] == NO){
-        dbname = [NSString stringWithFormat:@"%@.db",fileName];
+    return [self initWithDBPath:[LKDBHelper getDBPathWithDBName:dbname]];
+}
+-(instancetype)initWithDBPath:(NSString *)filePath
+{
+    if([LKDBUtils checkStringIsEmpty:filePath])
+    {
+        return nil;
     }
-    else{
-        dbname = fileName;
+    LKDBHelper* helper = [LKDBHelper dbHelperWithPath:filePath save:nil];
+    if(helper)
+    {
+        return helper;
+    }
+    else
+    {
+        self = [super init];
+        if (self) {
+            self.threadLock = [[NSRecursiveLock alloc]init];
+            [self setDBPath:filePath];
+            [LKDBHelper dbHelperWithPath:nil save:self];
+        }
+        return self;
+    }
+}
+
+#pragma mark- init FMDB
++(NSString*)getDBPathWithDBName:(NSString*)dbName
+{
+    NSString* fileName = nil;
+    if([dbName hasSuffix:@".db"] == NO) {
+        fileName = [NSString stringWithFormat:@"%@.db",dbName];
+    }
+    else {
+        fileName = dbName;
     }
     
-    NSString* filePath = [LKDBUtils getPathForDocuments:dbname inDir:@"db"];
-    [self setDBPath:filePath];
+    NSString* filePath = [LKDBUtils getPathForDocuments:fileName inDir:@"db"];
+    return filePath;
+}
+-(void)setDBName:(NSString *)dbName
+{
+    [self setDBPath:[LKDBHelper getDBPathWithDBName:dbName]];
 }
 
 -(void)setDBPath:(NSString *)filePath
 {
-    if(self.bindingQueue && [self.dbPath isEqualToString:[filePath lowercaseString]])
+    if(self.bindingQueue && [self.dbPath isEqualToString:filePath])
     {
         return;
     }
     
+    //创建数据库目录
     NSRange lastComponent = [filePath rangeOfString:@"/" options:NSBackwardsSearch];
-    if(lastComponent.length > 0){
+    if(lastComponent.length > 0)
+    {
         NSString* dirPath = [filePath substringToIndex:lastComponent.location];
         BOOL isDir = NO;
         BOOL isCreated = [[NSFileManager defaultManager] fileExistsAtPath:dirPath isDirectory:&isDir];
-        if ( isCreated == NO || isDir == NO ) {
+        if ( isCreated == NO || isDir == NO )
+        {
             NSError* error = nil;
             BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:dirPath withIntermediateDirectories:YES attributes:nil error:&error];
             if(success == NO)
+            {
                 NSLog(@"create dir error: %@",error.debugDescription);
+            }
         }
     }
     self.dbPath = filePath;
     [self.bindingQueue close];
-    self.bindingQueue = [[FMDatabaseQueue alloc]initWithPath:self.dbPath];
+    self.bindingQueue = [[FMDatabaseQueue alloc]initWithPath:filePath];
     
 #ifdef DEBUG
     //debug 模式下  打印错误日志
@@ -263,6 +324,14 @@ return NO;}
 #pragma mark- dealloc
 -(void)dealloc
 {
+    NSArray* array = [LKDBHelper dbHelperSingleArray];
+    for (LKDBWeakObject* weakObject in array) {
+        if([weakObject.obj isEqual:self])
+        {
+            weakObject.obj = nil;
+        }
+    }
+    
     [self.bindingQueue close];
     self.usingdb = nil;
     self.bindingQueue = nil;
@@ -318,7 +387,9 @@ return NO;}
         for (int i=0; i<infos.count; i++) {
             LKDBProperty* p = [infos objectWithIndex:i];
             if([p.sqlColumnName.lowercaseString isEqualToString:@"rowid"])
+            {
                 continue;
+            }
             
             if([columnArray indexOfObject:p.sqlColumnName.lowercaseString] == NSNotFound)
             {
@@ -378,9 +449,14 @@ return NO;}
     LKModelInfos* infos = [modelClass getModelInfos];
     NSArray* primaryKeys = infos.primaryKeys;
     BOOL isAutoinc = NO;
-    if(primaryKeys.count == 1 && [[primaryKeys lastObject] isEqual:@"rowid"])
+    if(primaryKeys.count == 1)
     {
-        isAutoinc = YES;
+        //主键只有一个 并且是 int 类型 则设置为自增长
+        NSString* primaryType = [infos objectWithSqlColumnName:[primaryKeys lastObject]].sqlColumnType;
+        if([primaryType isEqualToString:LKSQL_Type_Int])
+        {
+            isAutoinc = YES;
+        }
     }
     NSMutableString* table_pars = [NSMutableString string];
     for (int i=0; i<infos.count; i++) {
@@ -393,7 +469,9 @@ return NO;}
         
         NSString* columnType = property.sqlColumnType;
         if([columnType isEqualToString:LKSQL_Type_Double])
+        {
             columnType = LKSQL_Type_Text;
+        }
         
         [table_pars appendFormat:@"%@ %@",property.sqlColumnName,columnType];
         
@@ -422,7 +500,7 @@ return NO;}
         }
         if(isAutoinc)
         {
-            if([property.sqlColumnName isEqualToString:@"rowid"])
+            if([property.sqlColumnName isEqualToString:[primaryKeys lastObject]])
             {
                 [table_pars appendString:@" primary key autoincrement"];
             }
@@ -691,6 +769,8 @@ return NO;}
                 }
             }
         }
+        
+        [modelClass dbDidSeleted:bindingModel];
         [array addObject:bindingModel];
     }
     return array;
@@ -1085,4 +1165,6 @@ return NO;}
 }
 @end
 
+@implementation LKDBWeakObject
 
+@end

@@ -444,9 +444,19 @@ static char LKModelBase_Key_RowID;
          */
         
         if ([propertyType hasPrefix:@"T@"]) {
+            
             NSString* propertyClassName = [propertyType substringWithRange:NSMakeRange(3, [propertyType rangeOfString:@","].location-4)];
-            if(propertyClassName==nil){
+            if(propertyClassName==nil)
+            {
                 propertyClassName = @"NSString";
+            }
+            else if([propertyClassName hasSuffix:@">"])
+            {
+                NSRange range = [propertyClassName rangeOfString:@"<"];
+                if (range.length>0)
+                {
+                    propertyClassName = [propertyClassName substringToIndex:range.location];
+                }
             }
             [protypes addObject:propertyClassName];
         }
@@ -485,6 +495,10 @@ static char LKModelBase_Key_RowID;
         }
     }
     free(properties);
+    if([self isContainParent] && [self superclass] != [NSObject class])
+    {
+        [[self superclass] getSelfPropertys:pronames protypes:protypes];
+    }
 }
 
 #pragma mark - log all property

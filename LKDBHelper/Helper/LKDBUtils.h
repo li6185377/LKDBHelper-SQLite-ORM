@@ -9,36 +9,36 @@
 #import <Foundation/Foundation.h>
 
 @interface LKDBUtils:NSObject
-//返回根目录路径 "document"
+///返回根目录路径 "document"
 +(NSString*) getDocumentPath;
-//返回 "document/dir/" 文件夹路径
+///返回 "document/dir/" 文件夹路径
 +(NSString*) getDirectoryForDocuments:(NSString*) dir;
-//返回 "document/filename" 路径
+///返回 "document/filename" 路径
 +(NSString*) getPathForDocuments:(NSString*)filename;
-//返回 "document/dir/filename" 路径
+///返回 "document/dir/filename" 路径
 +(NSString*) getPathForDocuments:(NSString *)filename inDir:(NSString*)dir;
-//文件是否存在 
+///文件是否存在
 +(BOOL) isFileExists:(NSString*)filepath;
-//删除文件
+///删除文件
 +(BOOL)deleteWithFilepath:(NSString*)filepath;
-//返回该文件目录下 所有文件名
+///返回该文件目录下 所有文件名
 +(NSArray*)getFilenamesWithDir:(NSString*)dir;
 
-//检测字符串是否为空
+///检测字符串是否为空
 +(BOOL)checkStringIsEmpty:(NSString *)string;
 +(NSString*)getTrimStringWithString:(NSString*)string;
 
-//把Date 转换成String
+///把Date 转换成String
 +(NSString*)stringWithDate:(NSDate*)date;
-//把String 转换成Date
+///把String 转换成Date
 +(NSDate *)dateWithString:(NSString *)str;
 @end
 
 #ifdef DEBUG
 #ifdef NSLog
-#define LKErrorLog(fmt, ...) NSLog(@"#LKDBHelper LOG: \n %@" fmt,##__VA_ARGS__,@"\n\n");
+#define LKErrorLog(fmt, ...) NSLog(@"#LKDBHelper ERROR:\n" fmt,##__VA_ARGS__);
 #else
-#define LKErrorLog(fmt, ...) NSLog(@"#LKDBHelper LOG: \n %s  [Line %d] %@" fmt, __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__ ,@"\n\n");
+#define LKErrorLog(fmt, ...) NSLog(@"\n#LKDBHelper ERROR: %s  [Line %d] \n" fmt, __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
 #endif
 #else
 #   define LKErrorLog(...)
@@ -65,7 +65,7 @@ static NSString* const LKSQL_Mapping_Inherit          =   @"LKDBInherit";
 static NSString* const LKSQL_Mapping_Binding          =   @"LKDBBinding";
 static NSString* const LKSQL_Mapping_UserCalculate    =   @"LKDBUserCalculate";
 
-//Object-c type converted to SQLite type  把Object-c 类型 转换为sqlite 类型
+///Object-c type converted to SQLite type  把Object-c 类型 转换为sqlite 类型
 extern NSString* LKSQLTypeFromObjcType(NSString *objcType);
 
 

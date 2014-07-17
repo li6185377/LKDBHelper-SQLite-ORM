@@ -98,10 +98,15 @@
         return;
     }
     
+    Class clazz = NSClassFromString(propertyTypeName);
     LKModelInfos* infos = [self getModelInfos];
     for (int i=0; i<infos.count; i++) {
         LKDBProperty* property = [infos objectWithIndex:i];
-        if([property.propertyType isEqualToString:propertyTypeName])
+        
+        Class p_cls = NSClassFromString(property.propertyType);
+        BOOL isSubClass = ((p_cls && clazz) && [p_cls isSubclassOfClass:clazz]);
+        BOOL isNameEqual = [property.propertyType isEqualToString:propertyTypeName];
+        if(isSubClass || isNameEqual)
         {
             [property enableUserCalculate];
         }

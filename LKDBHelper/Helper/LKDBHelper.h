@@ -20,9 +20,9 @@
 
 @interface LKDBHelper : NSObject
 
-// you can use [LKDBHelper getUsingLKDBHelper]
+/// you can use [LKDBHelper getUsingLKDBHelper]
 #pragma mark- deprecated
-+(LKDBHelper*)sharedDBHelper DEPRECATED_ATTRIBUTE;
++(LKDBHelper*)sharedDBHelper __deprecated_msg("Method deprecated. Use `[Model getUsingLKDBHelper]`");
 #pragma mark-
 
 /**

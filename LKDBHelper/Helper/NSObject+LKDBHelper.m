@@ -16,6 +16,7 @@
 +(void)dbDidDeleted:(NSObject *)entity result:(BOOL)result{}
 +(void)dbDidInserted:(NSObject *)entity result:(BOOL)result{}
 +(void)dbDidUpdated:(NSObject *)entity result:(BOOL)result{}
++(void)dbDidSeleted:(NSObject *)entity{}
 
 +(BOOL)dbWillDelete:(NSObject *)entity{
     return YES;
@@ -36,7 +37,14 @@
     NSLog(@"%@ can not use %@",NSStringFromClass(self),NSStringFromClass(model.class));
     return NO;
 }
-
++(int)rowCountWithWhereFormat:(NSString*)where, ...
+{
+    va_list list;
+    va_start(list, where);
+    NSString* string = [[NSString alloc]initWithFormat:where arguments:list];
+    va_end(list);
+    return [self rowCountWithWhere:string];
+}
 +(int)rowCountWithWhere:(id)where{
     return [[self getUsingLKDBHelper] rowCount:self where:where];
 }

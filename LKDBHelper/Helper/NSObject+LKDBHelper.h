@@ -24,9 +24,12 @@
 +(BOOL)dbWillDelete:(NSObject*)entity;
 +(void)dbDidDeleted:(NSObject*)entity result:(BOOL)result;
 
+///data read finish
++(void)dbDidSeleted:(NSObject*)entity;
 
 //only simplify synchronous function
 +(int)rowCountWithWhere:(id)where;
++(int)rowCountWithWhereFormat:(NSString*)where,...;
 
 +(NSMutableArray*)searchColumn:(id)columns where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
 +(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
