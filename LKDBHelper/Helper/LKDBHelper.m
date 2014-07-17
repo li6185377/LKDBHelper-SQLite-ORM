@@ -86,12 +86,13 @@ return NO;}
 {
     if([LKDBUtils checkStringIsEmpty:filePath])
     {
-        return nil;
+        self = nil;
+        return self;
     }
     LKDBHelper* helper = [LKDBHelper dbHelperWithPath:filePath save:nil];
     if(helper)
     {
-        return helper;
+        self = helper;
     }
     else
     {
@@ -101,8 +102,8 @@ return NO;}
             [self setDBPath:filePath];
             [LKDBHelper dbHelperWithPath:nil save:self];
         }
-        return self;
     }
+    return self;
 }
 
 #pragma mark- init FMDB
@@ -304,7 +305,9 @@ return NO;}
                 if(pvalue)
                 {
                     if(pwhere.length>0)
+                    {
                         [pwhere appendString:@"and"];
+                    }
                     
                     if(addPValues)
                     {
@@ -758,14 +761,16 @@ return NO;}
             }
             else
             {
-                NSString* sqlValue = [set stringForColumnIndex:i];
                 if(property.propertyName && isUserCalculate == NO)
                 {
+                    NSString* sqlValue = [set stringForColumnIndex:i];
                     [bindingModel modelSetValue:property value:sqlValue];
                 }
                 else
                 {
-                    [bindingModel userSetValueForModel:property value:sqlValue];
+                    NSData* sqlData = [set dataForColumnIndex:i];
+                    NSString* sqlValue = [[NSString alloc] initWithData:sqlData encoding:NSUTF8StringEncoding];
+                    [bindingModel userSetValueForModel:property value:sqlValue?:sqlData];
                 }
             }
         }

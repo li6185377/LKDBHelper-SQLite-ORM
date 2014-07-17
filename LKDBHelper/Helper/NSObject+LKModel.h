@@ -62,7 +62,7 @@
  *	@brief	overwrite in your models,return insert sqlite table data
  *
  *	@param 	property        will set property
- *	@param 	value           sqlite value (normal value is NSString type)
+ *	@param 	value           sqlite value (NSString(NSData UTF8 Coding) or NSData)
  */
 -(void)userSetValueForModel:(LKDBProperty*)property value:(id)value;
 
