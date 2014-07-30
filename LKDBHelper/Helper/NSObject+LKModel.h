@@ -94,6 +94,14 @@
  */
 +(BOOL)isContainParent;
 
+
+/**
+ *  当前表中的列是否包含自身的属性。
+ *
+ *  @return BOOL
+ */
++(BOOL)isContainSelf;
+
 /**
  *	@brief log all property 	打印所有的属性名称和数据
  */
