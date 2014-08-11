@@ -737,6 +737,14 @@ return NO;}
         {
             [array addObject:string];
         }
+        else
+        {
+            NSData* data = [set dataForColumnIndex:0];
+            if(data)
+            {
+                [array addObject:data];
+            }
+        }
     }
     return array;
 }

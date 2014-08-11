@@ -37,15 +37,26 @@
     NSLog(@"%@ can not use %@",NSStringFromClass(self),NSStringFromClass(model.class));
     return NO;
 }
-+(int)rowCountWithWhereFormat:(NSString*)where, ...
++(int)rowCountWithWhereFormat:(id)where, ...
 {
-    va_list list;
-    va_start(list, where);
-    NSString* string = [[NSString alloc]initWithFormat:where arguments:list];
-    va_end(list);
-    return [self rowCountWithWhere:string];
+    if ([where isKindOfClass:[NSString class]])
+    {
+        va_list list;
+        va_start(list, where);
+        where = [[NSString alloc]initWithFormat:where arguments:list];
+        va_end(list);
+    }
+    return [[self getUsingLKDBHelper] rowCount:self where:where];
 }
-+(int)rowCountWithWhere:(id)where{
++(int)rowCountWithWhere:(id)where, ...
+{
+    if ([where isKindOfClass:[NSString class]])
+    {
+        va_list list;
+        va_start(list, where);
+        where = [[NSString alloc]initWithFormat:where arguments:list];
+        va_end(list);
+    }
     return [[self getUsingLKDBHelper] rowCount:self where:where];
 }
 +(NSMutableArray *)searchColumn:(id)columns where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
@@ -76,25 +87,49 @@
     }
     return NO;
 }
-+(BOOL)updateToDB:(NSObject *)model where:(id)where{
++(BOOL)updateToDB:(NSObject *)model where:(id)where,...
+{
     if([self checkModelClass:model])
     {
+        if ([where isKindOfClass:[NSString class]])
+        {
+            va_list list;
+            va_start(list, where);
+            where = [[NSString alloc]initWithFormat:where arguments:list];
+            va_end(list);
+        }
         return [[self getUsingLKDBHelper] updateToDB:model where:where];
     }
     return NO;
 }
-+(BOOL)updateToDBWithSet:(NSString *)sets where:(id)where
++(BOOL)updateToDBWithSet:(NSString *)sets where:(id)where,...
 {
+    if ([where isKindOfClass:[NSString class]])
+    {
+        va_list list;
+        va_start(list, where);
+        where = [[NSString alloc]initWithFormat:where arguments:list];
+        va_end(list);
+    }
     return [[self getUsingLKDBHelper] updateToDB:self set:sets where:where];
 }
-+(BOOL)deleteToDB:(NSObject*)model{
++(BOOL)deleteToDB:(NSObject*)model
+{
     if([self checkModelClass:model])
     {
         return [[self getUsingLKDBHelper] deleteToDB:model];
     }
     return NO;
 }
-+(BOOL)deleteWithWhere:(id)where{
++(BOOL)deleteWithWhere:(id)where,...
+{
+    if ([where isKindOfClass:[NSString class]])
+    {
+        va_list list;
+        va_start(list, where);
+        where = [[NSString alloc]initWithFormat:where arguments:list];
+        va_end(list);
+    }
     return [[self getUsingLKDBHelper] deleteWithClass:self where:where];
 }
 +(BOOL)isExistsWithModel:(NSObject *)model

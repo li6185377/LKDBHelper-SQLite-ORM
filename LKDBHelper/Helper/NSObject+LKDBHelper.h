@@ -28,8 +28,8 @@
 +(void)dbDidSeleted:(NSObject*)entity;
 
 //only simplify synchronous function
-+(int)rowCountWithWhere:(id)where;
-+(int)rowCountWithWhereFormat:(NSString*)where,...;
++(int)rowCountWithWhere:(id)where,...;
++(int)rowCountWithWhereFormat:(id)where,...;
 
 +(NSMutableArray*)searchColumn:(id)columns where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
 +(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
@@ -37,10 +37,10 @@
 
 +(BOOL)insertToDB:(NSObject*)model;
 +(BOOL)insertWhenNotExists:(NSObject*)model;
-+(BOOL)updateToDB:(NSObject *)model where:(id)where;
-+(BOOL)updateToDBWithSet:(NSString*)sets where:(id)where;
++(BOOL)updateToDB:(NSObject *)model where:(id)where,...;
++(BOOL)updateToDBWithSet:(NSString*)sets where:(id)where,...;
 +(BOOL)deleteToDB:(NSObject*)model;
-+(BOOL)deleteWithWhere:(id)where;
++(BOOL)deleteWithWhere:(id)where,...;
 +(BOOL)isExistsWithModel:(NSObject*)model;
 
 - (BOOL)saveToDB;
