@@ -370,7 +370,10 @@ static char LKModelBase_Key_RowID;
         NSMutableArray* pronames = [NSMutableArray array];
         NSMutableArray* protypes = [NSMutableArray array];
         NSDictionary* keymapping = [self getTableMapping];
-        [self getSelfPropertys:pronames protypes:protypes];
+        
+        if ([self isContainSelf] && [self class] != [NSObject class]) {
+            [self getSelfPropertys:pronames protypes:protypes];
+        }
         
         NSArray* pkArray = [self getPrimaryKeyUnionArray];
         if(pkArray.count == 0)
@@ -403,10 +406,17 @@ static char LKModelBase_Key_RowID;
     return infos;
     
 }
+
 +(BOOL)isContainParent
 {
     return NO;
 }
+
++(BOOL)isContainSelf
+{
+    return YES;
+}
+
 /**
  *	@brief	获取自身的属性
  *
