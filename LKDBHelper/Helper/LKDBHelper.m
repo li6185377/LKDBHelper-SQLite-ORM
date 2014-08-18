@@ -855,8 +855,10 @@ return NO;}
         
         if([property isEqual:primaryProperty])
         {
-            if([model singlePrimaryKeyValueIsEmpty])
+            if([property.sqlColumnType isEqualToString:LKSQL_Type_Int] && [model singlePrimaryKeyValueIsEmpty])
+            {
                 continue;
+            }
         }
         
         if(insertKey.length>0)
