@@ -172,6 +172,10 @@ return NO;}
     }
     else
     {
+        if(_bindingQueue == nil)
+        {
+            _bindingQueue = [[FMDatabaseQueue alloc]initWithPath:_dbPath];
+        }
         [_bindingQueue inDatabase:^(FMDatabase *db) {
             self.usingdb = db;
             block(db);
