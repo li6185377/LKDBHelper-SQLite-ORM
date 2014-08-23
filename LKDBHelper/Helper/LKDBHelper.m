@@ -16,12 +16,11 @@ return NO;}
 #define checkModelIsInvalid(model)if(model == nil){LKErrorLog(@"model is nil");return NO;}checkClassIsInvalid(model.class)
 
 @interface LKDBWeakObject : NSObject
-@property(unsafe_unretained,nonatomic)LKDBHelper* obj;
+@property(LKDBWeak,nonatomic)LKDBHelper* obj;
 @end
 
-
 @interface LKDBHelper()
-@property(unsafe_unretained,nonatomic)FMDatabase* usingdb;
+@property(LKDBWeak,nonatomic)FMDatabase* usingdb;
 @property(strong,nonatomic)FMDatabaseQueue* bindingQueue;
 @property(copy,nonatomic)NSString* dbPath;
 

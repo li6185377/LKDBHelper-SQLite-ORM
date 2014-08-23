@@ -63,7 +63,7 @@
 
 @interface LKTableManager()
 @property(strong,nonatomic)NSMutableDictionary* tableInfos;
-@property(unsafe_unretained,nonatomic)LKDBHelper* dbhelper;
+@property(LKDBWeak,nonatomic)LKDBHelper* dbhelper;
 @end
 @implementation LKTableManager
 - (id)initWithLKDBHelper:(LKDBHelper *)helper
