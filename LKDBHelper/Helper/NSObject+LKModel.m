@@ -512,6 +512,14 @@ static char LKModelBase_Key_RowID;
 }
 
 #pragma mark - log all property
+-(NSMutableString *)getAllPropertysString
+{
+    Class clazz = [self class];
+    NSMutableString* sb = [NSMutableString stringWithFormat:@"\n <%@> :\n", NSStringFromClass(clazz)];
+    [sb appendFormat:@"rowid : %d\n",self.rowid];
+    [self mutableString:sb appendPropertyStringWithClass:clazz containParent:YES];
+    return sb;
+}
 -(NSString*)printAllPropertys
 {
     return [self printAllPropertysIsContainParent:NO];
@@ -531,6 +539,10 @@ static char LKModelBase_Key_RowID;
 }
 -(void)mutableString:(NSMutableString*)sb appendPropertyStringWithClass:(Class)clazz containParent:(BOOL)containParent
 {
+    if (clazz == [NSObject class])
+    {
+        return;
+    }
     unsigned int outCount, i;
     objc_property_t *properties = class_copyPropertyList(clazz, &outCount);
     for (i = 0; i < outCount; i++) {
@@ -541,7 +553,7 @@ static char LKModelBase_Key_RowID;
     free(properties);
     if(containParent)
     {
-        [self mutableString:sb appendPropertyStringWithClass:self.superclass containParent:containParent];
+        [self mutableString:sb appendPropertyStringWithClass:clazz.superclass containParent:containParent];
     }
 }
 

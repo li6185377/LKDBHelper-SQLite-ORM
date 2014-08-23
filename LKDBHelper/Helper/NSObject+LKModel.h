@@ -108,4 +108,5 @@
 -(NSString*)printAllPropertys;
 -(NSString*)printAllPropertysIsContainParent:(BOOL)containParent;
 
+-(NSMutableString*)getAllPropertysString;
 @end
