@@ -16,24 +16,44 @@
 #pragma mark- 表结构
 @interface NSObject(LKTabelStructure)
 
-/// overwrite in your models, return # table name #
+/**
+ *  overwrite in your models
+ *
+ *  @return # table name #
+ */
 +(NSString*)getTableName;
-+(BOOL)getAutoUpdateSqlColumn;
 
-/// overwrite in your models, set column attribute
+/**
+ *  If you set it will use it as a table name
+ */
+@property(copy,nonatomic)NSString* db_tableName;
+
+/**
+ *  overwrite in your models set column attribute
+ *
+ *  @param property infos
+ */
 +(void)columnAttributeWithProperty:(LKDBProperty*)property;
 
 /**
- *	@brief	overwrite in your models, if your table has primary key
- return # column name  #
+ *  overwrite in your models, if your table has primary key
  
- 主键列名 如果rowid<0 则跟据此名称update 和delete
+ *  主键列名 如果rowid<0 则跟据此名称update 和delete
+ 
+ *  @return # column name  #
  */
 +(NSString*)getPrimaryKey;
 
-///return multi primary key    返回联合主键
+/**
+ *  multi primary key
+ *  联合主键
+ *  @return
+ */
 +(NSArray*) getPrimaryKeyUnionArray;
 
+/**
+ *  sqlite comes with rowid
+ */
 @property int rowid;
 
 /**
@@ -80,12 +100,17 @@
 
 @interface NSObject (LKModel)
 
-///return model use LKDBHelper , default return global LKDBHelper;
+/**
+ *  return model use LKDBHelper , default return global LKDBHelper;
+ *
+ *  @return LKDBHelper
+ */
 +(LKDBHelper*)getUsingLKDBHelper;
 
 /**
- *	@brief  返回 该Model 的基础信息
+ *  class attributes
  *
+ *  @return LKModelInfos
  */
 +(LKModelInfos*)getModelInfos;
 
@@ -93,7 +118,6 @@
  *	@brief Containing the super class attributes	设置是否包含 父类 的属性
  */
 +(BOOL)isContainParent;
-
 
 /**
  *  当前表中的列是否包含自身的属性。

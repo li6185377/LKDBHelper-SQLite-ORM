@@ -18,7 +18,10 @@
 #endif
 
 static char LKModelBase_Key_RowID;
+static char LKModelBase_Key_TableName;
+
 @implementation NSObject (LKModel)
+
 +(LKDBHelper *)getUsingLKDBHelper
 {
     static LKDBHelper* helper;
@@ -32,10 +35,6 @@ static char LKModelBase_Key_RowID;
 +(NSString *)getTableName
 {
     return NSStringFromClass(self);
-}
-+(BOOL)getAutoUpdateSqlColumn
-{
-    return YES;
 }
 +(NSString *)getPrimaryKey
 {
@@ -58,6 +57,15 @@ static char LKModelBase_Key_RowID;
 {
     return [objc_getAssociatedObject(self, &LKModelBase_Key_RowID) intValue];
 }
+-(void)setDb_tableName:(NSString *)db_tableName
+{
+    objc_setAssociatedObject(self, &LKModelBase_Key_TableName,db_tableName, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
+-(NSString *)db_tableName
+{
+    return objc_getAssociatedObject(self, &LKModelBase_Key_TableName);
+}
+
 +(NSString *)getDBImagePathWithName:(NSString *)filename
 {
     NSString* dir = [NSString stringWithFormat:@"dbimg/%@",NSStringFromClass(self)];
@@ -371,7 +379,8 @@ static char LKModelBase_Key_RowID;
         NSMutableArray* protypes = [NSMutableArray array];
         NSDictionary* keymapping = [self getTableMapping];
         
-        if ([self isContainSelf] && [self class] != [NSObject class]) {
+        if ([self isContainSelf] && [self class] != [NSObject class])
+        {
             [self getSelfPropertys:pronames protypes:protypes];
         }
         

@@ -34,7 +34,7 @@
 {
     __strong NSMutableDictionary* _proNameDic;
     __strong NSMutableDictionary* _sqlNameDic;
-    __strong NSMutableArray* _primaryKeys;
+    __strong NSArray* _primaryKeys;
 }
 -(void)removeWithColumnName:(NSString*)columnName;
 -(void)addDBPropertyWithType:(NSString *)type cname:(NSString *)column_name ctype:(NSString *)ctype pname:(NSString *)pname ptype:(NSString *)ptype;
@@ -133,6 +133,14 @@
         [infos addDBPropertyWithType:LKSQL_Mapping_Binding cname:columnName ctype:LKSQL_Type_Text pname:propertyName ptype:property.propertyType];
     }
 }
++(void)removePropertyWithColumnNameArray:(NSArray *)columnNameArray
+{
+    LKModelInfos* infos = [self getModelInfos];
+    for (NSString* columnName in columnNameArray)
+    {
+        [infos removeWithColumnName:columnName];
+    }
+}
 +(void)removePropertyWithColumnName:(NSString *)columnName
 {
     [[self getModelInfos] removeWithColumnName:columnName];
@@ -147,7 +155,7 @@
     self = [super init];
     if (self) {
         
-        _primaryKeys = [primaryKeys copy];
+        _primaryKeys = [NSArray arrayWithArray:primaryKeys];
         
         _proNameDic = [[NSMutableDictionary alloc]init];
         _sqlNameDic = [[NSMutableDictionary alloc]init];
@@ -217,7 +225,13 @@
             }
         }
         
-        for (NSString* pkname in _primaryKeys) {
+        if(_primaryKeys.count == 0)
+        {
+            _primaryKeys = [NSArray arrayWithObject:@"rowid"];
+        }
+        
+        for (NSString* pkname in _primaryKeys)
+        {
             if([pkname.lowercaseString isEqualToString:@"rowid"])
             {
                 if([self objectWithSqlColumnName:pkname] == nil)

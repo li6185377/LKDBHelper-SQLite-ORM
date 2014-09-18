@@ -10,10 +10,11 @@
 #import "LKDBHelper.h"
 
 @class LKDBHelper;
-@interface NSObject(LKDBHelper)
 
-//callback delegate
-+(void)dbDidCreateTable:(LKDBHelper*)helper;
+@interface NSObject(LKDBHelper_Delegate)
+
++(void)dbDidCreateTable:(LKDBHelper*)helper tableName:(NSString*)tableName;
++(void)dbDidCreateTable:(LKDBHelper*)helper tableName:(NSString*)tableName addColumns:(NSArray*)columns;
 
 +(BOOL)dbWillInsert:(NSObject*)entity;
 +(void)dbDidInserted:(NSObject*)entity result:(BOOL)result;
@@ -27,10 +28,33 @@
 ///data read finish
 +(void)dbDidSeleted:(NSObject*)entity;
 
+@end
+
 //only simplify synchronous function
+@interface NSObject(LKDBHelper_Execute)
+
+/**
+ *  返回行数
+ *
+ *  @param where type can NSDictionary or NSString
+ *
+ *  @return  row count
+ */
 +(int)rowCountWithWhere:(id)where,...;
 +(int)rowCountWithWhereFormat:(id)where,...;
 
+/**
+ *  搜索
+ *
+ *  @param columns type can NSArray or NSString(Search for a specific column.  Search only one, only to return the contents of the column collection)
+ 
+ *  @param where   where type can NSDictionary or NSString
+ *  @param orderBy
+ *  @param offset
+ *  @param count
+ *
+ *  @return model collection  or   contents of the columns collection
+ */
 +(NSMutableArray*)searchColumn:(id)columns where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
 +(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
 +(id)searchSingleWithWhere:(id)where orderBy:(NSString*)orderBy;

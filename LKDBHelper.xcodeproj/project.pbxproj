@@ -29,7 +29,6 @@
 		53226E47171BFB6900B1A490 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 53226E46171BFB6900B1A490 /* libsqlite3.dylib */; };
 		53226E4A171C1F0400B1A490 /* NSObject+LKModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 53226E49171C1F0400B1A490 /* NSObject+LKModel.m */; };
 		53226E4C171C207F00B1A490 /* 41.png in Resources */ = {isa = PBXBuildFile; fileRef = 53226E4B171C207F00B1A490 /* 41.png */; };
-		534D38D51772FA5B00E24E96 /* LKDB+Manager.m in Sources */ = {isa = PBXBuildFile; fileRef = 534D38D41772FA5B00E24E96 /* LKDB+Manager.m */; };
 		534D38D81772FA6A00E24E96 /* LKDB+Mapping.m in Sources */ = {isa = PBXBuildFile; fileRef = 534D38D71772FA6A00E24E96 /* LKDB+Mapping.m */; };
 /* End PBXBuildFile section */
 
@@ -71,8 +70,6 @@
 		53226E48171C1F0400B1A490 /* NSObject+LKModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+LKModel.h"; sourceTree = "<group>"; };
 		53226E49171C1F0400B1A490 /* NSObject+LKModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+LKModel.m"; sourceTree = "<group>"; };
 		53226E4B171C207F00B1A490 /* 41.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 41.png; sourceTree = "<group>"; };
-		534D38D31772FA5B00E24E96 /* LKDB+Manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "LKDB+Manager.h"; sourceTree = "<group>"; };
-		534D38D41772FA5B00E24E96 /* LKDB+Manager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "LKDB+Manager.m"; sourceTree = "<group>"; };
 		534D38D61772FA6A00E24E96 /* LKDB+Mapping.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "LKDB+Mapping.h"; sourceTree = "<group>"; };
 		534D38D71772FA6A00E24E96 /* LKDB+Mapping.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "LKDB+Mapping.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -195,8 +192,6 @@
 				5311E11B1762DEFE00ADBB7D /* NSObject+LKDBHelper.m */,
 				53226E43171BA44100B1A490 /* LKDBUtils.h */,
 				53226E44171BA44100B1A490 /* LKDBUtils.m */,
-				534D38D31772FA5B00E24E96 /* LKDB+Manager.h */,
-				534D38D41772FA5B00E24E96 /* LKDB+Manager.m */,
 				534D38D61772FA6A00E24E96 /* LKDB+Mapping.h */,
 				534D38D71772FA6A00E24E96 /* LKDB+Mapping.m */,
 			);
@@ -282,7 +277,6 @@
 				53226E45171BA44100B1A490 /* LKDBUtils.m in Sources */,
 				53226E4A171C1F0400B1A490 /* NSObject+LKModel.m in Sources */,
 				5311E11C1762DEFE00ADBB7D /* NSObject+LKDBHelper.m in Sources */,
-				534D38D51772FA5B00E24E96 /* LKDB+Manager.m in Sources */,
 				534D38D81772FA6A00E24E96 /* LKDB+Mapping.m in Sources */,
 				5303B79B178FEFB5007731A0 /* LKTestModels.m in Sources */,
 			);

@@ -8,13 +8,13 @@
 
 #import "NSObject+LKDBHelper.h"
 
+@implementation NSObject (LKDBHelper_Delegate)
 
-@implementation NSObject(LKDBHelper)
++(void)dbDidCreateTable:(LKDBHelper *)helper tableName:(NSString*)tableName{};
++(void)dbDidCreateTable:(LKDBHelper *)helper tableName:(NSString*)tableName addColumns:(NSArray *)columns{}
 
-+(void)dbDidCreateTable:(LKDBHelper *)helper{}
-
-+(void)dbDidDeleted:(NSObject *)entity result:(BOOL)result{}
 +(void)dbDidInserted:(NSObject *)entity result:(BOOL)result{}
++(void)dbDidDeleted:(NSObject *)entity result:(BOOL)result{}
 +(void)dbDidUpdated:(NSObject *)entity result:(BOOL)result{}
 +(void)dbDidSeleted:(NSObject *)entity{}
 
@@ -27,6 +27,9 @@
 +(BOOL)dbWillUpdate:(NSObject *)entity{
     return YES;
 }
+@end
+
+@implementation NSObject(LKDBHelper)
 
 #pragma mark - simplify synchronous function
 +(BOOL)checkModelClass:(NSObject*)model

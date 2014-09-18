@@ -56,10 +56,6 @@
     LKDBHelper* globalHelper = [LKTest getUsingLKDBHelper];
     [globalHelper dropAllTable];
     
-    //创建表  会根据表的版本号  来判断具体的操作 . create table need to manually call
-    [globalHelper createTableWithModelClass:[LKTest class]];
-    [globalHelper createTableWithModelClass:[LKTestForeign class]];
-
     addText(@"LKTest create table sql :\n%@\n",[LKTest getCreateTableSQL]);
     addText(@"LKTestForeign create table sql :\n%@\n",[LKTestForeign getCreateTableSQL]);
     

@@ -12,19 +12,12 @@
 
 #import "LKDBUtils.h"
 
-#import "LKDB+Manager.h"
 #import "LKDB+Mapping.h"
 
 #import "NSObject+LKModel.h"
 #import "NSObject+LKDBHelper.h"
 
 @interface LKDBHelper : NSObject
-
-/// you can use [LKDBHelper getUsingLKDBHelper]
-#pragma mark- deprecated
-+(LKDBHelper*)sharedDBHelper __deprecated_msg("Method deprecated. Use `[Model getUsingLKDBHelper]`");
-#pragma mark-
-
 /**
  *	@brief  filepath the use of : "documents/db/" + fileName + ".db"
  *  refer:  FMDatabase.h  + (instancetype)databaseWithPath:(NSString*)inPath;
@@ -52,9 +45,7 @@
 
 ///get table has created
 -(BOOL)getTableCreatedWithClass:(Class)model;
-
-///create table with entity class
--(BOOL)createTableWithModelClass:(Class)model;
+-(BOOL)getTableCreatedWithTableName:(NSString*)tableName;
 
 ///drop all table
 -(void)dropAllTable;
@@ -194,4 +185,13 @@
 +(void)clearNoneImage:(Class)modelClass columns:(NSArray*)columns;
 +(void)clearNoneData:(Class)modelClass columns:(NSArray*)columns;
 
+@end
+
+
+@interface LKDBHelper(Deprecated_Nonfunctional)
+/// you can use [LKDBHelper getUsingLKDBHelper]
+#pragma mark- deprecated
++(LKDBHelper*)sharedDBHelper __deprecated_msg("Method deprecated. Use `[Model getUsingLKDBHelper]`");
+-(BOOL)createTableWithModelClass:(Class)modelClass __deprecated_msg("Now you can not call it. Will automatically determine whether you need to create");
+#pragma mark-
 @end

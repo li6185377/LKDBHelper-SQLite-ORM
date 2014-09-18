@@ -33,6 +33,7 @@
 
 ///remove unwanted binding property
 +(void)removePropertyWithColumnName:(NSString*)columnName;
++(void)removePropertyWithColumnNameArray:(NSArray*)columnNameArray;
 @end
 
 @interface LKDBProperty:NSObject

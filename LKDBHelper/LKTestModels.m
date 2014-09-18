@@ -135,31 +135,7 @@
 {
     return @"LKTestTable";
 }
-//表版本
-+(int)getTableVersion
-{
-    return 3;
-}
-//升级
-+(LKTableUpdateType)tableUpdateForOldVersion:(int)oldVersion newVersion:(int)newVersion
-{
-    //..... eh...  upgrade for table
-    switch (oldVersion) {
-        case 1:
-        {
-//            [self updateToDBWithSet:@"blah blah" where:nil];
-        }
-        case 2:
-        {
-//            [self deleteWithWhere:@"blah blah"];
-        }
-            break;
-    }
-    return LKTableUpdateTypeCustom;
-}
 @end
-
-
 @implementation LKTestForeign
 +(LKDBHelper *)getUsingLKDBHelper
 {
@@ -176,10 +152,6 @@
 +(BOOL)isContainParent
 {
     return YES;
-}
-+(int)getTableVersion
-{
-    return 1;
 }
 @end
 
