@@ -25,7 +25,6 @@
 		C5549EC318E267B300F92DED /* FMDatabasePool.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EA218E267B300F92DED /* FMDatabasePool.m */; };
 		C5549EC418E267B300F92DED /* FMDatabaseQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EA418E267B300F92DED /* FMDatabaseQueue.m */; };
 		C5549EC518E267B300F92DED /* FMResultSet.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EA618E267B300F92DED /* FMResultSet.m */; };
-		C5549EC618E267B300F92DED /* LKDB+Manager.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EA918E267B300F92DED /* LKDB+Manager.m */; };
 		C5549EC718E267B300F92DED /* LKDB+Mapping.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EAB18E267B300F92DED /* LKDB+Mapping.m */; };
 		C5549EC818E267B300F92DED /* LKDBHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EAD18E267B300F92DED /* LKDBHelper.m */; };
 		C5549EC918E267B300F92DED /* LKDBUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = C5549EAF18E267B300F92DED /* LKDBUtils.m */; };
@@ -78,8 +77,6 @@
 		C5549EA418E267B300F92DED /* FMDatabaseQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabaseQueue.m; sourceTree = "<group>"; };
 		C5549EA518E267B300F92DED /* FMResultSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMResultSet.h; sourceTree = "<group>"; };
 		C5549EA618E267B300F92DED /* FMResultSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMResultSet.m; sourceTree = "<group>"; };
-		C5549EA818E267B300F92DED /* LKDB+Manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "LKDB+Manager.h"; sourceTree = "<group>"; };
-		C5549EA918E267B300F92DED /* LKDB+Manager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "LKDB+Manager.m"; sourceTree = "<group>"; };
 		C5549EAA18E267B300F92DED /* LKDB+Mapping.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "LKDB+Mapping.h"; sourceTree = "<group>"; };
 		C5549EAB18E267B300F92DED /* LKDB+Mapping.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "LKDB+Mapping.m"; sourceTree = "<group>"; };
 		C5549EAC18E267B300F92DED /* LKDBHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKDBHelper.h; sourceTree = "<group>"; };
@@ -251,8 +248,6 @@
 		C5549EA718E267B300F92DED /* Helper */ = {
 			isa = PBXGroup;
 			children = (
-				C5549EA818E267B300F92DED /* LKDB+Manager.h */,
-				C5549EA918E267B300F92DED /* LKDB+Manager.m */,
 				C5549EAA18E267B300F92DED /* LKDB+Mapping.h */,
 				C5549EAB18E267B300F92DED /* LKDB+Mapping.m */,
 				C5549EAC18E267B300F92DED /* LKDBHelper.h */,
@@ -374,7 +369,6 @@
 				C5549ECE18E267B300F92DED /* LKTestModels.m in Sources */,
 				C5549E7118E2675D00F92DED /* LKAppDelegate.m in Sources */,
 				C5549EC418E267B300F92DED /* FMDatabaseQueue.m in Sources */,
-				C5549EC618E267B300F92DED /* LKDB+Manager.m in Sources */,
 				C5549EC018E267B300F92DED /* FMDatabase+InMemoryOnDiskIO.m in Sources */,
 				C5549EC818E267B300F92DED /* LKDBHelper.m in Sources */,
 				C5549EC918E267B300F92DED /* LKDBUtils.m in Sources */,
