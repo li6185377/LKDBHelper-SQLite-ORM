@@ -14,7 +14,7 @@
 @interface NSObject(LKDBHelper_Delegate)
 
 +(void)dbDidCreateTable:(LKDBHelper*)helper tableName:(NSString*)tableName;
-+(void)dbDidCreateTable:(LKDBHelper*)helper tableName:(NSString*)tableName addColumns:(NSArray*)columns;
++(void)dbDidAlterTable:(LKDBHelper*)helper tableName:(NSString*)tableName addColumns:(NSArray*)columns;
 
 +(BOOL)dbWillInsert:(NSObject*)entity;
 +(void)dbDidInserted:(NSObject*)entity result:(BOOL)result;

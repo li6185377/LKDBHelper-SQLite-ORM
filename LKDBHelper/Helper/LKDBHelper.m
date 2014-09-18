@@ -427,7 +427,7 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
         
         if(alterAddColumns.count > 0)
         {
-            [clazz dbDidCreateTable:self tableName:tableName addColumns:alterAddColumns];
+            [clazz dbDidAlterTable:self tableName:tableName addColumns:alterAddColumns];
         }
     }];
 }

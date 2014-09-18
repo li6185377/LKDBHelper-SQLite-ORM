@@ -10,8 +10,8 @@
 
 @implementation NSObject (LKDBHelper_Delegate)
 
-+(void)dbDidCreateTable:(LKDBHelper *)helper tableName:(NSString*)tableName{};
-+(void)dbDidCreateTable:(LKDBHelper *)helper tableName:(NSString*)tableName addColumns:(NSArray *)columns{}
++(void)dbDidCreateTable:(LKDBHelper *)helper tableName:(NSString*)tableName{}
++(void)dbDidAlterTable:(LKDBHelper*)helper tableName:(NSString*)tableName addColumns:(NSArray*)columns{}
 
 +(void)dbDidInserted:(NSObject *)entity result:(BOOL)result{}
 +(void)dbDidDeleted:(NSObject *)entity result:(BOOL)result{}
