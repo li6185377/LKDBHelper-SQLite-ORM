@@ -54,6 +54,7 @@
 
 @property CGRect size;
 @property CGPoint point;
+@property NSRange range;
 @end
 
 

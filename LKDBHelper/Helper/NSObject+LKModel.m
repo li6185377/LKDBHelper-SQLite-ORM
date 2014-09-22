@@ -142,6 +142,10 @@ static char LKModelBase_Key_TableName;
         {
             returnValue = NSStringFromCGSize([value CGSizeValue]);
         }
+        else if([columnType isEqualToString:@"_NSRange"])
+        {
+            returnValue = NSStringFromRange([value rangeValue]);
+        }
 #else
         if([columnType hasSuffix:@"Rect"])
         {
@@ -154,6 +158,10 @@ static char LKModelBase_Key_TableName;
         else if([columnType hasSuffix:@"Size"])
         {
             returnValue = NSStringFromSize([value sizeValue]);
+        }
+        else if([columnType hasSuffix:@"Range"])
+        {
+            returnValue = NSStringFromRange([value rangeValue]);
         }
 #endif
     }
@@ -249,6 +257,10 @@ static char LKModelBase_Key_TableName;
         {
             modelValue = [NSValue valueWithCGSize:CGSizeFromString(value)];
         }
+        else if([columnType isEqualToString:@"_NSRange"])
+        {
+            modelValue = [NSValue valueWithRange:NSRangeFromString(value)];
+        }
 #else
         else if([columnType hasSuffix:@"Rect"])
         {
@@ -261,6 +273,10 @@ static char LKModelBase_Key_TableName;
         else if([columnType hasSuffix:@"Size"])
         {
             modelValue = [NSValue valueWithSize:NSSizeFromString(value)];
+        }
+        else if([columnType hasSuffix:@"Range"])
+        {
+            modelValue = [NSValue valueWithRange:NSRangeFromString(value)];
         }
 #endif
     }
