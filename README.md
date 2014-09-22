@@ -4,11 +4,11 @@ this is sqlite ORM (an automatic database operation) <br>
 thread-safe and not afraid of recursive deadlock
 
 
-#Big Upgrade
+#Big Upgrade 2.0
 
-Supported  NSArray, NSDictionary, ModelClass, NSNumber, NSString, NSDate, NSData, UIColor, UIImage, CGRect, CGPoint, CGSize, NSRange, int,char,float, double, long.. attribute to insert and select automation.
+Supported  __NSArray__,__NSDictionary__, __ModelClass__, __NSNumber__, __NSString__, __NSDate__, __NSData__, __UIColor__, __UIImage__, __CGRect__, __CGPoint__, __CGSize__, __NSRange__, __int__,__char__,__float__, __double__, __long__.. attribute to insert and select automation.
 
-全面支持 Supported  NSArray, NSDictionary, ModelClass, NSNumber, NSString, NSDate, NSData, UIColor, UIImage, CGRect, CGPoint, CGSize, NSRange, int,char,float, double, long.. 等属性的自动化操作(插入和查询)
+全面支持 __NSArray__,__NSDictionary__, __ModelClass__, __NSNumber__, __NSString__, __NSDate__, __NSData__, __UIColor__, __UIImage__, __CGRect__, __CGPoint__, __CGSize__, __NSRange__, __int__,__char__,__float__, __double__, __long__.. 等属性的自动化操作(插入和查询)
 
 ------------------------------------
 Requirements
