@@ -53,6 +53,13 @@
 
 +(void)dbDidAlterTable:(LKDBHelper *)helper tableName:(NSString *)tableName addColumns:(NSArray *)columns
 {
+    if([columns containsObject:@"error"])
+    {
+        [helper executeDB:^(FMDatabase *db) {
+            NSString* sql = [NSString stringWithFormat:@"update %@ set error = name",tableName];
+            [db executeUpdate:sql];
+        }];
+    }
     LKErrorLog(@"your know %@",columns);
 }
 

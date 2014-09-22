@@ -92,7 +92,9 @@
     
     addText(@"%f",test.score);
     //异步 插入第一条 数据   Insert the first
-    [globalHelper insertToDB:test];
+    [test saveToDB];
+    //or
+    //[globalHelper insertToDB:test];
     
     //多主键 的插入成功
     test.age = 17;
