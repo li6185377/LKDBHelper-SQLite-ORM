@@ -3,29 +3,12 @@ LKDBHelper
 this is sqlite ORM (an automatic database operation) <br>
 thread-safe and not afraid of recursive deadlock
 
-新版 添加字段的时候  可以直接  定义属性就好了  不用再调用  [self tableUpdateAddColumnWithPN:@"color"]; 这种的方法了
-#v1.1
-* 支持 `列名` 和 `属性` 之间的绑定。<br>
-* 你也可以 设置 列 的属性。<br>
-* 当你列 映射 使用 `LKSQLUserCalculate` 值  。 就重载下面两个方法,由你决定插入到数据库中的数据<br>
-`-(id)userGetValueForModel:(LKDBProperty *)property`<br>
-`-(void)userSetValueForModel:(LKDBProperty *)property value:(id)value`<br>
 
-* 还增加了两个添加列的方法,方便在表版本升级的时候调用。<br>
-* 为了 支持多数据库 取消了 `shareDBHelper` 这个方法, <br>
-改成 `[modelClass getUsingDBHelper]`  这样每个model 可以重载 , 选择要使用的数据库<br>
-可以看 `NSObject+LKDBHelper` 里面 的方法<br>
-#v1.1
-* Support `column name`  binding  `attributes`. <br>
-* You can also set the properties of the column. <br>
-* When you use `LKSQLUserCalculate` column mapping value. To override the following two methods you decide to insert data in the database <br>
-`- (id) userGetValueForModel: (LKDBProperty *) property` <br>
-`- (void) userSetValueForModel: (LKDBProperty *) property value: (id) value` <br>
+#Big Upgrade 2.0
 
-* Also added two ways to add columns for easy upgrades in the table when called. <br>
-* In order to support multiple databases canceled `shareDBHelper` this method, <br>
-Changed to `[modelClass getUsingDBHelper]` so that each model can be overloaded, select the database you want to use <br>
-You can see `NSObject LKDBHelper` method inside <br>
+Supported  __NSArray__,__NSDictionary__, __ModelClass__, __NSNumber__, __NSString__, __NSDate__, __NSData__, __UIColor__, __UIImage__, __CGRect__, __CGPoint__, __CGSize__, __NSRange__, __int__,__char__,__float__, __double__, __long__.. attribute to insert and select automation.
+
+全面支持 __NSArray__,__NSDictionary__, __ModelClass__, __NSNumber__, __NSString__, __NSDate__, __NSData__, __UIColor__, __UIImage__, __CGRect__, __CGPoint__, __CGSize__, __NSRange__, __int__,__char__,__float__, __double__, __long__.. 等属性的自动化操作(插入和查询)
 
 ------------------------------------
 Requirements
@@ -52,20 +35,17 @@ pod 'LKDBHelper', :head
 ```objective-c
 @interface LKTest : NSObject
 @property(copy,nonatomic)NSString* name;
-@property int  age;
+@property NSUInteger  age;
 @property BOOL isGirl;
 
 @property(strong,nonatomic)LKTestForeign* address;
+@property(strong,nonatomic)NSArray* blah;
+@property(strong,nonatomic)NSDictionary* hoho;
 
 @property char like;
-@property(strong,nonatomic) UIImage* img;
-@property(strong,nonatomic) NSDate* date;
-
-@property(copy,nonatomic)NSString* error;
-@property(copy,nonatomic)UIColor* color;
-@end
+...
 ```
-2 . in the *.m file, overwirte getTableName function
+2 . in the *.m file, overwirte getTableName function  (option)
 
 ```objective-c
 +(NSString *)getTableName
@@ -73,30 +53,53 @@ pod 'LKDBHelper', :head
     return @"LKTestTable";
 }
 ```
-3 . In your app start function
+3 . in the *.m file, overwirte callback function (option)
 
 ```objective-c
-    LKDBHelper* globalHelper = [LKDBHelper getUsingLKDBHelper];
-   
-    //create table need to manually call! will check the version number of the table
-    [globalHelper createTableWithModelClass:[LKTest class]];
+@interface NSObject(LKDBHelper_Delegate)
+
++(void)dbDidCreateTable:(LKDBHelper*)helper tableName:(NSString*)tableName;
++(void)dbDidAlterTable:(LKDBHelper*)helper tableName:(NSString*)tableName addColumns:(NSArray*)columns;
+
++(BOOL)dbWillInsert:(NSObject*)entity;
++(void)dbDidInserted:(NSObject*)entity result:(BOOL)result;
+
++(BOOL)dbWillUpdate:(NSObject*)entity;
++(void)dbDidUpdated:(NSObject*)entity result:(BOOL)result;
+
++(BOOL)dbWillDelete:(NSObject*)entity;
++(void)dbDidDeleted:(NSObject*)entity result:(BOOL)result;
+
+///data read finish
++(void)dbDidSeleted:(NSObject*)entity;
+
+@end
+
 ```
-4 . Initialize your model with data and insert to database
+4 . Initialize your model with data and insert to database  
 
 ```objective-c
+    LKTestForeign* foreign = [[LKTestForeign alloc]init];
+    foreign.address = @":asdasdasdsadasdsdas";
+    foreign.postcode  = 123341;
+    foreign.addid = 213214;
+    
+    //插入数据    insert table row
     LKTest* test = [[LKTest alloc]init];
     test.name = @"zhan san";
     test.age = 16;
     
+    //外键 foreign key
     test.address = foreign;
+    test.blah = @[@"1",@"2",@"3"];
+    test.blah = @[@"0",@[@1],@{@"2":@2},foreign];
+    test.hoho = @{@"array":test.blah,@"foreign":foreign,@"normal":@123456,@"date":[NSDate date]};
+    ///warning: NSDate没做处理  所以不能在 NSArray 里 或者 NSDictionry 里面使用NSDate
     
-    test.isGirl = YES;
-    test.like = 'I';
-    test.img = [UIImage imageNamed:@"41.png"];
-    test.date = [NSDate date];
-    test.color = [UIColor orangeColor];
-    
-    [globalHelper insertToDB:test];
+    //异步 插入第一条 数据   Insert the first
+    [test saveToDB];
+    //or
+    //[globalHelper insertToDB:test];
     
 ```
 5 . select 、 delete 、 update 、 isExists 、 rowCount ...
@@ -167,20 +170,16 @@ overwirte getTableMapping Function
 ##table update
 
 ```objective-c
-+(LKTableUpdateType)tableUpdateForOldVersion:(int)oldVersion newVersion:(int)newVersion
++(void)dbDidAlterTable:(LKDBHelper *)helper tableName:(NSString *)tableName addColumns:(NSArray *)columns
 {
-    switch (oldVersion) {
-        case 1:
-        {
-            [self tableUpdateAddColumnWithPN:@"color"];
-        }
-        case 2:
-        {
-            [self tableUpdateAddColumnWithName:@"address" sqliteType:LKSQLText];
-        }
-            break;
+    if([columns containsObject:@"error"])
+    {
+        [helper executeDB:^(FMDatabase *db) {
+            NSString* sql = [NSString stringWithFormat:@"update %@ set error = name",tableName];
+            [db executeUpdate:sql];
+        }];
     }
-    return LKTableUpdateTypeCustom;
+    LKErrorLog(@"your know %@",columns);
 }
 ```
 ## set column attribute
