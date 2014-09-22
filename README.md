@@ -3,9 +3,12 @@ LKDBHelper
 this is sqlite ORM (an automatic database operation) <br>
 thread-safe and not afraid of recursive deadlock
 
-全面支持 NSArray，NSDictionary，ModelClass 属性了
 
-supported NSArray, NSDictionary, ModelClass attribute
+#Big Upgrade
+
+Supported  NSArray, NSDictionary, ModelClass, NSNumber, NSString, NSDate, NSData, UIColor, UIImage, CGRect, CGPoint, CGSize, NSRange, int,char,float, double, long.. attribute to insert and select automation.
+
+全面支持 Supported  NSArray, NSDictionary, ModelClass, NSNumber, NSString, NSDate, NSData, UIColor, UIImage, CGRect, CGPoint, CGSize, NSRange, int,char,float, double, long.. 等属性的自动化操作(插入和查询)
 
 ------------------------------------
 Requirements
