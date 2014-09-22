@@ -75,6 +75,9 @@
     
     //外键 foreign key
     test.address = foreign;
+    test.blah = @[@"1",@"2",@"3"];
+    test.blah = @[@"0",@[@1],@{@"2":@2},foreign];
+    test.hoho = @{@"array":test.blah,@"foreign":foreign,@"normal":@123456,@"date":[NSDate date]};
     
     test.isGirl = YES;
     test.like = 'I';

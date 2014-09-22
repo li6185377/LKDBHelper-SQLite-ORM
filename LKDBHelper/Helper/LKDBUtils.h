@@ -70,6 +70,18 @@ static NSString* const LKSQL_Mapping_Inherit          =   @"LKDBInherit";
 static NSString* const LKSQL_Mapping_Binding          =   @"LKDBBinding";
 static NSString* const LKSQL_Mapping_UserCalculate    =   @"LKDBUserCalculate";
 
+static NSString* const LKDB_TypeKey = @"DB_Type";
+
+static NSString* const LKDB_TypeKey_Model = @"DB_Type_Model";
+static NSString* const LKDB_TypeKey_JSON = @"DB_Type_JSON";
+static NSString* const LKDB_TypeKey_Combo = @"DB_Type_Combo";
+
+static NSString* const LKDB_ValueKey = @"DB_Value";
+
+static NSString* const LKDB_TableNameKey = @"DB_TableName";
+static NSString* const LKDB_ClassKey = @"DB_Class";
+static NSString* const LKDB_RowIdKey = @"DB_RowId";
+
 ///Object-c type converted to SQLite type  把Object-c 类型 转换为sqlite 类型
 extern NSString* LKSQLTypeFromObjcType(NSString *objcType);
 

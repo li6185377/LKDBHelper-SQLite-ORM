@@ -26,6 +26,8 @@
 @property BOOL isGirl;
 
 @property(strong,nonatomic)LKTestForeign* address;
+@property(strong,nonatomic)NSArray* blah;
+@property(strong,nonatomic)NSDictionary* hoho;
 
 @property char like;
 

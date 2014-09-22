@@ -27,7 +27,9 @@
     //[self setUserCalculateForPTN:@"NSDictionary"];
     
     //enable own calculations
-    [self setUserCalculateForCN:@"address"];
+    //[self setUserCalculateForCN:@"address"];
+    
+    
     
     //enable the column binding property name
     [self setTableColumnName:@"MyAge" bindingPropertyName:@"age"];
@@ -49,6 +51,10 @@
     return db;
 }
 
++(void)dbDidAlterTable:(LKDBHelper *)helper tableName:(NSString *)tableName addColumns:(NSArray *)columns
+{
+    LKErrorLog(@"your know %@",columns);
+}
 
 // 将要插入数据库
 +(BOOL)dbWillInsert:(NSObject *)entity

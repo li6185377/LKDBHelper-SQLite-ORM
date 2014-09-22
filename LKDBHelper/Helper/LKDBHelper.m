@@ -6,7 +6,6 @@
 //  Copyright (c) 2012年 linggan. All rights reserved.
 //
 
-
 #import "LKDBHelper.h"
 
 #define checkClassIsInvalid(modelClass)if([LKDBUtils checkStringIsEmpty:[modelClass getTableName]]){\
@@ -672,8 +671,9 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
     
     [self sqlString:query AddOder:orderBy offset:offset count:count];
     
+    NSString* db_tableName = [modelClass getTableName];
     //replace @t to model table name
-    NSString* replaceTableName = [NSString stringWithFormat:@" %@ ",[modelClass getTableName]];
+    NSString* replaceTableName = [NSString stringWithFormat:@" %@ ",db_tableName];
     if([query hasSuffix:@" @t"])
     {
         [query appendString:@" "];
@@ -698,7 +698,7 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
         }
         else
         {
-            results = [self executeResult:set Class:modelClass];
+            results = [self executeResult:set Class:modelClass tableName:db_tableName];
         }
         
         [set close];
@@ -708,16 +708,16 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
 -(NSMutableArray *)searchWithSQL:(NSString *)sql toClass:(Class)modelClass
 {
     //replace @t to model table name
-    NSString* tableName = [NSString stringWithFormat:@" %@ ",[modelClass getTableName]];
+    NSString* replaceString = [NSString stringWithFormat:@" %@ ",[modelClass getTableName]];
     if([sql hasSuffix:@" @t"]){
         sql = [sql stringByAppendingString:@" "];
     }
-    NSString* executeSQL = [sql stringByReplacingOccurrencesOfString:@" @t " withString:tableName options:NSCaseInsensitiveSearch range:NSMakeRange(0, sql.length)];
+    NSString* executeSQL = [sql stringByReplacingOccurrencesOfString:@" @t " withString:replaceString options:NSCaseInsensitiveSearch range:NSMakeRange(0, sql.length)];
     
     __block NSMutableArray* results = nil;
     [self executeDB:^(FMDatabase *db) {
         FMResultSet* set = [db executeQuery:executeSQL];
-        results = [self executeResult:set Class:modelClass];
+        results = [self executeResult:set Class:modelClass tableName:nil];
         [set close];
     }];
     return results;
@@ -758,7 +758,7 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
     }
     return array;
 }
-- (NSMutableArray *)executeResult:(FMResultSet *)set Class:(Class)modelClass
+- (NSMutableArray *)executeResult:(FMResultSet *)set Class:(Class)modelClass tableName:(NSString*)tableName
 {
     NSMutableArray* array = [NSMutableArray arrayWithCapacity:0];
     LKModelInfos* infos = [modelClass getModelInfos];
@@ -792,7 +792,7 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
                 }
             }
         }
-        
+        bindingModel.db_tableName = tableName;
         [modelClass dbDidSeleted:bindingModel];
         [array addObject:bindingModel];
     }

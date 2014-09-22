@@ -63,7 +63,12 @@ static char LKModelBase_Key_TableName;
 }
 -(NSString *)db_tableName
 {
-    return objc_getAssociatedObject(self, &LKModelBase_Key_TableName);
+    NSString* tableName = objc_getAssociatedObject(self, &LKModelBase_Key_TableName);
+    if(tableName.length == 0)
+    {
+        tableName = [self.class getTableName];
+    }
+    return tableName;
 }
 
 +(NSString *)getDBImagePathWithName:(NSString *)filename
@@ -81,9 +86,12 @@ static char LKModelBase_Key_TableName;
     return nil;
 }
 #pragma mark- Table Data Function 表数据
-+(NSDateFormatter*)getModelDateFormatter{
++(NSDateFormatter*)getModelDateFormatter
+{
     return nil;
 }
+
+///get
 -(id)modelGetValue:(LKDBProperty *)property
 {
     id value = [self valueForKey:property.propertyName];
@@ -177,37 +185,94 @@ static char LKModelBase_Key_TableName;
         
         returnValue = filename;
     }
-    
-    return returnValue;
-}
--(void)modelSetValue:(LKDBProperty *)property value:(id)value
-{
-    id modelValue = value;
-    NSString* columnType = property.propertyType;
-    if([columnType isEqualToString:@"NSString"])
+    else
     {
-        
-    }
-    else if([columnType isEqualToString:@"NSNumber"])
-    {
-        modelValue = [NSNumber numberWithDouble:[value doubleValue]];
-    }
-    else if([LKSQL_Convert_FloatType rangeOfString:columnType].location != NSNotFound)
-    {
-        modelValue = [NSNumber numberWithDouble:[value doubleValue]];
-    }
-    else if([LKSQL_Convert_IntType rangeOfString:columnType].location != NSNotFound)
-    {
-        if([columnType isEqualToString:@"long"])
+        if([value isKindOfClass:[NSArray class]])
         {
-            modelValue = [NSNumber numberWithLongLong:[value longLongValue]];
+            returnValue = [self db_jsonObjectFromArray:value];
+        }
+        else if([value isKindOfClass:[NSDictionary class]])
+        {
+            returnValue = [self db_jsonObjectFromDictionary:value];
         }
         else
         {
-            modelValue = [NSNumber numberWithInteger:[value intValue]];
+            returnValue = [self db_jsonObjectFromModel:value];
         }
+        returnValue = [self db_jsonStringFromObject:returnValue];
     }
-    else if([columnType isEqualToString:@"NSDate"])
+    
+    return returnValue;
+}
+
+///set
+-(void)modelSetValue:(LKDBProperty *)property value:(id)value
+{
+    ///参试获取属性的Class
+    Class columnClass = NSClassFromString(property.propertyType);
+    
+    id modelValue = value;
+    if([value length] == 0)
+    {
+        modelValue = nil;
+    }
+    else if(columnClass == nil)
+    {
+        ///当找不到 class 时，就是 基础类型 int,float CGRect 之类的
+        
+        NSString* columnType = property.propertyType;
+        if([LKSQL_Convert_FloatType rangeOfString:columnType].location != NSNotFound)
+        {
+            modelValue = [NSNumber numberWithDouble:[value doubleValue]];
+        }
+        else if([LKSQL_Convert_IntType rangeOfString:columnType].location != NSNotFound)
+        {
+            if([columnType isEqualToString:@"long"])
+            {
+                modelValue = [NSNumber numberWithLongLong:[value longLongValue]];
+            }
+            else
+            {
+                modelValue = [NSNumber numberWithInteger:[value intValue]];
+            }
+        }
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
+        else if([columnType isEqualToString:@"CGRect"])
+        {
+            modelValue = [NSValue valueWithCGRect:CGRectFromString(value)];
+        }
+        else if([columnType isEqualToString:@"CGPoint"])
+        {
+            modelValue = [NSValue valueWithCGPoint:CGPointFromString(value)];
+        }
+        else if([columnType isEqualToString:@"CGSize"])
+        {
+            modelValue = [NSValue valueWithCGSize:CGSizeFromString(value)];
+        }
+#else
+        else if([columnType hasSuffix:@"Rect"])
+        {
+            modelValue = [NSValue valueWithRect:NSRectFromString(value)];
+        }
+        else if([columnType hasSuffix:@"Point"])
+        {
+            modelValue = [NSValue valueWithPoint:NSPointFromString(value)];
+        }
+        else if([columnType hasSuffix:@"Size"])
+        {
+            modelValue = [NSValue valueWithSize:NSSizeFromString(value)];
+        }
+#endif
+    }
+    else if([columnClass isSubclassOfClass:[NSString class]])
+    {
+        
+    }
+    else if([columnClass isSubclassOfClass:[NSNumber class]])
+    {
+        modelValue = [NSNumber numberWithDouble:[value doubleValue]];
+    }
+    else if([columnClass isSubclassOfClass:[NSDate class]])
     {
         NSString* datestr = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSDateFormatter* formatter = [self.class getModelDateFormatter];
@@ -218,7 +283,7 @@ static char LKModelBase_Key_TableName;
             modelValue = [LKDBUtils dateWithString:datestr];
         }
     }
-    else if([columnType isEqualToString:NSStringFromClass([LKDBColor class])])
+    else if([columnClass isSubclassOfClass:[LKDBColor class]])
     {
         NSString* color = value;
         NSArray* array = [color componentsSeparatedByString:@","];
@@ -230,34 +295,7 @@ static char LKModelBase_Key_TableName;
         
         modelValue = [LKDBColor colorWithRed:r green:g blue:b alpha:a];
     }
-#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
-    else if([columnType isEqualToString:@"CGRect"])
-    {
-        modelValue = [NSValue valueWithCGRect:CGRectFromString(value)];
-    }
-    else if([columnType isEqualToString:@"CGPoint"])
-    {
-        modelValue = [NSValue valueWithCGPoint:CGPointFromString(value)];
-    }
-    else if([columnType isEqualToString:@"CGSize"])
-    {
-        modelValue = [NSValue valueWithCGSize:CGSizeFromString(value)];
-    }
-#else
-    else if([columnType hasSuffix:@"Rect"])
-    {
-        modelValue = [NSValue valueWithRect:NSRectFromString(value)];
-    }
-    else if([columnType hasSuffix:@"Point"])
-    {
-        modelValue = [NSValue valueWithPoint:NSPointFromString(value)];
-    }
-    else if([columnType hasSuffix:@"Size"])
-    {
-        modelValue = [NSValue valueWithSize:NSSizeFromString(value)];
-    }
-#endif
-    else if([columnType isEqualToString:NSStringFromClass([LKDBImage class])])
+    else if([columnClass isSubclassOfClass:[LKDBImage class]])
     {
         NSString* filename = value;
         NSString* filepath = [self.class getDBImagePathWithName:filename];
@@ -271,7 +309,7 @@ static char LKModelBase_Key_TableName;
             modelValue = nil;
         }
     }
-    else if([columnType isEqualToString:@"NSData"])
+    else if([columnClass isSubclassOfClass:[NSData class]])
     {
         NSString* filename = value;
         NSString* filepath = [self.class getDBDataPathWithName:filename];
@@ -285,9 +323,271 @@ static char LKModelBase_Key_TableName;
             modelValue = nil;
         }
     }
+    else
+    {
+        modelValue = [self db_modelWithJsonValue:value];
+        if([modelValue isKindOfClass:columnClass] == NO)
+        {
+            modelValue = nil;
+        }
+    }
     
     [self setValue:modelValue forKey:property.propertyName];
 }
+
+#pragma mark- 对 model NSArray NSDictionary 进行支持
+-(id)db_jsonObjectFromDictionary:(NSDictionary*)dic
+{
+    if([NSJSONSerialization isValidJSONObject:dic])
+    {
+        NSDictionary* bomb = @{LKDB_TypeKey:LKDB_TypeKey_JSON,LKDB_ValueKey:dic};
+        return bomb;
+    }
+    else
+    {
+        NSMutableDictionary* toDic = [NSMutableDictionary dictionary];
+        NSArray* allKeys = dic.allKeys;
+        for (int i = 0; i<allKeys.count; i++)
+        {
+            NSString* key = [allKeys objectAtIndex:i];
+            id obj = [dic objectForKey:key];
+            id jsonObject = [self db_jsonObjectWithObject:obj];
+            if(jsonObject)
+            {
+                [toDic setObject:jsonObject forKey:key];
+            }
+        }
+        
+        if(toDic.count)
+        {
+            NSDictionary* bomb = @{LKDB_TypeKey:LKDB_TypeKey_Combo,LKDB_ValueKey:toDic};
+            return bomb;
+        }
+    }
+    return nil;
+    
+}
+-(id)db_jsonObjectFromArray:(NSArray*)array
+{
+    if([NSJSONSerialization isValidJSONObject:array])
+    {
+        NSDictionary* bomb = @{LKDB_TypeKey:LKDB_TypeKey_JSON,LKDB_ValueKey:array};
+        return bomb;
+    }
+    else
+    {
+        NSMutableArray* toArray = [NSMutableArray array];
+        NSInteger count = array.count;
+        for (int i = 0; i < count; i++)
+        {
+            id obj = [array objectAtIndex:i];
+            id jsonObject = [self db_jsonObjectWithObject:obj];
+            if(jsonObject)
+            {
+                [toArray addObject:jsonObject];
+            }
+        }
+        
+        if(toArray.count)
+        {
+            NSDictionary* bomb = @{LKDB_TypeKey:LKDB_TypeKey_Combo,LKDB_ValueKey:toArray};
+            return bomb;
+        }
+    }
+    return nil;
+}
+///目前只支持 model、NSString、NSNumber 简单类型
+-(id)db_jsonObjectWithObject:(id)obj
+{
+    NSString* jsonObject = nil;
+    if ([obj isKindOfClass:[NSString class]] || [obj isKindOfClass:[NSNumber class]])
+    {
+        jsonObject = obj;
+    }
+    else if([obj isKindOfClass:[NSArray class]])
+    {
+        jsonObject = [self db_jsonObjectFromArray:obj];
+    }
+    else if([obj isKindOfClass:[NSDictionary class]])
+    {
+        jsonObject = [self db_jsonObjectFromArray:obj];
+    }
+    else
+    {
+        jsonObject = [self db_jsonObjectFromModel:obj];
+    }
+    
+    if(jsonObject == nil)
+    {
+        jsonObject = [obj description];
+    }
+    return jsonObject;
+}
+
+-(id)db_jsonObjectFromModel:(NSObject*)model
+{
+    Class clazz = model.class;
+    NSDictionary* jsonObject = nil;
+    if(model.rowid > 0)
+    {
+        jsonObject = @{LKDB_TypeKey:LKDB_TypeKey_Model,
+                       LKDB_TableNameKey:model.db_tableName,
+                       LKDB_ClassKey:NSStringFromClass(clazz),
+                       LKDB_RowIdKey:@(model.rowid)};
+    }
+    else
+    {
+        uint outCount = 0;
+        objc_property_t *properties = class_copyPropertyList(clazz, &outCount);
+        free(properties);
+        if(outCount > 0)
+        {
+            BOOL success = [model saveToDB];
+            if(success)
+            {
+                jsonObject = @{LKDB_TypeKey:LKDB_TypeKey_Model,
+                               LKDB_TableNameKey:model.db_tableName,
+                               LKDB_ClassKey:NSStringFromClass(clazz),
+                               LKDB_RowIdKey:@(model.rowid)};
+            }
+        }
+    }
+    return jsonObject;
+}
+-(NSString*)db_jsonStringFromObject:(NSObject*)jsonObject
+{
+    if(jsonObject && [NSJSONSerialization isValidJSONObject:jsonObject])
+    {
+        NSData* data = [NSJSONSerialization dataWithJSONObject:jsonObject options:0 error:nil];
+        if(data.length > 0)
+        {
+            NSString* jsonString = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+            return jsonString;
+        }
+    }
+    return nil;
+}
+-(id)db_modelWithJsonValue:(id)value
+{
+    NSData* jsonData = nil;
+    if([value isKindOfClass:[NSString class]])
+    {
+        jsonData = [value dataUsingEncoding:NSUTF8StringEncoding];
+    }
+    else if([value isKindOfClass:[NSData class]])
+    {
+        jsonData = value;
+    }
+    
+    if(jsonData.length > 0)
+    {
+        NSDictionary* jsonDic = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:nil];
+        return [self db_objectWithDictionary:jsonDic];
+    }
+    return nil;
+}
+-(id)db_objectWithArray:(NSArray*)array
+{
+    NSMutableArray* toArray = nil;
+    
+    NSInteger count = array.count;
+    for (int i=0; i<count; i++)
+    {
+        id value = [array objectAtIndex:i];
+        if([value isKindOfClass:[NSDictionary class]])
+        {
+            value = [self db_objectWithDictionary:value];
+        }
+        else if([value isKindOfClass:[NSArray class]])
+        {
+            value = [self db_objectWithArray:value];
+        }
+        
+        if(value)
+        {
+            if (toArray == nil)
+            {
+                toArray = [NSMutableArray array];
+            }
+            [toArray addObject:value];
+        }
+    }
+    
+    return toArray;
+}
+-(id)db_objectWithDictionary:(NSDictionary*)dic
+{
+    if(dic.count == 0)
+    {
+        return nil;
+    }
+    NSString* type = [dic objectForKey:LKDB_TypeKey];
+    if(type)
+    {
+        if([type isEqualToString:LKDB_TypeKey_Model])
+        {
+            Class clazz = NSClassFromString([dic objectForKey:LKDB_ClassKey]);
+            int rowid = [[dic objectForKey:LKDB_RowIdKey] intValue];
+            NSString* tableName = [dic objectForKey:LKDB_TableNameKey];
+            
+            NSArray* array = [[clazz getUsingLKDBHelper] searchWithSQL:[NSString stringWithFormat:@"select rowid,* from %@ where rowid=%d limit 1",tableName,rowid] toClass:clazz];
+            if(array.count > 0)
+            {
+                NSObject* result = [array objectAtIndex:0];
+                result.db_tableName = tableName;
+                return result;
+            }
+        }
+        else if([type isEqualToString:LKDB_TypeKey_JSON])
+        {
+            id value = [dic objectForKey:LKDB_ValueKey];
+            return value;
+        }
+        else if([type isEqualToString:LKDB_TypeKey_Combo])
+        {
+            id value = [dic objectForKey:LKDB_ValueKey];
+            if ([value isKindOfClass:[NSArray class]])
+            {
+                return [self db_objectWithArray:value];
+            }
+            else if([value isKindOfClass:[NSDictionary class]])
+            {
+                return [self db_objectWithDictionary:value];
+            }
+            else
+            {
+                return value;
+            }
+        }
+    }
+    else
+    {
+        NSArray* allKeys = dic.allKeys;
+        NSMutableDictionary* toDic = [NSMutableDictionary dictionary];
+        for (int i=0; i < allKeys.count; i++)
+        {
+            NSString* key = [allKeys objectAtIndex:i];
+            id value = [dic objectForKey:key];
+
+            id saveObj = value;
+            if([value isKindOfClass:[NSArray class]])
+            {
+                saveObj = [self db_objectWithArray:value];
+            }
+            else if([value isKindOfClass:[NSDictionary class]])
+            {
+                saveObj = [self db_objectWithDictionary:value];
+            }
+            
+            [toDic setObject:saveObj forKey:key];
+        }
+        return toDic;
+    }
+    return nil;
+}
+
+
+#pragma mark-
 -(void)userSetValueForModel:(LKDBProperty *)property value:(id)value{}
 -(id)userGetValueForModel:(LKDBProperty *)property
 {
