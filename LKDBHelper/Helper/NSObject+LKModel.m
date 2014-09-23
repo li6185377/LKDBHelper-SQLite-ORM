@@ -247,52 +247,63 @@ static char LKModelBase_Key_Inserting;
         NSString* columnType = property.propertyType;
         if([LKSQL_Convert_FloatType rangeOfString:columnType].location != NSNotFound)
         {
-            modelValue = [NSNumber numberWithDouble:[value doubleValue]];
+            double number = [value doubleValue];
+            modelValue = [NSNumber numberWithDouble:number];
         }
         else if([LKSQL_Convert_IntType rangeOfString:columnType].location != NSNotFound)
         {
             if([columnType isEqualToString:@"long"])
             {
-                modelValue = [NSNumber numberWithLongLong:[value longLongValue]];
+                long long number = [value longLongValue];
+                modelValue = [NSNumber numberWithLongLong:number];
             }
             else
             {
-                modelValue = [NSNumber numberWithInteger:[value intValue]];
+                int number = [value intValue];
+                modelValue = [NSNumber numberWithInteger:number];
             }
         }
 #ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
         else if([columnType isEqualToString:@"CGRect"])
         {
-            modelValue = [NSValue valueWithCGRect:CGRectFromString(value)];
+            CGRect rect = CGRectFromString(value);
+            modelValue = [NSValue valueWithCGRect:rect];
         }
         else if([columnType isEqualToString:@"CGPoint"])
         {
-            modelValue = [NSValue valueWithCGPoint:CGPointFromString(value)];
+            CGPoint point = CGPointFromString(value);
+            modelValue = [NSValue valueWithCGPoint:point];
         }
         else if([columnType isEqualToString:@"CGSize"])
         {
-            modelValue = [NSValue valueWithCGSize:CGSizeFromString(value)];
+            CGSize size = CGSizeFromString(value);
+            modelValue = [NSValue valueWithCGSize:size];
         }
         else if([columnType isEqualToString:@"_NSRange"])
         {
-            modelValue = [NSValue valueWithRange:NSRangeFromString(value)];
+            NSRange range = NSRangeFromString(value);
+            modelValue = [NSValue valueWithRange:range];
         }
 #else
         else if([columnType hasSuffix:@"Rect"])
         {
-            modelValue = [NSValue valueWithRect:NSRectFromString(value)];
+            NSRect rect = NSRectFromString(value);
+            modelValue = [NSValue valueWithRect:rect];
         }
         else if([columnType hasSuffix:@"Point"])
         {
-            modelValue = [NSValue valueWithPoint:NSPointFromString(value)];
+            NSPoint point = NSPointFromString(value);
+            modelValue = [NSValue valueWithPoint:point];
         }
         else if([columnType hasSuffix:@"Size"])
         {
-            modelValue = [NSValue valueWithSize:NSSizeFromString(value)];
+            NSSize size = NSSizeFromString(value);
+            modelValue = [NSValue valueWithSize:size];
         }
         else if([columnType hasSuffix:@"Range"])
         {
-            modelValue = [NSValue valueWithRange:NSRangeFromString(value)];
+            NSRange range = NSRangeFromString(value);
+            modelValue = [NSValue valueWithRange:range];
         }
 #endif
     }
@@ -366,7 +377,6 @@ static char LKModelBase_Key_Inserting;
     
     [self setValue:modelValue forKey:property.propertyName];
 }
-
 #pragma mark- 对 model NSArray NSDictionary 进行支持
 -(id)db_jsonObjectFromDictionary:(NSDictionary*)dic
 {
@@ -618,6 +628,10 @@ static char LKModelBase_Key_Inserting;
     return nil;
 }
 #pragma mark- your can overwrite
+-(void)setNilValueForKey:(NSString *)key
+{
+    NSLog(@"nil 这种设置到了 int 等基础类型中");
+}
 -(id)valueForUndefinedKey:(NSString *)key
 {
     NSLog(@"你有get方法没实现");
@@ -796,7 +810,7 @@ static char LKModelBase_Key_Inserting;
         NSString *propertyType = [NSString stringWithCString: property_getAttributes(property) encoding:NSUTF8StringEncoding];
         
         ///过滤只读属性
-        if ([propertyType containsString:@",R,"] || [propertyType hasSuffix:@",R"])
+        if ([propertyType rangeOfString:@",R,"].length > 0 || [propertyType hasSuffix:@",R"])
         {
             NSString* setMethodString = [NSString stringWithFormat:@"set%@:",[propertyName capitalizedString]];
             SEL setSEL = NSSelectorFromString(setMethodString);
