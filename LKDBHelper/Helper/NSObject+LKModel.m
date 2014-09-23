@@ -19,36 +19,38 @@
 
 static char LKModelBase_Key_RowID;
 static char LKModelBase_Key_TableName;
+static char LKModelBase_Key_Inserting;
 
 @implementation NSObject (LKModel)
 
 +(LKDBHelper *)getUsingLKDBHelper
 {
-    static LKDBHelper* helper;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        helper = [[LKDBHelper alloc]init];
-    });
-    return helper;
+    ///ios8 能获取系统类的属性了  所以没有办法判断属性数量来区分自定义类和系统类
+    ///所以要 重载该方法 才能进行数据库操作
+    return nil;
 }
 #pragma mark Tabel Structure Function 表结构
 +(NSString *)getTableName
 {
     return NSStringFromClass(self);
 }
+
 +(NSString *)getPrimaryKey
 {
     return @"rowid";
 }
+
 +(NSArray *)getPrimaryKeyUnionArray
 {
     return nil;
 }
 
+
 +(void)columnAttributeWithProperty:(LKDBProperty *)property
 {
     //overwrite
 }
+#pragma 属性
 -(void)setRowid:(int)rowid
 {
     objc_setAssociatedObject(self, &LKModelBase_Key_RowID,[NSNumber numberWithInt:rowid], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -57,6 +59,7 @@ static char LKModelBase_Key_TableName;
 {
     return [objc_getAssociatedObject(self, &LKModelBase_Key_RowID) intValue];
 }
+
 -(void)setDb_tableName:(NSString *)db_tableName
 {
     objc_setAssociatedObject(self, &LKModelBase_Key_TableName,db_tableName, OBJC_ASSOCIATION_COPY_NONATOMIC);
@@ -70,7 +73,20 @@ static char LKModelBase_Key_TableName;
     }
     return tableName;
 }
-
+-(BOOL)db_inserting
+{
+   return [objc_getAssociatedObject(self, &LKModelBase_Key_Inserting) boolValue];
+}
+-(void)setDb_inserting:(BOOL)db_inserting
+{
+    NSNumber* number = nil;
+    if(db_inserting)
+    {
+        number = [NSNumber numberWithBool:YES];
+    }
+    objc_setAssociatedObject(self, &LKModelBase_Key_Inserting,number, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+#pragma 无关紧要的
 +(NSString *)getDBImagePathWithName:(NSString *)filename
 {
     NSString* dir = [NSString stringWithFormat:@"dbimg/%@",NSStringFromClass(self)];
@@ -456,7 +472,7 @@ static char LKModelBase_Key_TableName;
         uint outCount = 0;
         objc_property_t *properties = class_copyPropertyList(clazz, &outCount);
         free(properties);
-        if(outCount > 0)
+        if(outCount > 0 && model.db_inserting == NO)
         {
             BOOL success = [model saveToDB];
             if(success)
@@ -584,7 +600,7 @@ static char LKModelBase_Key_TableName;
         {
             NSString* key = [allKeys objectAtIndex:i];
             id value = [dic objectForKey:key];
-
+            
             id saveObj = value;
             if([value isKindOfClass:[NSArray class]])
             {
@@ -601,7 +617,16 @@ static char LKModelBase_Key_TableName;
     }
     return nil;
 }
-
+#pragma mark- your can overwrite
+-(id)valueForUndefinedKey:(NSString *)key
+{
+    NSLog(@"你有get方法没实现");
+    return nil;
+}
+-(void)setValue:(id)value forUndefinedKey:(NSString *)key
+{
+    NSLog(@"你有set方法没实现");
+}
 
 #pragma mark-
 -(void)userSetValueForModel:(LKDBProperty *)property value:(id)value{}
@@ -756,7 +781,7 @@ static char LKModelBase_Key_TableName;
     id respondInstance = nil;
     if(outCount > 0)
     {
-       respondInstance = [[self alloc]init];
+        respondInstance = [[self alloc]init];
     }
     for (i = 0; i < outCount; i++) {
         objc_property_t property = properties[i];
@@ -769,9 +794,9 @@ static char LKModelBase_Key_TableName;
             continue;
         }
         NSString *propertyType = [NSString stringWithCString: property_getAttributes(property) encoding:NSUTF8StringEncoding];
-
+        
         ///过滤只读属性
-        if ([propertyType containsString:@",R,"])
+        if ([propertyType containsString:@",R,"] || [propertyType hasSuffix:@",R"])
         {
             NSString* setMethodString = [NSString stringWithFormat:@"set%@:",[propertyName capitalizedString]];
             SEL setSEL = NSSelectorFromString(setMethodString);

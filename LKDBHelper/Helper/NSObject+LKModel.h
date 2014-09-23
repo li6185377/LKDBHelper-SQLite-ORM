@@ -17,23 +17,26 @@
 @interface NSObject(LKTabelStructure)
 
 /**
- *  overwrite in your models
+ *  overwrite in your models(option)
  *
  *  @return # table name #
  */
 +(NSString*)getTableName;
 
 /**
- *  If you set it will use it as a table name
+ *  if you set it will use it as a table name
  */
 @property(copy,nonatomic)NSString* db_tableName;
 
 /**
- *  overwrite in your models set column attribute
- *
- *  @param property infos
+ *  the model is inserting ..
  */
-+(void)columnAttributeWithProperty:(LKDBProperty*)property;
+@property(readonly,nonatomic)BOOL db_inserting;
+
+/**
+ *  sqlite comes with rowid
+ */
+@property int rowid;
 
 /**
  *  overwrite in your models, if your table has primary key
@@ -51,15 +54,22 @@
  */
 +(NSArray*) getPrimaryKeyUnionArray;
 
+
+
+
+
 /**
- *  sqlite comes with rowid
+ *  overwrite in your models set column attribute
+ *
+ *  @param property infos
  */
-@property int rowid;
++(void)columnAttributeWithProperty:(LKDBProperty*)property;
+
 
 /**
  *	@brief   get saved pictures and data file path,can overwirte
  
- 获取保存的 图片和数据的文件路径
+    获取保存的 图片和数据的文件路径
  */
 +(NSString*)getDBImagePathWithName:(NSString*)filename;
 +(NSString*)getDBDataPathWithName:(NSString*)filename;

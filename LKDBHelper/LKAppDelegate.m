@@ -53,7 +53,11 @@
     addText(@"示例 开始 example start \n\n");
     
     //清空数据库
+    //一定要重载 getUsingLKDBHelper 这个方法
+
+    //must be overloaded getUsingLKDBHelper method
     LKDBHelper* globalHelper = [LKTest getUsingLKDBHelper];
+    
     [globalHelper dropAllTable];
     
     addText(@"LKTest create table sql :\n%@\n",[LKTest getCreateTableSQL]);

@@ -771,6 +771,11 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
             
             NSString* sqlName = [set columnNameForIndex:i];
             LKDBProperty* property = [infos objectWithSqlColumnName:sqlName];
+
+            if(property == nil)
+            {
+                continue;
+            }
             
             BOOL isUserCalculate = [property.type isEqualToString:LKSQL_Mapping_UserCalculate];
             if([[sqlName lowercaseString] isEqualToString:@"rowid"] && isUserCalculate==NO)
@@ -846,6 +851,9 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
         LKErrorLog(@"your cancel %@ insert",model);
         return NO;
     }
+    
+    [model performSelector:@selector(setDb_inserting:) withObject:@YES];
+    
     NSString* db_tableName = model.db_tableName?:[modelClass getTableName];
     
     if([_createdTableNames containsObject:db_tableName] == NO)
@@ -905,6 +913,8 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
     }];
     
     model.rowid = (int)lastInsertRowId;
+    
+    [model performSelector:@selector(setDb_inserting:) withObject:nil];
     if(execute == NO)
     {
         LKErrorLog(@"database insert fail %@, sql:%@",NSStringFromClass(modelClass),insertSQL);
