@@ -752,6 +752,12 @@ static char LKModelBase_Key_TableName;
 {
     unsigned int outCount, i;
     objc_property_t *properties = class_copyPropertyList(self, &outCount);
+    
+    id respondInstance = nil;
+    if(outCount > 0)
+    {
+       respondInstance = [[self alloc]init];
+    }
     for (i = 0; i < outCount; i++) {
         objc_property_t property = properties[i];
         NSString *propertyName = [NSString stringWithCString:property_getName(property) encoding:NSUTF8StringEncoding];
@@ -762,10 +768,21 @@ static char LKModelBase_Key_TableName;
         {
             continue;
         }
+        NSString *propertyType = [NSString stringWithCString: property_getAttributes(property) encoding:NSUTF8StringEncoding];
+
+        ///过滤只读属性
+        if ([propertyType containsString:@",R,"])
+        {
+            NSString* setMethodString = [NSString stringWithFormat:@"set%@:",[propertyName capitalizedString]];
+            SEL setSEL = NSSelectorFromString(setMethodString);
+            ///有set方法就不过滤了
+            if([respondInstance respondsToSelector:setSEL] == NO)
+            {
+                continue;
+            }
+        }
         
         [pronames addObject:propertyName];
-        
-        NSString *propertyType = [NSString stringWithCString: property_getAttributes(property) encoding:NSUTF8StringEncoding];
         /*
          c char
          i int
@@ -829,6 +846,7 @@ static char LKModelBase_Key_TableName;
             }
         }
     }
+    respondInstance = nil;
     free(properties);
     if([self isContainParent] && [self superclass] != [NSObject class])
     {
