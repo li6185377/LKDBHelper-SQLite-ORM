@@ -851,8 +851,11 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
         LKErrorLog(@"your cancel %@ insert",model);
         return NO;
     }
-#pragma clang diagnostic fatal   "-Wundeclared-selector";
+    
+    _Pragma("clang diagnostic push")
+    _Pragma("clang diagnostic ignored \"-Warc-performSelector-leaks\"")
     [model performSelector:@selector(setDb_inserting:) withObject:@YES];
+    _Pragma("clang diagnostic pop")
     
     NSString* db_tableName = model.db_tableName?:[modelClass getTableName];
     
@@ -913,9 +916,12 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
     }];
     
     model.rowid = (int)lastInsertRowId;
-    
-#pragma clang diagnostic fatal   "-Wundeclared-selector";
+
+    _Pragma("clang diagnostic push")
+    _Pragma("clang diagnostic ignored \"-Warc-performSelector-leaks\"")
     [model performSelector:@selector(setDb_inserting:) withObject:nil];
+    _Pragma("clang diagnostic pop")
+    
     if(execute == NO)
     {
         LKErrorLog(@"database insert fail %@, sql:%@",NSStringFromClass(modelClass),insertSQL);
