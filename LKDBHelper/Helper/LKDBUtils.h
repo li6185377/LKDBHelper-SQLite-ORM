@@ -44,7 +44,7 @@
 #   define LKErrorLog(...)
 #endif
 
-#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_5_0 || __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_6
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_5_0 || __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_7
 #define LKDBWeak weak
 #else
 #define LKDBWeak unsafe_unretained
