@@ -30,6 +30,25 @@ pod 'LKDBHelper', :head
 
 ##Basic usage
 
+__Because IOS8 upgrade , You must override + (LKDBHelper *) getUsingLKDBHelper method__
+```objective-c
+@implementation LKTest
++(LKDBHelper *)getUsingLKDBHelper
+{
+    /// this is a demo
+    static LKDBHelper* db;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSString* dbpath = [NSHomeDirectory() stringByAppendingPathComponent:@"asd/asd.db"];
+        db = [[LKDBHelper alloc]initWithDBPath:dbpath];
+        //or
+        //db = [[LKDBHelper alloc]init];
+    });
+    return db;
+}
+...
+```
+
 1 . Create a new Objective-C class for your data model
 
 ```objective-c
@@ -107,27 +126,27 @@ pod 'LKDBHelper', :head
 ```objective-c
     select:
         
-        NSMutableArray* array = [globalHelper search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
-        for (NSObject* obj in array) {
+        NSMutableArray* array = [LKTest searchWithWhere:nil orderBy:nil offset:0 count:100];
+        for (id obj in arraySync) {
             addText(@"%@",[obj printAllPropertys]);
         }
         
     delete:
         
-        [globalHelper deleteToDB:test];
+        [LKTest deleteToDB:test];
         
     update:
         
         test.name = "rename";
-        [globalHelper updateToDB:test where:nil];
+        [LKTest updateToDB:test where:nil];
         
     isExists:
         
-        [globalHelper isExistsModel:test];
+        [LKTest isExistsWithModel:test];
     
     rowCount:
         
-        [globalHelper rowCount:[LKTest class] where:nil];
+        [LKTest rowCountWithWhere:nil];
         
      
 ```
@@ -152,7 +171,7 @@ pod 'LKDBHelper', :head
 
 ##table mapping
 
-overwirte getTableMapping Function
+overwirte getTableMapping Function (option)
 
 ```objective-c
 +(NSDictionary *)getTableMapping
@@ -167,22 +186,25 @@ overwirte getTableMapping Function
 }
 ```
 
-##table update
+##table update (option)
 
 ```objective-c
 +(void)dbDidAlterTable:(LKDBHelper *)helper tableName:(NSString *)tableName addColumns:(NSArray *)columns
 {
-    if([columns containsObject:@"error"])
+    for (int i=0; i<columns.count; i++)
     {
-        [helper executeDB:^(FMDatabase *db) {
-            NSString* sql = [NSString stringWithFormat:@"update %@ set error = name",tableName];
-            [db executeUpdate:sql];
-        }];
+        LKDBProperty* p = [columns objectAtIndex:i];
+        if([p.propertyName isEqualToString:@"error"])
+        {
+            [helper executeDB:^(FMDatabase *db) {
+                NSString* sql = [NSString stringWithFormat:@"update %@ set error = name",tableName];
+                [db executeUpdate:sql];
+            }];
+        }
     }
-    LKErrorLog(@"your know %@",columns);
 }
 ```
-## set column attribute
+## set column attribute (option)
 
 ```objective-c
 +(void)columnAttributeWithProperty:(LKDBProperty *)property
