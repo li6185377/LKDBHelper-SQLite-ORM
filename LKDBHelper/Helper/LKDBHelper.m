@@ -851,7 +851,7 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
         LKErrorLog(@"your cancel %@ insert",model);
         return NO;
     }
-    
+#pragma clang diagnostic fatal   "-Wundeclared-selector";
     [model performSelector:@selector(setDb_inserting:) withObject:@YES];
     
     NSString* db_tableName = model.db_tableName?:[modelClass getTableName];
@@ -914,6 +914,7 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
     
     model.rowid = (int)lastInsertRowId;
     
+#pragma clang diagnostic fatal   "-Wundeclared-selector";
     [model performSelector:@selector(setDb_inserting:) withObject:nil];
     if(execute == NO)
     {
