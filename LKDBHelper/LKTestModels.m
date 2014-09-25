@@ -10,6 +10,20 @@
 
 @implementation LKTest
 
+//重载选择 使用的LKDBHelper
++(LKDBHelper *)getUsingLKDBHelper
+{
+    static LKDBHelper* db;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSString* dbpath = [NSHomeDirectory() stringByAppendingPathComponent:@"asd/asd.db"];
+        db = [[LKDBHelper alloc]initWithDBPath:dbpath];
+        //or
+        //        db = [[LKDBHelper alloc]init];
+    });
+    return db;
+}
+
 //在类 初始化的时候
 +(void)initialize
 {
@@ -29,26 +43,9 @@
     //enable own calculations
     //[self setUserCalculateForCN:@"address"];
     
-    
-    
     //enable the column binding property name
     [self setTableColumnName:@"MyAge" bindingPropertyName:@"age"];
     [self setTableColumnName:@"MyDate" bindingPropertyName:@"date"];
-    
-    //You can create a table here
-    //[[self getUsingLKDBHelper] createTableWithModelClass:self];
-}
-
-//重载可以选择 使用的LKDBHelper
-+(LKDBHelper *)getUsingLKDBHelper
-{
-    static LKDBHelper* db;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        NSString* dbpath = [NSHomeDirectory() stringByAppendingPathComponent:@"asd/asd.db"];
-        db = [[LKDBHelper alloc]initWithDBPath:dbpath];
-    });
-    return db;
 }
 
 +(void)dbDidAlterTable:(LKDBHelper *)helper tableName:(NSString *)tableName addColumns:(NSArray *)columns
