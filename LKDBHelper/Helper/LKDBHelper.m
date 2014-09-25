@@ -16,6 +16,10 @@ return NO;}
 NSString* _model_tableName = model.db_tableName?:[model.class getTableName];\
 if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is invalid!",_model_tableName);return NO;}}
 
+@interface NSObject(LKTabelStructure_Private)
+-(void)setDb_inserting:(BOOL)db_inserting;
+@end
+
 @interface LKDBWeakObject : NSObject
 @property(LKDBWeak,nonatomic)LKDBHelper* obj;
 @end
@@ -851,11 +855,8 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
         LKErrorLog(@"your cancel %@ insert",model);
         return NO;
     }
-    
-    _Pragma("clang diagnostic push")
-    _Pragma("clang diagnostic ignored \"-Warc-performSelector-leaks\"")
-    [model performSelector:@selector(setDb_inserting:) withObject:@YES];
-    _Pragma("clang diagnostic pop")
+
+    [model setDb_inserting:YES];
     
     NSString* db_tableName = model.db_tableName?:[modelClass getTableName];
     
@@ -916,11 +917,8 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
     }];
     
     model.rowid = (int)lastInsertRowId;
-
-    _Pragma("clang diagnostic push")
-    _Pragma("clang diagnostic ignored \"-Warc-performSelector-leaks\"")
-    [model performSelector:@selector(setDb_inserting:) withObject:nil];
-    _Pragma("clang diagnostic pop")
+    
+    [model setDb_inserting:NO];
     
     if(execute == NO)
     {
