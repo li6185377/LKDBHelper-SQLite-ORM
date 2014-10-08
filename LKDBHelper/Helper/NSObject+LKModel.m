@@ -472,10 +472,7 @@ static char LKModelBase_Key_Inserting;
     NSDictionary* jsonObject = nil;
     if(model.rowid > 0)
     {
-        jsonObject = @{LKDB_TypeKey:LKDB_TypeKey_Model,
-                       LKDB_TableNameKey:model.db_tableName,
-                       LKDB_ClassKey:NSStringFromClass(clazz),
-                       LKDB_RowIdKey:@(model.rowid)};
+        jsonObject = [self db_readInfoWithModel:model class:clazz];
     }
     else
     {
@@ -487,15 +484,28 @@ static char LKModelBase_Key_Inserting;
             BOOL success = [model saveToDB];
             if(success)
             {
-                jsonObject = @{LKDB_TypeKey:LKDB_TypeKey_Model,
-                               LKDB_TableNameKey:model.db_tableName,
-                               LKDB_ClassKey:NSStringFromClass(clazz),
-                               LKDB_RowIdKey:@(model.rowid)};
+                jsonObject = [self db_readInfoWithModel:model class:clazz];
             }
         }
     }
     return jsonObject;
 }
+-(NSDictionary*)db_readInfoWithModel:(NSObject*)model class:(Class)clazz
+{
+    NSMutableDictionary* jsonObject = [NSMutableDictionary dictionary];
+    [jsonObject setObject:LKDB_TypeKey_Model forKey:LKDB_TypeKey];
+    [jsonObject setObject:model.db_tableName forKey:LKDB_TableNameKey];
+    [jsonObject setObject:NSStringFromClass(clazz) forKey:LKDB_ClassKey];
+    [jsonObject setObject:@(model.rowid) forKey:LKDB_RowIdKey];
+    
+    NSDictionary* dic = [model db_getPrimaryKeysValues];
+    if(dic.count > 0 && [NSJSONSerialization isValidJSONObject:dic])
+    {
+        [jsonObject setObject:dic forKey:LKDB_PValueKey];
+    }
+    return jsonObject;
+}
+
 -(NSString*)db_jsonStringFromObject:(NSObject*)jsonObject
 {
     if(jsonObject && [NSJSONSerialization isValidJSONObject:jsonObject])
@@ -572,12 +582,50 @@ static char LKModelBase_Key_Inserting;
             int rowid = [[dic objectForKey:LKDB_RowIdKey] intValue];
             NSString* tableName = [dic objectForKey:LKDB_TableNameKey];
             
-            NSArray* array = [[clazz getUsingLKDBHelper] searchWithSQL:[NSString stringWithFormat:@"select rowid,* from %@ where rowid=%d limit 1",tableName,rowid] toClass:clazz];
-            if(array.count > 0)
+            NSString* where = nil;
+            
+            NSString* rowCountWhere = [NSString stringWithFormat:@"select count(rowid) from %@ where rowid=%d limit 1",tableName,rowid];
+            int result = [[[clazz getUsingLKDBHelper] executeScalarWithSQL:rowCountWhere arguments:nil] intValue];
+            if(result > 0)
             {
-                NSObject* result = [array objectAtIndex:0];
-                result.db_tableName = tableName;
-                return result;
+                where = [NSString stringWithFormat:@"select rowid,* from %@ where rowid=%d limit 1",tableName,rowid];
+            }
+            else
+            {
+                NSDictionary* pv = [dic objectForKey:LKDB_PValueKey];
+                if(pv.count > 0)
+                {
+                    BOOL isNeedAddDot = NO;
+                    NSMutableString* sb = [NSMutableString stringWithFormat:@"select rowid,* from %@ where",tableName];
+
+                    NSArray* allKeys = pv.allKeys;
+                    for (NSString* key in allKeys)
+                    {
+                        id obj = [pv objectForKey:key];
+                        if(isNeedAddDot)
+                        {
+                            [sb appendString:@" and"];
+                        }
+                        [sb appendFormat:@" %@ = '%@'",key,obj];
+                        
+                        isNeedAddDot = YES;
+                    }
+                    
+                    [sb appendString:@" limit 1"];
+                    
+                    where = [NSString stringWithString:sb];
+                }
+            }
+            
+            if(where)
+            {
+                NSArray* array = [[clazz getUsingLKDBHelper] searchWithSQL:where toClass:clazz];
+                if(array.count > 0)
+                {
+                    NSObject* result = [array objectAtIndex:0];
+                    result.db_tableName = tableName;
+                    return result;
+                }
             }
         }
         else if([type isEqualToString:LKDB_TypeKey_JSON])
@@ -649,7 +697,30 @@ static char LKModelBase_Key_Inserting;
     return nil;
 }
 
-
+-(NSDictionary *)db_getPrimaryKeysValues
+{
+    LKModelInfos* infos = [self.class getModelInfos];
+    NSArray* array = infos.primaryKeys;
+    NSMutableDictionary* dic = [NSMutableDictionary dictionary];
+    for (NSString* pname in array)
+    {
+        LKDBProperty* property = [infos objectWithSqlColumnName:pname];
+        id value = nil;
+        if([property.type isEqualToString:LKSQL_Mapping_UserCalculate])
+        {
+           value = [self userGetValueForModel:property];
+        }
+        else
+        {
+           value = [self modelGetValue:property];
+        }
+        if(value)
+        {
+            [dic setObject:value forKey:property.sqlColumnName];
+        }
+    }
+    return dic;
+}
 //主键值 是否为空
 -(BOOL)singlePrimaryKeyValueIsEmpty
 {

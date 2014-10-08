@@ -81,6 +81,7 @@ static NSString* const LKDB_ValueKey = @"DB_Value";
 static NSString* const LKDB_TableNameKey = @"DB_TableName";
 static NSString* const LKDB_ClassKey = @"DB_Class";
 static NSString* const LKDB_RowIdKey = @"DB_RowId";
+static NSString* const LKDB_PValueKey = @"DB_PKeyValue";
 
 ///Object-c type converted to SQLite type  把Object-c 类型 转换为sqlite 类型
 extern NSString* LKSQLTypeFromObjcType(NSString *objcType);
