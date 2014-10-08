@@ -74,7 +74,6 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
     }
     return nil;
 }
-
 - (instancetype)init
 {
     return [self initWithDBName:@"LKDB"];
@@ -1227,6 +1226,10 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
 -(BOOL)createTableWithModelClass:(Class)modelClass
 {
     return [self _createTableWithModelClass:modelClass tableName:[modelClass getTableName]];
+}
++(LKDBHelper*)getUsingLKDBHelper
+{
+    return [[LKDBHelper alloc]init];
 }
 @end
 
