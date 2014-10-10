@@ -5,6 +5,9 @@ thread-safe and not afraid of recursive deadlock
 
 QQ群号 113767274  有什么问题或者改进的地方大家一起讨论
 
+推荐个  json 和 model  互转非常好用的工具类 https://github.com/dcty/YYJSON
+支持 NSData 直接转换成 model array
+
 #Big Upgrade 2.0
 
 Supported  __NSArray__,__NSDictionary__, __ModelClass__, __NSNumber__, __NSString__, __NSDate__, __NSData__, __UIColor__, __UIImage__, __CGRect__, __CGPoint__, __CGSize__, __NSRange__, __int__,__char__,__float__, __double__, __long__.. attribute to insert and select automation.
