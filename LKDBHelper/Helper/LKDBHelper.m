@@ -775,7 +775,7 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
             NSString* sqlName = [set columnNameForIndex:i];
             LKDBProperty* property = [infos objectWithSqlColumnName:sqlName];
 
-            if(property == nil)
+            if([sqlName isEqualToString:@"rowid"] == NO && property == nil)
             {
                 continue;
             }
