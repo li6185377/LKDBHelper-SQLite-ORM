@@ -10,9 +10,11 @@
 #import "LKDBHelper.h"
 
 #ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
+#import <UIKit/UIKit.h>
 #define LKDBImage UIImage
 #define LKDBColor UIColor
 #else
+#import <AppKit/AppKit.h>
 #define LKDBImage NSImage
 #define LKDBColor NSColor
 #endif
