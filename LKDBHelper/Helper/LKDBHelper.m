@@ -449,16 +449,8 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
 
     LKModelInfos* infos = [modelClass getModelInfos];
     NSArray* primaryKeys = infos.primaryKeys;
-    BOOL isAutoinc = NO;
-    if(primaryKeys.count == 1)
-    {
-        //主键只有一个 并且是 int 类型 则设置为自增长
-        NSString* primaryType = [infos objectWithSqlColumnName:[primaryKeys lastObject]].sqlColumnType;
-        if([primaryType isEqualToString:LKSQL_Type_Int])
-        {
-            isAutoinc = YES;
-        }
-    }
+    NSString* rowidAliasName = [modelClass db_rowidAliasName];
+    
     NSMutableString* table_pars = [NSMutableString string];
     for (int i=0; i<infos.count; i++)
     {
@@ -501,9 +493,9 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
         {
             [table_pars appendFormat:@" %@ %@",LKSQL_Attribute_Default,property.defaultValue];
         }
-        if(isAutoinc)
+        if(rowidAliasName.length > 0)
         {
-            if([property.sqlColumnName isEqualToString:[primaryKeys lastObject]])
+            if([property.sqlColumnName isEqualToString:rowidAliasName])
             {
                 [table_pars appendString:@" primary key autoincrement"];
             }
@@ -512,7 +504,7 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
     NSMutableString* pksb = [NSMutableString string];
 
     ///联合主键
-    if(isAutoinc == NO)
+    if(rowidAliasName.length == 0)
     {
         if(primaryKeys.count>0)
         {
@@ -715,11 +707,12 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
     if([sql hasSuffix:@" @t"]){
         sql = [sql stringByAppendingString:@" "];
     }
-    NSString* executeSQL = [sql stringByReplacingOccurrencesOfString:@" @t " withString:replaceString options:NSCaseInsensitiveSearch range:NSMakeRange(0, sql.length)];
+    sql = [sql stringByReplacingOccurrencesOfString:@" @t " withString:replaceString];
+    sql = [sql stringByReplacingOccurrencesOfString:@" from " withString:@",rowid from "];
     
     __block NSMutableArray* results = nil;
     [self executeDB:^(FMDatabase *db) {
-        FMResultSet* set = [db executeQuery:executeSQL];
+        FMResultSet* set = [db executeQuery:sql];
         results = [self executeResult:set Class:modelClass tableName:nil];
         [set close];
     }];
@@ -766,7 +759,10 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
     NSMutableArray* array = [NSMutableArray arrayWithCapacity:0];
     LKModelInfos* infos = [modelClass getModelInfos];
     int columnCount = [set columnCount];
-    while ([set next]) {
+    
+    ///当主键是int类型时 会替换掉rowid
+    NSString* rowidAliasName = [modelClass db_rowidAliasName];
+    while ([set next]){
         
         NSObject* bindingModel = [[modelClass alloc]init];
         
@@ -774,23 +770,29 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
             
             NSString* sqlName = [set columnNameForIndex:i];
             LKDBProperty* property = [infos objectWithSqlColumnName:sqlName];
-
-            if([sqlName isEqualToString:@"rowid"] == NO && property == nil)
+            
+            BOOL isRowid = [[sqlName lowercaseString] isEqualToString:@"rowid"];
+            if (isRowid == NO && property == nil)
             {
                 continue;
             }
             
-            BOOL isUserCalculate = [property.type isEqualToString:LKSQL_Mapping_UserCalculate];
-            if([[sqlName lowercaseString] isEqualToString:@"rowid"] && isUserCalculate==NO)
+            if (isRowid && (property == nil || [property.sqlColumnType isEqualToString:LKSQL_Type_Int]))
             {
                 bindingModel.rowid = [set intForColumnIndex:i];
             }
             else
             {
+                BOOL isUserCalculate = [property.type isEqualToString:LKSQL_Mapping_UserCalculate];
                 if(property.propertyName && isUserCalculate == NO)
                 {
                     NSString* sqlValue = [set stringForColumnIndex:i];
                     [bindingModel modelSetValue:property value:sqlValue];
+                    
+                    if([rowidAliasName isEqualToString:sqlName])
+                    {
+                        bindingModel.rowid = [set intForColumnIndex:i];
+                    }
                 }
                 else
                 {

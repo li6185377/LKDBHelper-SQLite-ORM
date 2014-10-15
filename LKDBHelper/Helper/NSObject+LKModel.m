@@ -784,6 +784,19 @@ static char LKModelBase_Key_Inserting;
     }
     return nil;
 }
++(NSString *)db_rowidAliasName
+{
+    LKModelInfos* infos = [self getModelInfos];
+    if(infos.primaryKeys.count == 1)
+    {
+        NSString* primaryType = [infos objectWithSqlColumnName:[infos.primaryKeys lastObject]].sqlColumnType;
+        if([primaryType isEqualToString:LKSQL_Type_Int])
+        {
+            return [infos.primaryKeys lastObject];
+        }
+    }
+    return nil;
+}
 
 #pragma mark- get model property info
 +(LKModelInfos *)getModelInfos

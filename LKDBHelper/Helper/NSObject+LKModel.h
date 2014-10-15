@@ -106,6 +106,7 @@
 -(id)singlePrimaryKeyValue;
 -(BOOL)singlePrimaryKeyValueIsEmpty;
 -(LKDBProperty*)singlePrimaryKeyProperty;
++(NSString*)db_rowidAliasName;
 @end
 
 @interface NSObject (LKModel)
