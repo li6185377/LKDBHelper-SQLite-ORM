@@ -34,25 +34,6 @@ pod 'LKDBHelper', :head
 
 ##Basic usage
 
-__Because IOS8 upgrade , You must override + (LKDBHelper *) getUsingLKDBHelper method__
-```objective-c
-@implementation LKTest
-+(LKDBHelper *)getUsingLKDBHelper
-{
-    /// this is a demo
-    static LKDBHelper* db;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        NSString* dbpath = [NSHomeDirectory() stringByAppendingPathComponent:@"asd/asd.db"];
-        db = [[LKDBHelper alloc]initWithDBPath:dbpath];
-        //or
-        //db = [[LKDBHelper alloc]init];
-    });
-    return db;
-}
-...
-```
-
 1 . Create a new Objective-C class for your data model
 
 ```objective-c

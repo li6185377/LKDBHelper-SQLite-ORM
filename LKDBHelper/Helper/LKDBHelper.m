@@ -448,6 +448,12 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
     }
 
     LKModelInfos* infos = [modelClass getModelInfos];
+    if(infos.count == 0)
+    {
+        LKErrorLog(@"Class: %@ 0属性 不需要创建表",NSStringFromClass(modelClass));
+        return NO;
+    }
+    
     NSArray* primaryKeys = infos.primaryKeys;
     NSString* rowidAliasName = [modelClass db_rowidAliasName];
     

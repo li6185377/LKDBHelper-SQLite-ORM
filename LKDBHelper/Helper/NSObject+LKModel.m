@@ -28,8 +28,13 @@ static char LKModelBase_Key_Inserting;
 +(LKDBHelper *)getUsingLKDBHelper
 {
     ///ios8 能获取系统类的属性了  所以没有办法判断属性数量来区分自定义类和系统类
-    ///所以要 重载该方法 才能进行数据库操作
-    return nil;
+    ///可能系统类的存取会不正确
+    static LKDBHelper* helper;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        helper = [[LKDBHelper alloc]init];
+    });
+    return helper;
 }
 #pragma mark Tabel Structure Function 表结构
 +(NSString *)getTableName
@@ -478,10 +483,7 @@ static char LKModelBase_Key_Inserting;
     }
     else
     {
-        uint outCount = 0;
-        objc_property_t *properties = class_copyPropertyList(clazz, &outCount);
-        free(properties);
-        if(outCount > 0 && model.db_inserting == NO)
+        if(model.db_inserting == NO && [clazz getModelInfos] > 0)
         {
             BOOL success = [model saveToDB];
             if(success)
@@ -671,7 +673,10 @@ static char LKModelBase_Key_Inserting;
                 saveObj = [self db_objectWithDictionary:value];
             }
             
-            [toDic setObject:saveObj forKey:key];
+            if(saveObj)
+            {
+                [toDic setObject:saveObj forKey:key];
+            }
         }
         return toDic;
     }
@@ -847,8 +852,15 @@ static char LKModelBase_Key_Inserting;
                 }
             }
         }
+        if (pronames.count > 0)
+        {
+            infos = [[LKModelInfos alloc]initWithKeyMapping:keymapping propertyNames:pronames propertyType:protypes primaryKeys:pkArray];
+        }
+        else
+        {
+            infos = [[LKModelInfos alloc]init];
+        }
         
-        infos = [[LKModelInfos alloc]initWithKeyMapping:keymapping propertyNames:pronames propertyType:protypes primaryKeys:pkArray];
         [oncePropertyDic setObject:infos forKey:NSStringFromClass(self)];
     }
     
@@ -907,7 +919,6 @@ static char LKModelBase_Key_Inserting;
             }
         }
         
-        [pronames addObject:propertyName];
         /*
          c char
          i int
@@ -922,22 +933,33 @@ static char LKModelBase_Key_Inserting;
         
         if ([propertyType hasPrefix:@"T@"]) {
             
-            NSString* propertyClassName = [propertyType substringWithRange:NSMakeRange(3, [propertyType rangeOfString:@","].location-4)];
-            if(propertyClassName==nil)
+            NSString* propertyClassName = nil;
+            NSRange range = NSMakeRange(3,MAX(0,[propertyType rangeOfString:@","].location-4));
+            if(range.location + range.length <= propertyType.length)
             {
-                propertyClassName = @"NSString";
-            }
-            else if([propertyClassName hasSuffix:@">"])
-            {
-                NSRange range = [propertyClassName rangeOfString:@"<"];
-                if (range.length>0)
+                propertyClassName = [propertyType substringWithRange:range];
+                if([propertyClassName hasSuffix:@">"])
                 {
-                    propertyClassName = [propertyClassName substringToIndex:range.location];
+                    NSRange range = [propertyClassName rangeOfString:@"<"];
+                    if (range.length>0)
+                    {
+                        propertyClassName = [propertyClassName substringToIndex:range.location];
+                    }
                 }
             }
+            if(propertyClassName == nil)
+            {
+                ///没找到具体的属性就放弃
+                continue;
+            }
+            
             [protypes addObject:propertyClassName];
         }
-        else if([propertyType hasPrefix:@"T{"])
+        
+        ///添加属性名
+        [pronames addObject:propertyName];
+        
+        if([propertyType hasPrefix:@"T{"])
         {
             [protypes addObject:[propertyType substringWithRange:NSMakeRange(2, [propertyType rangeOfString:@"="].location-2)]];
         }
