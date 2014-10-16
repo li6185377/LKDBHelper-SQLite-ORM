@@ -448,10 +448,26 @@ static char LKModelBase_Key_Inserting;
 ///目前只支持 model、NSString、NSNumber 简单类型
 -(id)db_jsonObjectWithObject:(id)obj
 {
-    NSString* jsonObject = nil;
+    id jsonObject = nil;
     if ([obj isKindOfClass:[NSString class]] || [obj isKindOfClass:[NSNumber class]])
     {
         jsonObject = obj;
+    }
+    else if([obj isKindOfClass:[NSDate class]])
+    {
+        NSString* dateString = nil;
+        NSDateFormatter* formatter = [self.class getModelDateFormatter];
+        if(formatter){
+            dateString = [formatter stringFromDate:obj];
+        }
+        else{
+            dateString = [LKDBUtils stringWithDate:obj];
+        }
+        dateString = [dateString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        if(dateString.length > 0)
+        {
+            jsonObject = @{LKDB_TypeKey:LKDB_TypeKey_Date,LKDB_ValueKey:dateString};
+        }
     }
     else if([obj isKindOfClass:[NSArray class]])
     {
@@ -651,6 +667,17 @@ static char LKModelBase_Key_Inserting;
             else
             {
                 return value;
+            }
+        }
+        else if([type isEqualToString:LKDB_TypeKey_Date])
+        {
+            NSString* datestr = [dic objectForKey:LKDB_ValueKey];
+            NSDateFormatter* formatter = [self.class getModelDateFormatter];
+            if(formatter){
+                return [formatter dateFromString:datestr];
+            }
+            else{
+                return [LKDBUtils dateWithString:datestr];
             }
         }
     }
@@ -931,9 +958,9 @@ static char LKModelBase_Key_Inserting;
          .... ^i 表示  int*  一般都不会用到
          */
         
+        NSString* propertyClassName = nil;
         if ([propertyType hasPrefix:@"T@"]) {
             
-            NSString* propertyClassName = nil;
             NSRange range = NSMakeRange(3,MAX(0,[propertyType rangeOfString:@","].location-4));
             if(range.location + range.length <= propertyType.length)
             {
@@ -947,51 +974,53 @@ static char LKModelBase_Key_Inserting;
                     }
                 }
             }
-            if(propertyClassName == nil)
-            {
-                ///没找到具体的属性就放弃
-                continue;
-            }
-            
-            [protypes addObject:propertyClassName];
         }
-        
-        ///添加属性名
-        [pronames addObject:propertyName];
-        
-        if([propertyType hasPrefix:@"T{"])
+        else if([propertyType hasPrefix:@"T{"])
         {
-            [protypes addObject:[propertyType substringWithRange:NSMakeRange(2, [propertyType rangeOfString:@"="].location-2)]];
+            NSRange range = NSMakeRange(2, [propertyType rangeOfString:@"="].location-2);
+            if(range.location + range.length <= propertyType.length)
+            {
+               propertyClassName = [propertyType substringWithRange:range];
+            }
         }
         else
         {
             propertyType = [propertyType lowercaseString];
             if ([propertyType hasPrefix:@"ti"] || [propertyType hasPrefix:@"tb"])
             {
-                [protypes addObject:@"int"];
+                propertyClassName = @"int";
             }
             else if ([propertyType hasPrefix:@"tf"])
             {
-                [protypes addObject:@"float"];
+                propertyClassName = @"float";
             }
-            else if([propertyType hasPrefix:@"td"]) {
-                [protypes addObject:@"double"];
+            else if([propertyType hasPrefix:@"td"])
+            {
+                propertyClassName = @"double";
             }
             else if([propertyType hasPrefix:@"tl"] || [propertyType hasPrefix:@"tq"])
             {
-                [protypes addObject:@"long"];
+                propertyClassName = @"long";
             }
-            else if ([propertyType hasPrefix:@"tc"]) {
-                [protypes addObject:@"char"];
+            else if ([propertyType hasPrefix:@"tc"])
+            {
+                propertyClassName = @"char";
             }
             else if([propertyType hasPrefix:@"ts"])
             {
-                [protypes addObject:@"short"];
-            }
-            else {
-                [protypes addObject:@"NSString"];
+                propertyClassName = @"short";
             }
         }
+        
+        if(propertyClassName.length == 0)
+        {
+            ///没找到具体的属性就放弃
+            continue;
+        }
+        ///添加属性
+        [pronames addObject:propertyName];
+        [protypes addObject:propertyClassName];
+        
     }
     respondInstance = nil;
     free(properties);

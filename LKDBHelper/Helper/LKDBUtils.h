@@ -75,6 +75,7 @@ static NSString* const LKDB_TypeKey = @"DB_Type";
 static NSString* const LKDB_TypeKey_Model = @"DB_Type_Model";
 static NSString* const LKDB_TypeKey_JSON = @"DB_Type_JSON";
 static NSString* const LKDB_TypeKey_Combo = @"DB_Type_Combo";
+static NSString* const LKDB_TypeKey_Date = @"DB_Type_Date";
 
 static NSString* const LKDB_ValueKey = @"DB_Value";
 
