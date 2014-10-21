@@ -29,7 +29,7 @@ if([model.class getModelInfos].count == 0)\
 NSString* _model_tableName = model.db_tableName?:[model.class getTableName];\
 if(_model_tableName.length == 0)\
 {\
-    LKErrorLog(@"model class name %@ table name is invalid!",_model_tableName);\
+    LKErrorLog(@"model class name %@ table name is invalid!",NSStringFromClass(model.class));\
     return NO;\
 }\
 
