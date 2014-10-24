@@ -383,6 +383,8 @@ if(_model_tableName.length == 0)\
             [db executeUpdate:dropTable];
         }
     }];
+    
+    [_createdTableNames removeAllObjects];
 }
 -(BOOL)dropTableWithClass:(Class)modelClass
 {
@@ -392,6 +394,9 @@ if(_model_tableName.length == 0)\
     NSString* dropTable = [NSString stringWithFormat:@"drop table %@",tableName];
     
     BOOL isDrop = [self executeSQL:dropTable arguments:nil];
+    
+    [_createdTableNames removeObject:tableName];
+    
     return isDrop;
 }
 -(void)fixSqlColumnsWithClass:(Class)clazz tableName:(NSString*)tableName
