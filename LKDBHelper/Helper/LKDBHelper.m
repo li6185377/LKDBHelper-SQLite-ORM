@@ -155,6 +155,7 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
     self.dbPath = filePath;
     [self.bindingQueue close];
     self.bindingQueue = [[FMDatabaseQueue alloc]initWithPath:filePath];
+    _encryptionKey = nil;
     
 #ifdef DEBUG
     //debug 模式下  打印错误日志
@@ -176,7 +177,18 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
     {
         if(_bindingQueue == nil)
         {
-            _bindingQueue = [[FMDatabaseQueue alloc]initWithPath:_dbPath];
+            self.bindingQueue = [[FMDatabaseQueue alloc]initWithPath:_dbPath];
+            [_bindingQueue inDatabase:^(FMDatabase *db)
+            {
+#ifdef DEBUG
+                //debug 模式下  打印错误日志
+                db.logsErrors = YES;
+#endif
+                if(_encryptionKey.length > 0)
+                {
+                    [db setKey:_encryptionKey];
+                }
+            }];
         }
         [_bindingQueue inDatabase:^(FMDatabase *db) {
             self.usingdb = db;
@@ -329,6 +341,18 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
         }
     }
     return pwhere;
+}
+
+#pragma mark- set key
+-(void)setEncryptionKey:(NSString *)encryptionKey
+{
+    _encryptionKey = encryptionKey;
+    if(_bindingQueue && encryptionKey.length > 0)
+    {
+        [self executeDB:^(FMDatabase *db) {
+            [db setKey:_encryptionKey];
+        }];
+    }
 }
 
 #pragma mark- dealloc

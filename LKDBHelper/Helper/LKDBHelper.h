@@ -32,6 +32,12 @@
 -(instancetype)initWithDBPath:(NSString*)filePath;
 -(void)setDBPath:(NSString*)filePath;
 
+/** 
+ *  @brief set and save encryption key.
+ *  refer: FMDatabase.h  - (BOOL)setKey:(NSString*)key;
+ */
+@property(strong,nonatomic)NSString* encryptionKey;
+
 /**
  *	@brief  execute database operations synchronously,not afraid of recursive deadlock  同步执行数据库操作 可递归调用
  */

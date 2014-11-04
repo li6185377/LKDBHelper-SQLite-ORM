@@ -30,7 +30,14 @@ If you are using CocoaPods, then, just add this line to your PodFile<br>
 pod 'LKDBHelper', :head
 ```
 
+If you are using Encryption, Order can not be wrong<br>
 
+```objective-c
+pod 'FMDB/SQLCipher',:head
+pod 'LKDBHelper',:head
+```
+
+@property(strong,nonatomic)NSString* encryptionKey;
 
 ##Basic usage
 
