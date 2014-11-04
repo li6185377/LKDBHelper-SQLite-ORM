@@ -8,13 +8,30 @@
 
 #import "LKDBHelper.h"
 
-#define checkClassIsInvalid(modelClass)if([LKDBUtils checkStringIsEmpty:[modelClass getTableName]]){\
-LKErrorLog(@"model class name %@ table name is invalid!",NSStringFromClass(modelClass));\
-return NO;}
+#define checkClassIsInvalid(modelClass)\
+if([LKDBUtils checkStringIsEmpty:[modelClass getTableName]])\
+{\
+    LKErrorLog(@"model class name %@ table name is invalid!",NSStringFromClass(modelClass));\
+    return NO;\
+}
 
-#define checkModelIsInvalid(model){if(model == nil){LKErrorLog(@"model is nil");return NO;}\
+#define checkModelIsInvalid(model)\
+if(model == nil)\
+{\
+    LKErrorLog(@"model is nil");\
+    return NO;\
+}\
+if([model.class getModelInfos].count == 0)\
+{\
+    LKErrorLog(@"class: %@  property count is 0!!",NSStringFromClass(model.class));\
+    return NO;\
+}\
 NSString* _model_tableName = model.db_tableName?:[model.class getTableName];\
-if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is invalid!",_model_tableName);return NO;}}
+if(_model_tableName.length == 0)\
+{\
+    LKErrorLog(@"model class name %@ table name is invalid!",NSStringFromClass(model.class));\
+    return NO;\
+}\
 
 @interface NSObject(LKTabelStructure_Private)
 -(void)setDb_inserting:(BOOL)db_inserting;
@@ -390,6 +407,8 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
             [db executeUpdate:dropTable];
         }
     }];
+    
+    [_createdTableNames removeAllObjects];
 }
 -(BOOL)dropTableWithClass:(Class)modelClass
 {
@@ -399,6 +418,9 @@ if(_model_tableName.length == 0){LKErrorLog(@"model class name %@ table name is 
     NSString* dropTable = [NSString stringWithFormat:@"drop table %@",tableName];
     
     BOOL isDrop = [self executeSQL:dropTable arguments:nil];
+    
+    [_createdTableNames removeObject:tableName];
+    
     return isDrop;
 }
 -(void)fixSqlColumnsWithClass:(Class)clazz tableName:(NSString*)tableName

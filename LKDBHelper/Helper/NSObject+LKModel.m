@@ -242,12 +242,9 @@ static char LKModelBase_Key_Inserting;
     ///参试获取属性的Class
     Class columnClass = NSClassFromString(property.propertyType);
     
-    id modelValue = value;
-    if([value length] == 0)
-    {
-        modelValue = nil;
-    }
-    else if(columnClass == nil)
+    id modelValue = nil;
+    
+    if(columnClass == nil)
     {
         ///当找不到 class 时，就是 基础类型 int,float CGRect 之类的
         
@@ -313,10 +310,19 @@ static char LKModelBase_Key_Inserting;
             modelValue = [NSValue valueWithRange:range];
         }
 #endif
+        ///如果都没有值 默认给个0
+        if(modelValue == nil)
+        {
+            modelValue = [NSNumber numberWithInt:0];
+        }
+    }
+    else if([value length] == 0)
+    {
+        //为了不继续遍历
     }
     else if([columnClass isSubclassOfClass:[NSString class]])
     {
-        
+        modelValue = value;
     }
     else if([columnClass isSubclassOfClass:[NSNumber class]])
     {
