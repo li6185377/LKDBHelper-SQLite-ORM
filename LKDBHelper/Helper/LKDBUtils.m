@@ -104,7 +104,10 @@
     {
         return YES;
     }
-    
+    if(string.length == 0)
+    {
+        return YES;
+    }
     return [[self getTrimStringWithString:string] isEqualToString:@""];
 }
 +(NSString *)getTrimStringWithString:(NSString *)string
@@ -139,7 +142,6 @@
 }
 @end
 
-
 inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
 {
     if([LKSQL_Convert_IntType rangeOfString:objcType].length > 0){
@@ -154,3 +156,7 @@ inline NSString *LKSQLTypeFromObjcType(NSString* objcType)
     
     return LKSQL_Type_Text;
 }
+
+@implementation LKDBQueryParams
+
+@end

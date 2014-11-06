@@ -75,12 +75,19 @@
 
 /**
  *	@brief	query table
+ *  
+ *  @param 	params query condition
+ */
+-(NSMutableArray*)searchWithParams:(LKDBQueryParams*)params;
+
+/**
+ *	@brief	query table
  *
  *	@param 	modelClass      entity class
  *	@param 	where           can use NSString or NSDictionary or nil
  
  *	@param 	orderBy         The Sort: Ascending "name asc",Descending "name desc"
-                            For example: @"rowid desc"  or @"rowid asc"
+ For example: @"rowid desc"x  or @"rowid asc"
  
  *	@param 	offset          Skip how many rows
  *	@param 	count           Limit the number

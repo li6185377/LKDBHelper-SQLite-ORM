@@ -144,6 +144,17 @@
     return NO;
 }
 
+-(BOOL)updateToDB
+{
+    if(self.rowid > 0)
+    {
+        return [self.class updateToDB:self where:nil];
+    }
+    else
+    {
+        return [self saveToDB];
+    }
+}
 - (BOOL)saveToDB
 {
     return [self.class insertToDB:self];

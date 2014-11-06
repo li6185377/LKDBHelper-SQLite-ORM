@@ -501,6 +501,7 @@ static char LKModelBase_Key_Inserting;
     NSDictionary* jsonObject = nil;
     if(model.rowid > 0)
     {
+        [model updateToDB];
         jsonObject = [self db_readInfoWithModel:model class:clazz];
     }
     else

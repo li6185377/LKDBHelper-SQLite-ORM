@@ -678,47 +678,88 @@ if(_model_tableName.length == 0)\
 }
 -(void)search:(Class)modelClass where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count callback:(void (^)(NSMutableArray *))block
 {
-    [self asyncBlock:^{
-        NSMutableArray* array = [self searchBase:modelClass columns:nil where:where orderBy:orderBy offset:offset count:count];
+    if(block)
+    {
+        __LKDBWeak LKDBHelper* wself = self;
+        [self asyncBlock:^{
+            __strong LKDBHelper* sself = wself;
+            if(sself)
+            {
+                LKDBQueryParams* params = [[LKDBQueryParams alloc]init];
+                params.toClass = modelClass;
         
-        if(block != nil)
-            block(array);
-    }];
+                if([where isKindOfClass:[NSDictionary class]])
+                {
+                    params.whereDic = where;
+                }
+                else if([where isKindOfClass:[NSString class]])
+                {
+                    params.where = where;
+                }
+                
+                params.orderBy = orderBy;
+                params.offset = offset;
+                params.count = count;
+                
+                NSMutableArray* array  = [self searchBaseWithParams:params];
+                block(array);
+            }
+        }];
+    }
 }
 
--(NSMutableArray *)searchBase:(Class)modelClass columns:(id)columns where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
+-(NSMutableArray *)searchBaseWithParams:(LKDBQueryParams *)params
 {
+    if(params.toClass == nil)
+    {
+        LKErrorLog(@"you search pars:%@! \n toClass is nil",params.getAllPropertysString);
+        return nil;
+    }
+    
+    NSString* db_tableName = params.tableName;
+    if([LKDBUtils checkStringIsEmpty:db_tableName])
+    {
+        db_tableName = [params.toClass getTableName];
+    }
+    if([LKDBUtils checkStringIsEmpty:db_tableName])
+    {
+        LKErrorLog(@"you search pars:%@! \n tableName is empty",params.getAllPropertysString);
+        return nil;
+    }
+    
     NSString* columnsString = nil;
     NSUInteger columnCount = 0;
-    if([columns isKindOfClass:[NSArray class]] && [columns count]>0)
+    if(params.columnArray.count > 0)
     {
-        columnCount = [columns count];
-        columnsString = [columns componentsJoinedByString:@","];
+        columnCount = params.columnArray.count;
+        columnsString = [params.columnArray componentsJoinedByString:@","];
     }
-    else if([LKDBUtils checkStringIsEmpty:columns]==NO)
+    else if([LKDBUtils checkStringIsEmpty:params.columns] == NO)
     {
-        columnsString = columns;
-        NSArray* array = [columns componentsSeparatedByString:@","];
-        
+        columnsString = params.columns;
+        NSArray* array = [params.columns componentsSeparatedByString:@","];
         columnCount = array.count;
     }
-    
-    if(columnCount > 1)
+    else
     {
-        columnsString = [NSString stringWithFormat:@"rowid,%@",columnsString];
+        columnsString = @"*";
     }
     
-    if(columnCount==0)
+    NSMutableString* query = [NSMutableString stringWithFormat:@"select %@,rowid from @t",columnsString];
+    NSMutableArray* whereValues = nil;
+    if (params.whereDic.count > 0)
     {
-        columnsString = @"rowid,*";
+        whereValues = [NSMutableArray arrayWithCapacity:params.whereDic.count];
+        NSString* wherekey = [self dictionaryToSqlWhere:params.whereDic andValues:whereValues];
+        [query appendFormat:@" where %@",wherekey];
+    }
+    else if([LKDBUtils checkStringIsEmpty:params.where] == NO)
+    {
+        [query appendFormat:@" where %@",params.where];
     }
     
-    NSMutableString* query = [NSMutableString stringWithFormat:@"select %@ from @t",columnsString];
-    NSMutableArray * values = [self extractQuery:query where:where];
+    [self sqlString:query groupBy:params.groupBy orderBy:params.orderBy offset:params.offset count:params.count];
     
-    [self sqlString:query AddOder:orderBy offset:offset count:count];
-    
-    NSString* db_tableName = [modelClass getTableName];
     //replace @t to model table name
     NSString* replaceTableName = [NSString stringWithFormat:@" %@ ",db_tableName];
     if([query hasSuffix:@" @t"])
@@ -730,13 +771,13 @@ if(_model_tableName.length == 0)\
     __block NSMutableArray* results = nil;
     [self executeDB:^(FMDatabase *db) {
         FMResultSet* set = nil;
-        if(values == nil)
+        if(whereValues.count == 0)
         {
             set = [db executeQuery:query];
         }
         else
         {
-            set = [db executeQuery:query withArgumentsInArray:values];
+            set = [db executeQuery:query withArgumentsInArray:whereValues];
         }
         
         if(columnCount == 1)
@@ -745,12 +786,60 @@ if(_model_tableName.length == 0)\
         }
         else
         {
-            results = [self executeResult:set Class:modelClass tableName:db_tableName];
+            results = [self executeResult:set Class:params.toClass tableName:db_tableName];
         }
         
         [set close];
     }];
     return results;
+}
+-(NSMutableArray *)searchWithParams:(LKDBQueryParams *)params
+{
+    if(params.callback)
+    {
+        __LKDBWeak LKDBHelper* wself = self;
+        [self asyncBlock:^{
+            __strong LKDBHelper* sself = wself;
+            if(sself)
+            {
+                NSMutableArray* array = [sself searchBaseWithParams:params];
+                params.callback(array);
+            }
+        }];
+        return nil;
+    }
+    else
+    {
+        return [self searchBaseWithParams:params];
+    }
+}
+-(NSMutableArray *)searchBase:(Class)modelClass columns:(id)columns where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
+{
+    LKDBQueryParams* params = [[LKDBQueryParams alloc]init];
+    params.toClass = modelClass;
+    if([columns isKindOfClass:[NSArray class]])
+    {
+        params.columnArray = columns;
+    }
+    else if([columns isKindOfClass:[NSString class]])
+    {
+        params.columns = columns;
+    }
+    
+    if([where isKindOfClass:[NSDictionary class]])
+    {
+        params.whereDic = where;
+    }
+    else if([where isKindOfClass:[NSString class]])
+    {
+        params.where = where;
+    }
+    
+    params.orderBy = orderBy;
+    params.offset = offset;
+    params.count = count;
+    
+    return [self searchBaseWithParams:params];
 }
 -(NSMutableArray *)searchWithSQL:(NSString *)sql toClass:(Class)modelClass
 {
@@ -771,13 +860,17 @@ if(_model_tableName.length == 0)\
     return results;
 }
 
--(void)sqlString:(NSMutableString*)sql AddOder:(NSString*)orderby offset:(int)offset count:(int)count
+-(void)sqlString:(NSMutableString*)sql groupBy:(NSString*)groupBy orderBy:(NSString*)orderby offset:(int)offset count:(int)count
 {
+    if([LKDBUtils checkStringIsEmpty:groupBy] == NO)
+    {
+        [sql appendFormat:@" group by %@",groupBy];
+    }
     if([LKDBUtils checkStringIsEmpty:orderby] == NO)
     {
         [sql appendFormat:@" order by %@",orderby];
     }
-    if(count>0)
+    if(count >0)
     {
         [sql appendFormat:@" limit %d offset %d",count,offset];
     }
@@ -913,6 +1006,7 @@ if(_model_tableName.length == 0)\
     
     NSString* db_tableName = model.db_tableName?:[modelClass getTableName];
     
+    //检测是否创建过表
     if([_createdTableNames containsObject:db_tableName] == NO)
     {
         [self _createTableWithModelClass:modelClass tableName:db_tableName];
@@ -1008,6 +1102,12 @@ if(_model_tableName.length == 0)\
         return NO;
     }
     NSString* db_tableName = model.db_tableName?:[modelClass getTableName];
+    
+    //检测是否创建过表
+    if([_createdTableNames containsObject:db_tableName] == NO)
+    {
+        [self _createTableWithModelClass:modelClass tableName:db_tableName];
+    }
     
     LKModelInfos* infos = [modelClass getModelInfos];
     

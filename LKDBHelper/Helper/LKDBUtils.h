@@ -46,8 +46,10 @@
 
 #if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_5_0 || __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_7
 #define LKDBWeak weak
+#define __LKDBWeak __weak
 #else
 #define LKDBWeak unsafe_unretained
+#define __LKDBWeak
 #endif
 
 static NSString* const LKSQL_Type_Text        =   @"text";
@@ -86,5 +88,28 @@ static NSString* const LKDB_PValueKey = @"DB_PKeyValue";
 
 ///Object-c type converted to SQLite type  把Object-c 类型 转换为sqlite 类型
 extern NSString* LKSQLTypeFromObjcType(NSString *objcType);
+
+@interface LKDBQueryParams : NSObject
+
+///columns or array
+@property(strong,nonatomic)NSString* columns;
+@property(strong,nonatomic)NSArray* columnArray;
+
+@property(strong,nonatomic)NSString* tableName;
+
+///where or dic
+@property(strong,nonatomic)NSString* where;
+@property(strong,nonatomic)NSDictionary* whereDic;
+
+@property(strong,nonatomic)NSString* groupBy;
+@property(strong,nonatomic)NSString* orderBy;
+
+@property(assign,nonatomic)int offset;
+@property(assign,nonatomic)int count;
+
+@property(assign,nonatomic)Class toClass;
+
+@property(copy,nonatomic)void(^callback)(NSMutableArray* results);
+@end
 
 
