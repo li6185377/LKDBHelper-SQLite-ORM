@@ -58,6 +58,7 @@
 
 ///drop table with entity class
 -(BOOL)dropTableWithClass:(Class)modelClass;
+-(BOOL)dropTableWithTableName:(NSString*)tableName;
 
 @end
 
@@ -72,6 +73,7 @@
  */
 -(NSInteger)rowCount:(Class)modelClass where:(id)where;
 -(void)rowCount:(Class)modelClass where:(id)where callback:(void(^)(NSInteger rowCount))callback;
+-(NSInteger)rowCountWithTableName:(NSString*)tableName where:(id)where;
 
 /**
  *	@brief	query table
@@ -147,6 +149,8 @@
 -(BOOL)updateToDB:(NSObject *)model where:(id)where;
 -(void)updateToDB:(NSObject *)model where:(id)where callback:(void (^)(BOOL result))block;
 -(BOOL)updateToDB:(Class)modelClass set:(NSString*)sets where:(id)where;
+-(BOOL)updateToDBWithTableName:(NSString*)tableName set:(NSString*)sets where:(id)where;
+
 /**
  *	@brief	delete table
  *
@@ -168,6 +172,7 @@
  */
 -(BOOL)deleteWithClass:(Class)modelClass where:(id)where;
 -(void)deleteWithClass:(Class)modelClass where:(id)where callback:(void (^)(BOOL result))block;
+-(BOOL)deleteWithTableName:(NSString*)tableName where:(id)where;
 
 /**
  *	@brief   entity exists?
@@ -179,7 +184,7 @@
  */
 -(BOOL)isExistsModel:(NSObject*)model;
 -(BOOL)isExistsClass:(Class)modelClass where:(id)where;
-
+-(BOOL)isExistsWithTableName:(NSString*)tableName where:(id)where;
 
 /**
  *	@brief	Clear data based on the entity class

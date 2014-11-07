@@ -8,14 +8,19 @@
 
 #import "LKDBHelper.h"
 
-#define checkClassIsInvalid(modelClass)\
-if([LKDBUtils checkStringIsEmpty:[modelClass getTableName]])\
+#define LKDBCheck_tableNameIsInvalid(tableName)\
+if ([LKDBUtils checkStringIsEmpty:tableName])\
 {\
-    LKErrorLog(@"model class name %@ table name is invalid!",NSStringFromClass(modelClass));\
+    LKErrorLog(@" \n Fail!Fail!Fail!Fail! \n with TableName is nil");\
     return NO;\
 }
 
-#define checkModelIsInvalid(model)\
+#define LKDBCode_Async_Begin __LKDBWeak LKDBHelper* wself = self;\
+[self asyncBlock:^{__strong LKDBHelper* sself = wself;if(sself){
+
+#define LKDBCode_Async_End }}];
+
+#define LKDBCheck_modelIsInvalid(model)\
 if(model == nil)\
 {\
     LKErrorLog(@"model is nil");\
@@ -27,7 +32,7 @@ if([model.class getModelInfos].count == 0)\
     return NO;\
 }\
 NSString* _model_tableName = model.db_tableName?:[model.class getTableName];\
-if(_model_tableName.length == 0)\
+if([LKDBUtils checkStringIsEmpty:_model_tableName])\
 {\
     LKErrorLog(@"model class name %@ table name is invalid!",NSStringFromClass(model.class));\
     return NO;\
@@ -410,11 +415,15 @@ if(_model_tableName.length == 0)\
     
     [_createdTableNames removeAllObjects];
 }
+
 -(BOOL)dropTableWithClass:(Class)modelClass
 {
-    checkClassIsInvalid(modelClass);
+    return [self dropTableWithTableName:[modelClass getTableName]];
+}
+-(BOOL)dropTableWithTableName:(NSString *)tableName
+{
+    LKDBCheck_tableNameIsInvalid(tableName);
     
-    NSString* tableName = [modelClass getTableName];
     NSString* dropTable = [NSString stringWithFormat:@"drop table %@",tableName];
     
     BOOL isDrop = [self executeSQL:dropTable arguments:nil];
@@ -481,7 +490,6 @@ if(_model_tableName.length == 0)\
 }
 -(BOOL)_createTableWithModelClass:(Class)modelClass tableName:(NSString*)tableName
 {
-    checkClassIsInvalid(modelClass);
     if([self getTableCreatedWithTableName:tableName])
     {
         //已创建表 就跳过
@@ -634,26 +642,23 @@ if(_model_tableName.length == 0)\
 #pragma mark - row count operation
 -(NSInteger)rowCount:(Class)modelClass where:(id)where
 {
-    return [self rowCountBase:modelClass where:where];
+    return [self rowCountWithTableName:[modelClass getTableName] where:where];
 }
 -(void)rowCount:(Class)modelClass where:(id)where callback:(void (^)(NSInteger))callback
 {
     if(callback)
     {
-        __LKDBWeak LKDBHelper* wself = self;
-        [self asyncBlock:^{
-            __strong LKDBHelper* sself = wself;
-            if(sself)
-            {
-                NSInteger result = [sself rowCountBase:modelClass where:where];
-                callback(result);
-            }
-        }];
+        LKDBCode_Async_Begin
+        NSInteger result = [sself rowCountWithTableName:[modelClass getTableName] where:where];
+        callback(result);
+        LKDBCode_Async_End
     }
 }
--(NSInteger)rowCountBase:(Class)modelClass where:(id)where
+-(NSInteger)rowCountWithTableName:(NSString *)tableName where:(id)where
 {
-    NSMutableString* rowCountSql = [NSMutableString stringWithFormat:@"select count(rowid) from %@",[modelClass getTableName]];
+    LKDBCheck_tableNameIsInvalid(tableName);
+    
+    NSMutableString* rowCountSql = [NSMutableString stringWithFormat:@"select count(rowid) from %@",tableName];
     
     NSMutableArray* valuesarray = [self extractQuery:rowCountSql where:where];
     NSInteger result = [[self executeScalarWithSQL:rowCountSql arguments:valuesarray] integerValue];
@@ -685,31 +690,26 @@ if(_model_tableName.length == 0)\
 {
     if(block)
     {
-        __LKDBWeak LKDBHelper* wself = self;
-        [self asyncBlock:^{
-            __strong LKDBHelper* sself = wself;
-            if(sself)
-            {
-                LKDBQueryParams* params = [[LKDBQueryParams alloc]init];
-                params.toClass = modelClass;
+        LKDBCode_Async_Begin
+        LKDBQueryParams* params = [[LKDBQueryParams alloc]init];
+        params.toClass = modelClass;
         
-                if([where isKindOfClass:[NSDictionary class]])
-                {
-                    params.whereDic = where;
-                }
-                else if([where isKindOfClass:[NSString class]])
-                {
-                    params.where = where;
-                }
-                
-                params.orderBy = orderBy;
-                params.offset = offset;
-                params.count = count;
-                
-                NSMutableArray* array  = [self searchBaseWithParams:params];
-                block(array);
-            }
-        }];
+        if([where isKindOfClass:[NSDictionary class]])
+        {
+            params.whereDic = where;
+        }
+        else if([where isKindOfClass:[NSString class]])
+        {
+            params.where = where;
+        }
+        
+        params.orderBy = orderBy;
+        params.offset = offset;
+        params.count = count;
+        
+        NSMutableArray* array  = [sself searchBaseWithParams:params];
+        block(array);
+        LKDBCode_Async_End
     }
 }
 
@@ -802,15 +802,10 @@ if(_model_tableName.length == 0)\
 {
     if(params.callback)
     {
-        __LKDBWeak LKDBHelper* wself = self;
-        [self asyncBlock:^{
-            __strong LKDBHelper* sself = wself;
-            if(sself)
-            {
-                NSMutableArray* array = [sself searchBaseWithParams:params];
-                params.callback(array);
-            }
-        }];
+        LKDBCode_Async_Begin
+        NSMutableArray* array = [sself searchBaseWithParams:params];
+        params.callback(array);
+        LKDBCode_Async_End
         return nil;
     }
     else
@@ -965,19 +960,13 @@ if(_model_tableName.length == 0)\
 }
 -(void)insertToDB:(NSObject *)model callback:(void (^)(BOOL))block
 {
-    __LKDBWeak LKDBHelper* wself = self;
-    [self asyncBlock:^{
-        __strong LKDBHelper* sself = wself;
-        BOOL result = NO;
-        if(sself)
-        {
-            result = [sself insertBase:model];
-        }
-        if(block)
-        {
-            block(result);
-        }
-    }];
+    LKDBCode_Async_Begin
+    BOOL result = [sself insertBase:model];
+    if(block)
+    {
+        block(result);
+    }
+    LKDBCode_Async_End
 }
 -(BOOL)insertWhenNotExists:(NSObject *)model
 {
@@ -989,20 +978,17 @@ if(_model_tableName.length == 0)\
 }
 -(void)insertWhenNotExists:(NSObject *)model callback:(void (^)(BOOL))block
 {
-    [self asyncBlock:^{
-        if(block != nil)
-        {
-            block([self insertWhenNotExists:model]);
-        }
-        else
-        {
-            [self insertWhenNotExists:model];
-        }
-    }];
+    LKDBCode_Async_Begin
+    BOOL result = [sself insertWhenNotExists:model];
+    if(block)
+    {
+        block(result);
+    }
+    LKDBCode_Async_End
 }
 -(BOOL)insertBase:(NSObject*)model{
     
-    checkModelIsInvalid(model);
+    LKDBCheck_modelIsInvalid(model);
     
     Class modelClass = model.class;
     
@@ -1094,15 +1080,17 @@ if(_model_tableName.length == 0)\
 }
 -(void)updateToDB:(NSObject *)model where:(id)where callback:(void (^)(BOOL))block
 {
-    [self asyncBlock:^{
-        BOOL result = [self updateToDBBase:model where:where];
-        if(block != nil)
-            block(result);
-    }];
+    LKDBCode_Async_Begin
+    BOOL result = [sself updateToDBBase:model where:where];
+    if(block)
+    {
+        block(result);
+    }
+    LKDBCode_Async_End
 }
 -(BOOL)updateToDBBase:(NSObject *)model where:(id)where
 {
-    checkModelIsInvalid(model);
+    LKDBCheck_modelIsInvalid(model);
     
     Class modelClass = model.class;
     
@@ -1182,15 +1170,21 @@ if(_model_tableName.length == 0)\
 }
 -(BOOL)updateToDB:(Class)modelClass set:(NSString *)sets where:(id)where
 {
-    checkClassIsInvalid(modelClass);
+    return [self updateToDBWithTableName:[modelClass getTableName] set:sets where:where];
+}
+-(BOOL)updateToDBWithTableName:(NSString *)tableName set:(NSString *)sets where:(id)where
+{
+    LKDBCheck_tableNameIsInvalid(tableName);
     
-    NSMutableString* updateSQL = [NSMutableString stringWithFormat:@"update %@ set %@ ",[modelClass getTableName],sets];
+    NSMutableString* updateSQL = [NSMutableString stringWithFormat:@"update %@ set %@ ",tableName,sets];
     NSMutableArray* updateValues = [self extractQuery:updateSQL where:where];
     
     BOOL execute = [self executeSQL:updateSQL arguments:updateValues];
     
     if(execute == NO)
-        LKErrorLog(@"database update fail %@   ----->sql:%@",NSStringFromClass(modelClass),updateSQL);
+    {
+        LKErrorLog(@"database update fail with TableName: %@   ----->sql:%@",tableName,updateSQL);
+    }
     
     return execute;
 }
@@ -1201,16 +1195,18 @@ if(_model_tableName.length == 0)\
 }
 -(void)deleteToDB:(NSObject *)model callback:(void (^)(BOOL))block
 {
-    [self asyncBlock:^{
-        BOOL isDeleted = [self deleteToDBBase:model];
-        if(block != nil)
-            block(isDeleted);
-    }];
+    LKDBCode_Async_Begin
+    BOOL isDeleted = [sself deleteToDBBase:model];
+    if(block)
+    {
+        block(isDeleted);
+    }
+    LKDBCode_Async_End
 }
 
 -(BOOL)deleteToDBBase:(NSObject *)model
 {
-    checkModelIsInvalid(model);
+    LKDBCheck_modelIsInvalid(model);
     
     Class modelClass = model.class;
     
@@ -1254,22 +1250,23 @@ if(_model_tableName.length == 0)\
 
 -(BOOL)deleteWithClass:(Class)modelClass where:(id)where
 {
-    return [self deleteWithClassBase:modelClass where:where];
+    return [self deleteWithTableName:[modelClass getTableName] where:where];
 }
 -(void)deleteWithClass:(Class)modelClass where:(id)where callback:(void (^)(BOOL))block
 {
-    [self asyncBlock:^{
-        BOOL isDeleted = [self deleteWithClassBase:modelClass where:where];
-        if (block != nil) {
-            block(isDeleted);
-        }
-    }];
+    LKDBCode_Async_Begin
+    BOOL isDeleted = [sself deleteWithTableName:[modelClass getTableName] where:where];
+    if (block)
+    {
+        block(isDeleted);
+    }
+    LKDBCode_Async_End
 }
--(BOOL)deleteWithClassBase:(Class)modelClass where:(id)where
+-(BOOL)deleteWithTableName:(NSString *)tableName where:(id)where
 {
-    checkClassIsInvalid(modelClass);
+    LKDBCheck_tableNameIsInvalid(tableName);
     
-    NSMutableString* deleteSQL = [NSMutableString stringWithFormat:@"delete from %@",[modelClass getTableName]];
+    NSMutableString* deleteSQL = [NSMutableString stringWithFormat:@"delete from %@",tableName];
     NSMutableArray* values = [self extractQuery:deleteSQL where:where];
     
     BOOL result = [self executeSQL:deleteSQL arguments:values];
@@ -1279,7 +1276,7 @@ if(_model_tableName.length == 0)\
 #pragma mark - other operation
 -(BOOL)isExistsModel:(NSObject *)model
 {
-    checkModelIsInvalid(model);
+    LKDBCheck_modelIsInvalid(model);
     NSString* pwhere = nil;
     if(model.rowid>0)
     {
@@ -1298,11 +1295,11 @@ if(_model_tableName.length == 0)\
 }
 -(BOOL)isExistsClass:(Class)modelClass where:(id)where
 {
-    return [self isExistsClassBase:modelClass where:where];
+    return [self isExistsWithTableName:[modelClass getTableName] where:where];
 }
--(BOOL)isExistsClassBase:(Class)modelClass where:(id)where
+-(BOOL)isExistsWithTableName:(NSString *)tableName where:(id)where
 {
-    return [self rowCount:modelClass where:where] > 0;
+    return [self rowCountWithTableName:tableName where:where] > 0;
 }
 
 #pragma mark- clear operation
