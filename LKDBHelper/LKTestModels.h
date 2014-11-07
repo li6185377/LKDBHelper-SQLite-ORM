@@ -15,7 +15,7 @@
 @end
 
 @interface LKTestForeign : LKTestForeignSuper
-@property int addid;
+@property NSInteger addid;
 @end
 
 
@@ -46,7 +46,7 @@
 @property(copy,nonatomic)NSString* error;
 
 //new add
-@property double score;
+@property CGFloat score;
 
 @property(strong,nonatomic)NSData* data;
 

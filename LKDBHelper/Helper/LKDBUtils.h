@@ -104,8 +104,8 @@ extern NSString* LKSQLTypeFromObjcType(NSString *objcType);
 @property(strong,nonatomic)NSString* groupBy;
 @property(strong,nonatomic)NSString* orderBy;
 
-@property(assign,nonatomic)int offset;
-@property(assign,nonatomic)int count;
+@property(assign,nonatomic)NSInteger offset;
+@property(assign,nonatomic)NSInteger count;
 
 @property(assign,nonatomic)Class toClass;
 

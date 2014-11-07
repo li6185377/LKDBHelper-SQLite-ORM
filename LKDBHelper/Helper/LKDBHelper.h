@@ -70,8 +70,8 @@
  *
  *	@return	rows number
  */
--(int)rowCount:(Class)modelClass where:(id)where;
--(void)rowCount:(Class)modelClass where:(id)where callback:(void(^)(int rowCount))callback;
+-(NSInteger)rowCount:(Class)modelClass where:(id)where;
+-(void)rowCount:(Class)modelClass where:(id)where callback:(void(^)(NSInteger rowCount))callback;
 
 /**
  *	@brief	query table
@@ -94,7 +94,7 @@
  *
  *	@return	query finished result is an array(model instance collection)
  */
--(NSMutableArray*)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
+-(NSMutableArray*)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(NSInteger)offset count:(NSInteger)count;
 
 /**
  *  query sql, query finished result is an array(model instance collection)
@@ -105,12 +105,12 @@
  */
 -(NSMutableArray*)searchWithSQL:(NSString*)sql toClass:(Class)modelClass;
 
--(void)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count callback:(void(^)(NSMutableArray* array))block;
+-(void)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(NSInteger)offset count:(NSInteger)count callback:(void(^)(NSMutableArray* array))block;
 /**
     columns may NSArray or NSString   if query column count == 1  return single column string array
     other return models entity array
  */
--(NSMutableArray*)search:(Class)modelClass column:(id)columns where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
+-(NSMutableArray*)search:(Class)modelClass column:(id)columns where:(id)where orderBy:(NSString*)orderBy offset:(NSInteger)offset count:(NSInteger)count;
 
 ///return first model or nil
 -(id)searchSingle:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy;

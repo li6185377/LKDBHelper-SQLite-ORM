@@ -58,13 +58,13 @@ static char LKModelBase_Key_Inserting;
     //overwrite
 }
 #pragma 属性
--(void)setRowid:(int)rowid
+-(void)setRowid:(NSInteger)rowid
 {
-    objc_setAssociatedObject(self, &LKModelBase_Key_RowID,[NSNumber numberWithInt:rowid], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &LKModelBase_Key_RowID,[NSNumber numberWithInteger:rowid], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
--(int)rowid
+-(NSInteger)rowid
 {
-    return [objc_getAssociatedObject(self, &LKModelBase_Key_RowID) intValue];
+    return [objc_getAssociatedObject(self, &LKModelBase_Key_RowID) integerValue];
 }
 
 -(void)setDb_tableName:(NSString *)db_tableName
@@ -263,7 +263,7 @@ static char LKModelBase_Key_Inserting;
             }
             else
             {
-                int number = [value intValue];
+                NSInteger number = [value integerValue];
                 modelValue = [NSNumber numberWithInteger:number];
             }
         }
@@ -402,7 +402,7 @@ static char LKModelBase_Key_Inserting;
     {
         NSMutableDictionary* toDic = [NSMutableDictionary dictionary];
         NSArray* allKeys = dic.allKeys;
-        for (int i = 0; i<allKeys.count; i++)
+        for (NSInteger i = 0; i<allKeys.count; i++)
         {
             NSString* key = [allKeys objectAtIndex:i];
             id obj = [dic objectForKey:key];
@@ -433,7 +433,7 @@ static char LKModelBase_Key_Inserting;
     {
         NSMutableArray* toArray = [NSMutableArray array];
         NSInteger count = array.count;
-        for (int i = 0; i < count; i++)
+        for (NSInteger i = 0; i < count; i++)
         {
             id obj = [array objectAtIndex:i];
             id jsonObject = [self db_jsonObjectWithObject:obj];
@@ -570,7 +570,7 @@ static char LKModelBase_Key_Inserting;
     NSMutableArray* toArray = nil;
     
     NSInteger count = array.count;
-    for (int i=0; i<count; i++)
+    for (NSInteger i=0; i<count; i++)
     {
         id value = [array objectAtIndex:i];
         if([value isKindOfClass:[NSDictionary class]])
@@ -606,16 +606,16 @@ static char LKModelBase_Key_Inserting;
         if([type isEqualToString:LKDB_TypeKey_Model])
         {
             Class clazz = NSClassFromString([dic objectForKey:LKDB_ClassKey]);
-            int rowid = [[dic objectForKey:LKDB_RowIdKey] intValue];
+            NSInteger rowid = [[dic objectForKey:LKDB_RowIdKey] integerValue];
             NSString* tableName = [dic objectForKey:LKDB_TableNameKey];
             
             NSString* where = nil;
             
-            NSString* rowCountWhere = [NSString stringWithFormat:@"select count(rowid) from %@ where rowid=%d limit 1",tableName,rowid];
-            int result = [[[clazz getUsingLKDBHelper] executeScalarWithSQL:rowCountWhere arguments:nil] intValue];
+            NSString* rowCountWhere = [NSString stringWithFormat:@"select count(rowid) from %@ where rowid=%ld limit 1",tableName,(long)rowid];
+            NSInteger result = [[[clazz getUsingLKDBHelper] executeScalarWithSQL:rowCountWhere arguments:nil] integerValue];
             if(result > 0)
             {
-                where = [NSString stringWithFormat:@"select rowid,* from %@ where rowid=%d limit 1",tableName,rowid];
+                where = [NSString stringWithFormat:@"select rowid,* from %@ where rowid=%ld limit 1",tableName,(long)rowid];
             }
             else
             {
@@ -692,7 +692,7 @@ static char LKModelBase_Key_Inserting;
     {
         NSArray* allKeys = dic.allKeys;
         NSMutableDictionary* toDic = [NSMutableDictionary dictionary];
-        for (int i=0; i < allKeys.count; i++)
+        for (NSInteger i=0; i < allKeys.count; i++)
         {
             NSString* key = [allKeys objectAtIndex:i];
             id value = [dic objectForKey:key];
@@ -776,14 +776,14 @@ static char LKModelBase_Key_Inserting;
                 if([LKDBUtils checkStringIsEmpty:pkvalue])
                     return YES;
                 
-                if([pkvalue intValue] == 0)
+                if([pkvalue integerValue] == 0)
                     return YES;
                 
                 return NO;
             }
             if([pkvalue isKindOfClass:[NSNumber class]])
             {
-                if([pkvalue intValue] == 0)
+                if([pkvalue integerValue] == 0)
                     return YES;
                 else
                     return NO;
@@ -877,7 +877,7 @@ static char LKModelBase_Key_Inserting;
         if([self isContainParent] && [self superclass] != [NSObject class])
         {
             LKModelInfos* superInfos = [[self superclass] getModelInfos];
-            for (int i=0; i<superInfos.count; i++) {
+            for (NSInteger i=0; i<superInfos.count; i++) {
                 LKDBProperty* db_p = [superInfos objectWithIndex:i];
                 if(db_p.propertyName && db_p.propertyType && [db_p.propertyName isEqualToString:@"rowid"]==NO)
                 {
@@ -921,7 +921,7 @@ static char LKModelBase_Key_Inserting;
  */
 + (void)getSelfPropertys:(NSMutableArray *)pronames protypes:(NSMutableArray *)protypes
 {
-    unsigned int outCount, i;
+    unsigned int outCount = 0, i = 0;
     objc_property_t *properties = class_copyPropertyList(self, &outCount);
     
     id respondInstance = nil;
@@ -1042,7 +1042,7 @@ static char LKModelBase_Key_Inserting;
 {
     Class clazz = [self class];
     NSMutableString* sb = [NSMutableString stringWithFormat:@"\n <%@> :\n", NSStringFromClass(clazz)];
-    [sb appendFormat:@"rowid : %d\n",self.rowid];
+    [sb appendFormat:@"rowid : %ld\n",(long)self.rowid];
     [self mutableString:sb appendPropertyStringWithClass:clazz containParent:YES];
     return sb;
 }
@@ -1055,7 +1055,7 @@ static char LKModelBase_Key_Inserting;
 #ifdef DEBUG
     Class clazz = [self class];
     NSMutableString* sb = [NSMutableString stringWithFormat:@"\n <%@> :\n", NSStringFromClass(clazz)];
-    [sb appendFormat:@"rowid : %d\n",self.rowid];
+    [sb appendFormat:@"rowid : %ld\n",(long)self.rowid];
     [self mutableString:sb appendPropertyStringWithClass:clazz containParent:containParent];
     NSLog(@"%@",sb);
     return sb;
@@ -1069,7 +1069,7 @@ static char LKModelBase_Key_Inserting;
     {
         return;
     }
-    unsigned int outCount, i;
+    unsigned int outCount = 0, i = 0;
     objc_property_t *properties = class_copyPropertyList(clazz, &outCount);
     for (i = 0; i < outCount; i++) {
         objc_property_t property = properties[i];

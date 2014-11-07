@@ -36,7 +36,7 @@
 /**
  *  sqlite comes with rowid
  */
-@property int rowid;
+@property NSInteger rowid;
 
 /**
  *  overwrite in your models, if your table has primary key

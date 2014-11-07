@@ -100,7 +100,7 @@
     
     Class clazz = NSClassFromString(propertyTypeName);
     LKModelInfos* infos = [self getModelInfos];
-    for (int i=0; i<infos.count; i++) {
+    for (NSInteger i=0; i<infos.count; i++) {
         LKDBProperty* property = [infos objectWithIndex:i];
         
         Class p_cls = NSClassFromString(property.propertyType);
@@ -165,7 +165,7 @@
         {
             NSArray* sql_names = keyMapping.allKeys;
             
-            for (int i =0; i< sql_names.count; i++) {
+            for (NSInteger i =0; i< sql_names.count; i++) {
                 
                 type = column_name = column_type = property_name = property_type = nil;
                 
@@ -211,7 +211,7 @@
         }
         else
         {
-            for (int i=0; i<propertyNames.count; i++) {
+            for (NSInteger i=0; i<propertyNames.count; i++) {
                 
                 type = LKSQL_Mapping_Inherit;
                 
@@ -263,7 +263,7 @@
 {
     return _sqlNameDic.count;
 }
--(LKDBProperty *)objectWithIndex:(int)index
+-(LKDBProperty *)objectWithIndex:(NSInteger)index
 {
     if(index < _sqlNameDic.count)
     {

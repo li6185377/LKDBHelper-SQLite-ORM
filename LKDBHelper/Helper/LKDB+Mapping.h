@@ -51,7 +51,7 @@
 @property BOOL isNotNull;
 @property(strong,nonatomic) NSString* defaultValue;
 @property(strong,nonatomic) NSString* checkValue;
-@property int length;
+@property NSInteger length;
 
 
 -(BOOL)isUserCalculate;
@@ -65,7 +65,7 @@
 @property(readonly,nonatomic)NSUInteger count;
 @property(readonly,nonatomic)NSArray* primaryKeys;
 
--(LKDBProperty*)objectWithIndex:(int)index;
+-(LKDBProperty*)objectWithIndex:(NSInteger)index;
 -(LKDBProperty*)objectWithPropertyName:(NSString*)propertyName;
 -(LKDBProperty*)objectWithSqlColumnName:(NSString*)columnName;
 

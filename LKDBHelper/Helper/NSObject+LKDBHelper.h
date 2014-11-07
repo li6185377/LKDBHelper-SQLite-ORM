@@ -40,8 +40,8 @@
  *
  *  @return  row count
  */
-+(int)rowCountWithWhere:(id)where,...;
-+(int)rowCountWithWhereFormat:(id)where,...;
++(NSInteger)rowCountWithWhere:(id)where,...;
++(NSInteger)rowCountWithWhereFormat:(id)where,...;
 
 /**
  *  搜索
@@ -55,8 +55,8 @@
  *
  *  @return model collection  or   contents of the columns collection
  */
-+(NSMutableArray*)searchColumn:(id)columns where:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
-+(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count;
++(NSMutableArray*)searchColumn:(id)columns where:(id)where orderBy:(NSString*)orderBy offset:(NSInteger)offset count:(NSInteger)count;
++(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(NSInteger)offset count:(NSInteger)count;
 +(id)searchSingleWithWhere:(id)where orderBy:(NSString*)orderBy;
 
 +(BOOL)insertToDB:(NSObject*)model;

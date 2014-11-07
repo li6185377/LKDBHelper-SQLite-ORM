@@ -74,7 +74,7 @@ if(_model_tableName.length == 0)\
     }
     else if(dbFilePath)
     {
-        for (int i=0; i<dbArray.count;)
+        for (NSInteger i = 0; i < dbArray.count;)
         {
             LKDBWeakObject* weakObj = [dbArray objectAtIndex:i];
             if(weakObj.obj == nil)
@@ -274,7 +274,7 @@ if(_model_tableName.length == 0)\
     if(dic != nil && dic.count >0 )
     {
         NSArray* keys = dic.allKeys;
-        for (int i=0; i< keys.count;i++) {
+        for (NSInteger i=0; i< keys.count;i++) {
             
             NSString* key = [keys objectAtIndex:i];
             id va = [dic objectForKey:key];
@@ -289,7 +289,7 @@ if(_model_tableName.length == 0)\
                 
                 [wherekey appendFormat:@" %@ in(",key];
                 
-                for (int j=0; j<vlist.count; j++) {
+                for (NSInteger j=0; j<vlist.count; j++) {
                     
                     [wherekey appendString:@"?"];
                     if(j== vlist.count-1)
@@ -322,7 +322,7 @@ if(_model_tableName.length == 0)\
     NSMutableString* pwhere = [NSMutableString string];
     if(primaryKeys.count>0)
     {
-        for (int i=0; i<primaryKeys.count; i++) {
+        for (NSInteger i=0; i<primaryKeys.count; i++) {
             NSString* pk = [primaryKeys objectAtIndex:i];
             if([LKDBUtils checkStringIsEmpty:pk] == NO)
             {
@@ -435,7 +435,7 @@ if(_model_tableName.length == 0)\
         [set close];
         
         NSMutableArray* alterAddColumns = [NSMutableArray array];
-        for (int i=0; i<infos.count; i++)
+        for (NSInteger i=0; i<infos.count; i++)
         {
             LKDBProperty* property = [infos objectWithIndex:i];
             if([property.sqlColumnName.lowercaseString isEqualToString:@"rowid"])
@@ -450,7 +450,7 @@ if(_model_tableName.length == 0)\
                 [clazz columnAttributeWithProperty:property];
                 
                 if(property.length>0 && [property.sqlColumnType isEqualToString:LKSQL_Type_Text])
-                    [addColumePars appendFormat:@"(%d)",property.length];
+                    [addColumePars appendFormat:@"(%ld)",(long)property.length];
                 
                 if(property.isNotNull)
                     [addColumePars appendFormat:@" %@",LKSQL_Attribute_NotNull];
@@ -504,7 +504,7 @@ if(_model_tableName.length == 0)\
     NSString* rowidAliasName = [modelClass db_rowidAliasName];
     
     NSMutableString* table_pars = [NSMutableString string];
-    for (int i=0; i<infos.count; i++)
+    for (NSInteger i=0; i<infos.count; i++)
     {
         if(i > 0)
         {
@@ -526,7 +526,7 @@ if(_model_tableName.length == 0)\
         {
             if(property.length>0)
             {
-                [table_pars appendFormat:@"(%d)",property.length];
+                [table_pars appendFormat:@"(%ld)",(long)property.length];
             }
         }
         if(property.isNotNull)
@@ -561,7 +561,7 @@ if(_model_tableName.length == 0)\
         if(primaryKeys.count>0)
         {
             pksb = [NSMutableString string];
-            for (int i=0; i<primaryKeys.count; i++) {
+            for (NSInteger i=0; i<primaryKeys.count; i++) {
                 NSString* pk = [primaryKeys objectAtIndex:i];
                 
                 if(pksb.length>0){
@@ -599,7 +599,7 @@ if(_model_tableName.length == 0)\
     [self executeDB:^(FMDatabase *db) {
         FMResultSet* set = [db executeQuery:@"select count(name) from sqlite_master where type='table' and name=?",tableName];
         [set next];
-        if([set intForColumnIndex:0]>0)
+        if([set longForColumnIndex:0]>0)
         {
             isTableCreated = YES;
         }
@@ -632,36 +632,41 @@ if(_model_tableName.length == 0)\
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),block);
 }
 #pragma mark - row count operation
--(int)rowCount:(Class)modelClass where:(id)where
+-(NSInteger)rowCount:(Class)modelClass where:(id)where
 {
     return [self rowCountBase:modelClass where:where];
 }
--(void)rowCount:(Class)modelClass where:(id)where callback:(void (^)(int))callback
+-(void)rowCount:(Class)modelClass where:(id)where callback:(void (^)(NSInteger))callback
 {
-    [self asyncBlock:^{
-        int result = [self rowCountBase:modelClass where:where];
-        if(callback != nil)
-        {
-            callback(result);
-        }
-    }];
+    if(callback)
+    {
+        __LKDBWeak LKDBHelper* wself = self;
+        [self asyncBlock:^{
+            __strong LKDBHelper* sself = wself;
+            if(sself)
+            {
+                NSInteger result = [sself rowCountBase:modelClass where:where];
+                callback(result);
+            }
+        }];
+    }
 }
--(int)rowCountBase:(Class)modelClass where:(id)where
+-(NSInteger)rowCountBase:(Class)modelClass where:(id)where
 {
     NSMutableString* rowCountSql = [NSMutableString stringWithFormat:@"select count(rowid) from %@",[modelClass getTableName]];
     
     NSMutableArray* valuesarray = [self extractQuery:rowCountSql where:where];
-    int result = [[self executeScalarWithSQL:rowCountSql arguments:valuesarray] intValue];
+    NSInteger result = [[self executeScalarWithSQL:rowCountSql arguments:valuesarray] integerValue];
     
     return result;
 }
 
 #pragma mark- search operation
--(NSMutableArray *)search:(Class)modelClass where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
+-(NSMutableArray *)search:(Class)modelClass where:(id)where orderBy:(NSString *)orderBy offset:(NSInteger)offset count:(NSInteger)count
 {
     return [self searchBase:modelClass columns:nil where:where orderBy:orderBy offset:offset count:count];
 }
--(NSMutableArray *)search:(Class)modelClass column:(id)columns where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
+-(NSMutableArray *)search:(Class)modelClass column:(id)columns where:(id)where orderBy:(NSString *)orderBy offset:(NSInteger)offset count:(NSInteger)count
 {
     return [self searchBase:modelClass columns:columns where:where orderBy:orderBy offset:offset count:count];
 }
@@ -676,7 +681,7 @@ if(_model_tableName.length == 0)\
     
     return nil;
 }
--(void)search:(Class)modelClass where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count callback:(void (^)(NSMutableArray *))block
+-(void)search:(Class)modelClass where:(id)where orderBy:(NSString *)orderBy offset:(NSInteger)offset count:(NSInteger)count callback:(void (^)(NSMutableArray *))block
 {
     if(block)
     {
@@ -813,7 +818,7 @@ if(_model_tableName.length == 0)\
         return [self searchBaseWithParams:params];
     }
 }
--(NSMutableArray *)searchBase:(Class)modelClass columns:(id)columns where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
+-(NSMutableArray *)searchBase:(Class)modelClass columns:(id)columns where:(id)where orderBy:(NSString *)orderBy offset:(NSInteger)offset count:(NSInteger)count
 {
     LKDBQueryParams* params = [[LKDBQueryParams alloc]init];
     params.toClass = modelClass;
@@ -860,7 +865,7 @@ if(_model_tableName.length == 0)\
     return results;
 }
 
--(void)sqlString:(NSMutableString*)sql groupBy:(NSString*)groupBy orderBy:(NSString*)orderby offset:(int)offset count:(int)count
+-(void)sqlString:(NSMutableString*)sql groupBy:(NSString*)groupBy orderBy:(NSString*)orderby offset:(NSInteger)offset count:(NSInteger)count
 {
     if([LKDBUtils checkStringIsEmpty:groupBy] == NO)
     {
@@ -872,11 +877,11 @@ if(_model_tableName.length == 0)\
     }
     if(count >0)
     {
-        [sql appendFormat:@" limit %d offset %d",count,offset];
+        [sql appendFormat:@" limit %ld offset %ld",(long)count,(long)offset];
     }
     else if(offset > 0)
     {
-        [sql appendFormat:@" limit %d offset %d",INT_MAX,offset];
+        [sql appendFormat:@" limit %d offset %ld",INT_MAX,(long)offset];
     }
 }
 - (NSMutableArray *)executeOneColumnResult:(FMResultSet *)set
@@ -903,7 +908,7 @@ if(_model_tableName.length == 0)\
 {
     NSMutableArray* array = [NSMutableArray arrayWithCapacity:0];
     LKModelInfos* infos = [modelClass getModelInfos];
-    int columnCount = [set columnCount];
+    NSInteger columnCount = [set columnCount];
     
     ///当主键是int类型时 会替换掉rowid
     NSString* rowidAliasName = [modelClass db_rowidAliasName];
@@ -924,7 +929,7 @@ if(_model_tableName.length == 0)\
             
             if (isRowid && (property == nil || [property.sqlColumnType isEqualToString:LKSQL_Type_Int]))
             {
-                bindingModel.rowid = [set intForColumnIndex:i];
+                bindingModel.rowid = [set longForColumnIndex:i];
             }
             else
             {
@@ -936,7 +941,7 @@ if(_model_tableName.length == 0)\
                     
                     if([rowidAliasName isEqualToString:sqlName])
                     {
-                        bindingModel.rowid = [set intForColumnIndex:i];
+                        bindingModel.rowid = [set longForColumnIndex:i];
                     }
                 }
                 else
@@ -960,9 +965,15 @@ if(_model_tableName.length == 0)\
 }
 -(void)insertToDB:(NSObject *)model callback:(void (^)(BOOL))block
 {
+    __LKDBWeak LKDBHelper* wself = self;
     [self asyncBlock:^{
-        BOOL result = [self insertBase:model];
-        if(block != nil)
+        __strong LKDBHelper* sself = wself;
+        BOOL result = NO;
+        if(sself)
+        {
+            result = [sself insertBase:model];
+        }
+        if(block)
         {
             block(result);
         }
@@ -1022,7 +1033,7 @@ if(_model_tableName.length == 0)\
     
     LKDBProperty* primaryProperty = [model singlePrimaryKeyProperty];
     
-    for (int i=0; i<infos.count; i++)
+    for (NSInteger i=0; i<infos.count; i++)
     {
         LKDBProperty* property = [infos objectWithIndex:i];
         if([LKDBUtils checkStringIsEmpty:property.sqlColumnName])
@@ -1060,10 +1071,10 @@ if(_model_tableName.length == 0)\
     
     [self executeDB:^(FMDatabase *db) {
         execute = [db executeUpdate:insertSQL withArgumentsInArray:insertValues];
-        lastInsertRowId= db.lastInsertRowId;
+        lastInsertRowId = db.lastInsertRowId;
     }];
     
-    model.rowid = (int)lastInsertRowId;
+    model.rowid = (NSInteger)lastInsertRowId;
     
     [model setDb_inserting:NO];
     
@@ -1113,7 +1124,7 @@ if(_model_tableName.length == 0)\
     
     NSMutableString* updateKey = [NSMutableString string];
     NSMutableArray* updateValues = [NSMutableArray arrayWithCapacity:infos.count];
-    for (int i=0; i<infos.count; i++) {
+    for (NSInteger i=0; i<infos.count; i++) {
         
         LKDBProperty* property = [infos objectWithIndex:i];
         
@@ -1144,7 +1155,7 @@ if(_model_tableName.length == 0)\
     }
     else if(model.rowid > 0)
     {
-        [updateSQL appendFormat:@" rowid=%d",model.rowid];
+        [updateSQL appendFormat:@" rowid=%ld",(long)model.rowid];
     }
     else
     {
@@ -1215,7 +1226,7 @@ if(_model_tableName.length == 0)\
     NSMutableArray* parsArray = [NSMutableArray array];
     if(model.rowid > 0)
     {
-        [deleteSQL appendFormat:@"rowid = %d",model.rowid];
+        [deleteSQL appendFormat:@"rowid = %ld",(long)model.rowid];
     }
     else
     {
@@ -1270,10 +1281,12 @@ if(_model_tableName.length == 0)\
 {
     checkModelIsInvalid(model);
     NSString* pwhere = nil;
-    if(model.rowid>0){
-        pwhere = [NSString stringWithFormat:@"rowid=%d",model.rowid];
+    if(model.rowid>0)
+    {
+        pwhere = [NSString stringWithFormat:@"rowid=%ld",(long)model.rowid];
     }
-    else{
+    else
+    {
         pwhere = [self primaryKeyWhereSQLWithModel:model addPValues:nil];
     }
     if(pwhere.length == 0)
@@ -1311,7 +1324,7 @@ if(_model_tableName.length == 0)\
     [self clearFileWithTable:modelClass columns:columns type:2];
 }
 #define LKTestDirFilename @"LKTestDirFilename111"
-+(void)clearFileWithTable:(Class)modelClass columns:(NSArray*)columns type:(int)type
++(void)clearFileWithTable:(Class)modelClass columns:(NSArray*)columns type:(NSInteger)type
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         
@@ -1337,7 +1350,7 @@ if(_model_tableName.length == 0)\
         
         NSString* seleteColumn = [columns componentsJoinedByString:@","];
         NSMutableString* whereStr =[NSMutableString string];
-        for (int i=0; i<count ; i++) {
+        for (NSInteger i=0; i<count ; i++) {
             [whereStr appendFormat:@" %@ != '' ",[columns objectAtIndex:i]];
             if(i< count -1)
             {

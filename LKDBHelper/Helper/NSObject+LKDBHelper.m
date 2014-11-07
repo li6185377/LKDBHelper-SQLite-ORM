@@ -40,7 +40,7 @@
     NSLog(@"%@ can not use %@",NSStringFromClass(self),NSStringFromClass(model.class));
     return NO;
 }
-+(int)rowCountWithWhereFormat:(id)where, ...
++(NSInteger)rowCountWithWhereFormat:(id)where, ...
 {
     if ([where isKindOfClass:[NSString class]])
     {
@@ -51,7 +51,7 @@
     }
     return [[self getUsingLKDBHelper] rowCount:self where:where];
 }
-+(int)rowCountWithWhere:(id)where, ...
++(NSInteger)rowCountWithWhere:(id)where, ...
 {
     if ([where isKindOfClass:[NSString class]])
     {
@@ -62,11 +62,11 @@
     }
     return [[self getUsingLKDBHelper] rowCount:self where:where];
 }
-+(NSMutableArray *)searchColumn:(id)columns where:(id)where orderBy:(NSString *)orderBy offset:(int)offset count:(int)count
++(NSMutableArray *)searchColumn:(id)columns where:(id)where orderBy:(NSString *)orderBy offset:(NSInteger)offset count:(NSInteger)count
 {
     return [[self getUsingLKDBHelper] search:self column:columns where:where orderBy:orderBy offset:offset count:count];
 }
-+(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(int)offset count:(int)count{
++(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(NSInteger)offset count:(NSInteger)count{
     return [[self getUsingLKDBHelper] search:self where:where orderBy:orderBy offset:offset count:count];
 }
 +(id)searchSingleWithWhere:(id)where orderBy:(NSString *)orderBy
