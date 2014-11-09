@@ -38,6 +38,9 @@
 }
 -(void)removeWithColumnName:(NSString*)columnName;
 -(void)addDBPropertyWithType:(NSString *)type cname:(NSString *)column_name ctype:(NSString *)ctype pname:(NSString *)pname ptype:(NSString *)ptype;
+
+-(void)updateProperty:(LKDBProperty*)property sqlColumnName:(NSString*)columnName;
+-(void)updateProperty:(LKDBProperty*)property propertyName:(NSString*)propertyName;
 @end
 
 #pragma mark- LKDBProperty
@@ -121,15 +124,22 @@
     
     LKDBProperty* property = [infos objectWithPropertyName:propertyName];
     if(property==nil)
+    {
         return;
+    }
     
     LKDBProperty* column = [infos objectWithSqlColumnName:columnName];
     if(column)
     {
-        column.propertyName = propertyName;
+        [infos updateProperty:column propertyName:propertyName];
         column.propertyType = property.propertyType;
     }
-    else{
+    else if([property.sqlColumnName isEqualToString:property.propertyName])
+    {
+        [infos updateProperty:property sqlColumnName:columnName];
+    }
+    else
+    {
         [infos addDBPropertyWithType:LKSQL_Mapping_Binding cname:columnName ctype:LKSQL_Type_Text pname:propertyName ptype:property.propertyType];
     }
 }
@@ -251,7 +261,8 @@
     {
         [_proNameDic setObject:db_property forKey:db_property.propertyName];
     }
-    if(db_property.sqlColumnName){
+    if(db_property.sqlColumnName)
+    {
         [_sqlNameDic setObject:db_property forKey:db_property.sqlColumnName];
     }
 }
@@ -279,6 +290,19 @@
 -(LKDBProperty *)objectWithSqlColumnName:(NSString *)columnName
 {
     return [_sqlNameDic objectForKey:columnName];
+}
+
+-(void)updateProperty:(LKDBProperty*)property propertyName:(NSString*)propertyName
+{
+    [_proNameDic removeObjectForKey:property.propertyName];
+    property.propertyName = propertyName;
+    [_proNameDic setObject:property forKey:propertyName];
+}
+-(void)updateProperty:(LKDBProperty*)property sqlColumnName:(NSString*)columnName
+{
+    [_sqlNameDic removeObjectForKey:property.sqlColumnName];
+    property.sqlColumnName = columnName;
+    [_sqlNameDic setObject:property forKey:columnName];
 }
 -(void)removeWithColumnName:(NSString*)columnName
 {
