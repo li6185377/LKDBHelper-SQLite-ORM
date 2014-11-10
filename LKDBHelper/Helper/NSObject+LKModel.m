@@ -968,26 +968,28 @@ static char LKModelBase_Key_Inserting;
         NSString* propertyClassName = nil;
         if ([propertyType hasPrefix:@"T@"]) {
             
-            NSRange range = NSMakeRange(3,MAX(0,[propertyType rangeOfString:@","].location-4));
-            if(range.location + range.length <= propertyType.length)
+            NSRange range = [propertyType rangeOfString:@","];
+            if(range.location > 4 && range.location <= propertyType.length)
             {
+                range = NSMakeRange(3,range.location - 4);
                 propertyClassName = [propertyType substringWithRange:range];
                 if([propertyClassName hasSuffix:@">"])
                 {
-                    NSRange range = [propertyClassName rangeOfString:@"<"];
-                    if (range.length>0)
+                    NSRange categoryRange = [propertyClassName rangeOfString:@"<"];
+                    if (categoryRange.length>0)
                     {
-                        propertyClassName = [propertyClassName substringToIndex:range.location];
+                        propertyClassName = [propertyClassName substringToIndex:categoryRange.location];
                     }
                 }
             }
         }
         else if([propertyType hasPrefix:@"T{"])
         {
-            NSRange range = NSMakeRange(2, [propertyType rangeOfString:@"="].location-2);
-            if(range.location + range.length <= propertyType.length)
+            NSRange range = [propertyType rangeOfString:@"="];
+            if(range.location > 2 && range.location <= propertyType.length)
             {
-               propertyClassName = [propertyType substringWithRange:range];
+                range = NSMakeRange(2, range.location-2);
+                propertyClassName = [propertyType substringWithRange:range];
             }
         }
         else
@@ -1019,7 +1021,7 @@ static char LKModelBase_Key_Inserting;
             }
         }
         
-        if(propertyClassName.length == 0)
+        if([LKDBUtils checkStringIsEmpty:propertyClassName])
         {
             ///没找到具体的属性就放弃
             continue;
@@ -1027,7 +1029,6 @@ static char LKModelBase_Key_Inserting;
         ///添加属性
         [pronames addObject:propertyName];
         [protypes addObject:propertyClassName];
-        
     }
     respondInstance = nil;
     free(properties);
