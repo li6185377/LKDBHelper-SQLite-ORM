@@ -5,7 +5,7 @@ thread-safe and not afraid of recursive deadlock
 
 QQ群号 113767274  有什么问题或者改进的地方大家一起讨论
 
-推荐个  json 和 model  互转非常好用的工具类 https://github.com/dcty/YYJSON
+推荐个  json 和 model  互转非常好用的工具类 https://github.com/dcty/YYJSON 作者是个萌萌哒的17岁少女
 支持 NSData 直接转换成 model array
 
 #Big Upgrade 2.0
