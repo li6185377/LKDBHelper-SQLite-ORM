@@ -105,7 +105,6 @@ pod 'LKDBHelper',:head
     test.blah = @[@"1",@"2",@"3"];
     test.blah = @[@"0",@[@1],@{@"2":@2},foreign];
     test.hoho = @{@"array":test.blah,@"foreign":foreign,@"normal":@123456,@"date":[NSDate date]};
-    ///warning: NSDate没做处理  所以不能在 NSArray 里 或者 NSDictionry 里面使用NSDate
     
     //异步 插入第一条 数据   Insert the first
     [test saveToDB];
