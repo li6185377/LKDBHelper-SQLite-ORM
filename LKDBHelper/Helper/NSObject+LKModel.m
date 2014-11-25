@@ -82,7 +82,7 @@ static char LKModelBase_Key_Inserting;
 }
 -(BOOL)db_inserting
 {
-   return [objc_getAssociatedObject(self, &LKModelBase_Key_Inserting) boolValue];
+    return [objc_getAssociatedObject(self, &LKModelBase_Key_Inserting) boolValue];
 }
 -(void)setDb_inserting:(BOOL)db_inserting
 {
@@ -624,7 +624,7 @@ static char LKModelBase_Key_Inserting;
                 {
                     BOOL isNeedAddDot = NO;
                     NSMutableString* sb = [NSMutableString stringWithFormat:@"select rowid,* from %@ where",tableName];
-
+                    
                     NSArray* allKeys = pv.allKeys;
                     for (NSString* key in allKeys)
                     {
@@ -749,11 +749,11 @@ static char LKModelBase_Key_Inserting;
         id value = nil;
         if([property.type isEqualToString:LKSQL_Mapping_UserCalculate])
         {
-           value = [self userGetValueForModel:property];
+            value = [self userGetValueForModel:property];
         }
         else
         {
-           value = [self modelGetValue:property];
+            value = [self modelGetValue:property];
         }
         if(value)
         {
@@ -924,17 +924,12 @@ static char LKModelBase_Key_Inserting;
     unsigned int outCount = 0, i = 0;
     objc_property_t *properties = class_copyPropertyList(self, &outCount);
     
-    id respondInstance = nil;
-    if(outCount > 0)
-    {
-        respondInstance = [[self alloc]init];
-    }
     for (i = 0; i < outCount; i++) {
         objc_property_t property = properties[i];
         NSString *propertyName = [NSString stringWithCString:property_getName(property) encoding:NSUTF8StringEncoding];
         
         //取消rowid 的插入 //子类 已重载的属性 取消插入
-        if([propertyName isEqualToString:@"rowid"] ||
+        if(propertyName.length == 0 || [propertyName isEqualToString:@"rowid"] ||
            [pronames indexOfObject:propertyName] != NSNotFound)
         {
             continue;
@@ -944,10 +939,12 @@ static char LKModelBase_Key_Inserting;
         ///过滤只读属性
         if ([propertyType rangeOfString:@",R,"].length > 0 || [propertyType hasSuffix:@",R"])
         {
-            NSString* setMethodString = [NSString stringWithFormat:@"set%@:",[propertyName capitalizedString]];
+            NSString* firstWord = [[propertyName substringToIndex:1] uppercaseString];
+            NSString* otherWord = [propertyName substringFromIndex:1];
+            NSString* setMethodString = [NSString stringWithFormat:@"set%@%@:",firstWord,otherWord];
             SEL setSEL = NSSelectorFromString(setMethodString);
             ///有set方法就不过滤了
-            if([respondInstance respondsToSelector:setSEL] == NO)
+            if([self instancesRespondToSelector:setSEL] == NO)
             {
                 continue;
             }
@@ -1030,7 +1027,6 @@ static char LKModelBase_Key_Inserting;
         [pronames addObject:propertyName];
         [protypes addObject:propertyClassName];
     }
-    respondInstance = nil;
     free(properties);
     if([self isContainParent] && [self superclass] != [NSObject class])
     {
