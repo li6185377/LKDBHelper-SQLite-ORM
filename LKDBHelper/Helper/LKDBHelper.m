@@ -619,7 +619,8 @@ if([LKDBUtils checkStringIsEmpty:_model_tableName])\
 
 @implementation LKDBHelper(DatabaseExecute)
 
--(id)modelValueWithProperty:(LKDBProperty *)property model:(NSObject *)model {
+-(id)modelValueWithProperty:(LKDBProperty *)property model:(NSObject *)model
+{
     id value = nil;
     if(property.isUserCalculate)
     {
@@ -1016,9 +1017,7 @@ if([LKDBUtils checkStringIsEmpty:_model_tableName])\
     NSMutableString* insertValuesString = [NSMutableString stringWithCapacity:0];
     NSMutableArray* insertValues = [NSMutableArray arrayWithCapacity:infos.count];
     
-    
     LKDBProperty* primaryProperty = [model singlePrimaryKeyProperty];
-    
     for (NSInteger i=0; i<infos.count; i++)
     {
         LKDBProperty* property = [infos objectWithIndex:i];
@@ -1035,6 +1034,13 @@ if([LKDBUtils checkStringIsEmpty:_model_tableName])\
             }
         }
         
+        id value = [self modelValueWithProperty:property model:model];
+        ///跳过 rowid = 0 的属性
+        if([property.sqlColumnName isEqualToString:@"rowid"] && [value intValue] == 0)
+        {
+            continue;
+        }
+        
         if(insertKey.length>0)
         {
             [insertKey appendString:@","];
@@ -1043,8 +1049,6 @@ if([LKDBUtils checkStringIsEmpty:_model_tableName])\
         
         [insertKey appendString:property.sqlColumnName];
         [insertValuesString appendString:@"?"];
-        
-        id value = [self modelValueWithProperty:property model:model];
         
         [insertValues addObject:value];
     }
@@ -1116,12 +1120,23 @@ if([LKDBUtils checkStringIsEmpty:_model_tableName])\
         
         LKDBProperty* property = [infos objectWithIndex:i];
         
-        if(i>0)
-            [updateKey appendString:@","];
-        
-        [updateKey appendFormat:@"%@=?",property.sqlColumnName];
+        if([LKDBUtils checkStringIsEmpty:property.sqlColumnName])
+        {
+            continue;
+        }
         
         id value = [self modelValueWithProperty:property model:model];
+        ///跳过 rowid = 0 的属性
+        if([property.sqlColumnName isEqualToString:@"rowid"] && [value intValue] == 0)
+        {
+            continue;
+        }
+        
+        if(updateKey.length > 0)
+        {
+            [updateKey appendString:@","];
+        }
+        [updateKey appendFormat:@"%@=?",property.sqlColumnName];
         
         [updateValues addObject:value];
     }
