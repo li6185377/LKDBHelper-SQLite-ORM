@@ -1,9 +1,9 @@
 //
 //  LKDBHelper.m
-//  upin
+//  LJH
 //
-//  Created by Fanhuan on 12-12-6.
-//  Copyright (c) 2012年 linggan. All rights reserved.
+//  Created by LJH on 12-12-6.
+//  Copyright (c) 2012年 LJH. All rights reserved.
 //
 
 #import "LKDBHelper.h"

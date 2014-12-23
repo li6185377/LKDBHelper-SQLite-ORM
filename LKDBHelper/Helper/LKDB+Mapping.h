@@ -2,7 +2,7 @@
 //  LKDBProperty+KeyMapping.h
 //  LKDBHelper
 //
-//  Created by upin on 13-6-17.
+//  Created by LJH on 13-6-17.
 //  Copyright (c) 2013年 ljh. All rights reserved.
 //
 

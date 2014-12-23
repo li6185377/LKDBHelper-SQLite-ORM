@@ -2,7 +2,7 @@
 //  NSObject+LKDBHelper.h
 //  LKDBHelper
 //
-//  Created by upin on 13-6-8.
+//  Created by LJH on 13-6-8.
 //  Copyright (c) 2013年 ljh. All rights reserved.
 //
 
