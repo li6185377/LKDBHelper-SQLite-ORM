@@ -45,6 +45,7 @@
 
 -(BOOL)executeSQL:(NSString *)sql arguments:(NSArray *)args;
 -(NSString *)executeScalarWithSQL:(NSString *)sql arguments:(NSArray *)args;
+
 @end
 
 @interface LKDBHelper(DatabaseManager)

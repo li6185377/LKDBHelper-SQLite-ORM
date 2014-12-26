@@ -225,9 +225,18 @@ if([LKDBUtils checkStringIsEmpty:_model_tableName])\
     __block BOOL execute = NO;
     [self executeDB:^(FMDatabase *db) {
         if(args.count>0)
+        {
             execute = [db executeUpdate:sql withArgumentsInArray:args];
+        }
         else
+        {
             execute = [db executeUpdate:sql];
+        }
+        
+        if(db.hadError)
+        {
+            LKErrorLog(@" sql:%@ \n args:%@ \n sqlite error :%@ \n",sql,args,db.lastErrorMessage);
+        }
     }];
     return execute;
 }
@@ -237,9 +246,18 @@ if([LKDBUtils checkStringIsEmpty:_model_tableName])\
     [self executeDB:^(FMDatabase *db) {
         FMResultSet* set = nil;
         if(args.count>0)
+        {
             set = [db executeQuery:sql withArgumentsInArray:args];
+        }
         else
+        {
             set = [db executeQuery:sql];
+        }
+        
+        if(db.hadError)
+        {
+            LKErrorLog(@" sql:%@ \n args:%@ \n sqlite error :%@ \n",sql,args,db.lastErrorMessage);
+        }
         
         if([set columnCount]>0 && [set next])
         {
@@ -1062,16 +1080,16 @@ if([LKDBUtils checkStringIsEmpty:_model_tableName])\
     [self executeDB:^(FMDatabase *db) {
         execute = [db executeUpdate:insertSQL withArgumentsInArray:insertValues];
         lastInsertRowId = db.lastInsertRowId;
+
+        if(db.hadError)
+        {
+            LKErrorLog(@" sql:%@ \n args:%@ \n sqlite error :%@ \n",insertSQL,insertValues,db.lastErrorMessage);
+        }
     }];
     
     model.rowid = (NSInteger)lastInsertRowId;
     
     [model setDb_inserting:NO];
-    
-    if(execute == NO)
-    {
-        LKErrorLog(@"database insert fail %@, sql:%@",NSStringFromClass(modelClass),insertSQL);
-    }
     
     //callback
     [modelClass dbDidInserted:model result:execute];
@@ -1173,11 +1191,6 @@ if([LKDBUtils checkStringIsEmpty:_model_tableName])\
     }
     
     BOOL execute = [self executeSQL:updateSQL arguments:updateValues];
-    if(execute == NO)
-    {
-        LKErrorLog(@"database update fail : %@   -----> update sql: %@",NSStringFromClass(modelClass),updateSQL);
-    }
-    
     //callback
     [modelClass dbDidUpdated:model result:execute];
     
@@ -1195,11 +1208,6 @@ if([LKDBUtils checkStringIsEmpty:_model_tableName])\
     NSMutableArray* updateValues = [self extractQuery:updateSQL where:where];
     
     BOOL execute = [self executeSQL:updateSQL arguments:updateValues];
-    
-    if(execute == NO)
-    {
-        LKErrorLog(@"database update fail with TableName: %@   ----->sql:%@",tableName,updateSQL);
-    }
     
     return execute;
 }
