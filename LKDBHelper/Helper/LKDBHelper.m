@@ -73,26 +73,32 @@ if([LKDBUtils checkStringIsEmpty:_model_tableName])\
     
     if(helper)
     {
-        LKDBWeakObject* weakObj = [LKDBWeakObject new];
+        LKDBWeakObject* weakObj = [[LKDBWeakObject alloc] init];
         weakObj.obj = helper;
         [dbArray addObject:weakObj];
     }
     else if(dbFilePath)
     {
-        for (NSInteger i = 0; i < dbArray.count;)
+        LKDBHelper* instance = nil;
+        @synchronized(dbArray)
         {
-            LKDBWeakObject* weakObj = [dbArray objectAtIndex:i];
-            if(weakObj.obj == nil)
+            for (NSInteger i = 0; i < dbArray.count;)
             {
-                [dbArray removeObject:weakObj];
-                continue;
+                LKDBWeakObject* weakObj = [dbArray objectAtIndex:i];
+                if(weakObj.obj == nil)
+                {
+                    [dbArray removeObjectAtIndex:i];
+                    continue;
+                }
+                else if([weakObj.obj.dbPath isEqualToString:dbFilePath])
+                {
+                    instance = weakObj.obj;
+                    break;
+                }
+                i++;
             }
-            else if([weakObj.obj.dbPath isEqualToString:dbFilePath])
-            {
-                return weakObj.obj;
-            }
-            i++;
         }
+        return instance;
     }
     return nil;
 }
@@ -108,8 +114,9 @@ if([LKDBUtils checkStringIsEmpty:_model_tableName])\
 {
     if([LKDBUtils checkStringIsEmpty:filePath])
     {
+        ///release self
         self = nil;
-        return self;
+        return nil;
     }
     LKDBHelper* helper = [LKDBHelper dbHelperWithPath:filePath save:nil];
     if(helper)
