@@ -52,34 +52,38 @@
 {
     addText(@"示例 开始 example start \n\n");
     
-    //清空数据库
+    ///获取 LKTest 类使用的 LKDBHelper
     LKDBHelper* globalHelper = [LKTest getUsingLKDBHelper];
     
+    ///删除所有表   delete all table
     [globalHelper dropAllTable];
     
     addText(@"LKTest create table sql :\n%@\n",[LKTest getCreateTableSQL]);
     addText(@"LKTestForeign create table sql :\n%@\n",[LKTestForeign getCreateTableSQL]);
     
-    //清空表数据   clear table data
+    //清空表数据  clear table data
     [LKDBHelper clearTableData:[LKTest class]];
     
+    //初始化数据模型  init object
+    LKTest* test = [[LKTest alloc]init];
+    test.name = @"zhan san";
+    test.age = 16;
     
+    //外键  foreign key
     LKTestForeign* foreign = [[LKTestForeign alloc]init];
     foreign.address = @":asdasdasdsadasdsdas";
     foreign.postcode  = 123341;
     foreign.addid = 213214;
     
-    //插入数据    insert table row
-    LKTest* test = [[LKTest alloc]init];
-    test.name = @"zhan san";
-    test.age = 16;
-    
-    //外键 foreign key
     test.address = foreign;
+    
+    
+    ///复杂对象 complex object
     test.blah = @[@"1",@"2",@"3"];
     test.blah = @[@"0",@[@1],@{@"2":@2},foreign];
     test.hoho = @{@"array":test.blah,@"foreign":foreign,@"normal":@123456,@"date":[NSDate date]};
     
+    ///other
     test.isGirl = YES;
     test.like = 'I';
     test.img = [UIImage imageNamed:@"41.png"];
@@ -92,37 +96,40 @@
     test.data = [@"hahaha" dataUsingEncoding:NSUTF8StringEncoding];
     
     addText(@"%f",test.score);
-    //异步 插入第一条 数据   Insert the first
+    //同步 插入第一条 数据   synchronous insert the first
     [test saveToDB];
     //or
     //[globalHelper insertToDB:test];
     
-    //多主键 的插入成功
+    //更改主键继续插入   Insert the change after the primary key
     test.age = 17;
     [globalHelper insertToDB:test];
     
     //事物  transaction
-    [globalHelper executeDB:^(FMDatabase *db) {
-        
-        [db beginTransaction];
+    [globalHelper executeForTransaction:^BOOL(LKDBHelper *helper) {
         
         test.name = @"1";
-        [globalHelper insertToDB:test];
+        BOOL success = [helper insertToDB:test];
         
         test.name = @"2";
-        [globalHelper insertToDB:test];
+        success = [helper insertToDB:test];
         
         //重复主键   duplicate primary key
         test.name = @"1";
         test.rowid = 0;     //no new object,should set rowid:0
-        BOOL insertSucceed = [globalHelper insertWhenNotExists:test];
-
+        BOOL insertSucceed = [helper insertWhenNotExists:test];
+        
         //insert fail
         if(insertSucceed == NO)
-            [db rollback];
+        {
+            ///rollback
+            return NO;
+        }
         else
-            [db commit];
-        
+        {
+            ///commit
+            return YES;
+        }
     }];
 
     
@@ -130,34 +137,36 @@
     
     sleep(1);
     
-    
-    //改个 主键 插入第2条数据   update primary column value  Insert the second
     test.name = @"li si";
     [globalHelper insertToDB:test callback:^(BOOL isInsert) {
         addText(@"asynchronization insert complete: %@",isInsert>0?@"YES":@"NO");
     }];
     
     //查询   search
-    addText(@"同步搜索    sync search");
-    
-    NSMutableArray* arraySync = nil;
-    arraySync = [globalHelper searchWithSQL:@"select * from @t" toClass:[LKTest class]];
-    for (id obj in arraySync) {
+    NSMutableArray* searchResultArray = nil;
+
+    addText(@"\n search one: \n");
+    ///同步搜索 执行sql语句 把结果变为LKTest对象
+    ///Synchronous search executes the SQL statement put the results into a LKTest object
+    searchResultArray = [globalHelper searchWithSQL:@"select * from @t" toClass:[LKTest class]];
+    for (id obj in searchResultArray) {
         addText(@"%@",[obj printAllPropertys]);
     }
     
-    //查询   search
-    addText(@"同步搜索    sync search 2");
-    arraySync = [LKTest searchWithWhere:nil orderBy:nil offset:0 count:100];
-    for (id obj in arraySync) {
+    addText(@"\n search two: \n");
+    ///搜索所有值     search all
+    searchResultArray = [LKTest searchWithWhere:nil orderBy:nil offset:0 count:100];
+    for (id obj in searchResultArray) {
         addText(@"%@",[obj printAllPropertys]);
     }
     
-    //查询 单个 列   search single column
-    addText(@"只获取name那列的值   search with column 'name' results");
+    addText(@"查询 单个 列   search single column");
+    ///只获取name那列的值   search with column 'name' results
     NSArray* nameArray = [LKTest searchColumn:@"name" where:nil orderBy:nil offset:0 count:0];
     addText(@"%@",[nameArray componentsJoinedByString:@","]);
     
+    
+    ///
     addText(@"休息2秒 开始  为了说明 是异步插入的\n"
             "rest for 2 seconds to start is asynchronous inserted to illustrate");
     
@@ -165,7 +174,7 @@
     
     addText(@"休息2秒 结束 \n rest for 2 seconds at the end");
     
-    //异步
+    //异步 asynchronous
     [globalHelper search:[LKTest class] where:nil orderBy:nil offset:0 count:100 callback:^(NSMutableArray *array) {
         
         addText(@"异步搜索 结束,  async search end");
@@ -175,7 +184,7 @@
         
         sleep(1);
 
-        //修改    update
+        ///修改    update object
         LKTest* test2 = [array objectAtIndex:0];
         test2.name = @"wang wu";
 
@@ -183,13 +192,15 @@
         
         addText(@"修改完成 , update completed ");
         
+        ///all
         array =  [globalHelper search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
         for (NSObject* obj in array) {
             addText(@"%@",[obj printAllPropertys]);
         }
         
-        test2.rowid = 0;
         
+        ///delete
+        test2.rowid = 0;
         BOOL ishas = [globalHelper isExistsModel:test2];
         if(ishas)
         {
@@ -200,6 +211,7 @@
         addText(@"删除完成, delete completed");
         sleep(1);
         
+        ///all
         array =  [globalHelper search:[LKTest class] where:nil orderBy:nil offset:0 count:100];
         for (NSObject* obj in array) {
             addText(@"%@",[obj printAllPropertys]);

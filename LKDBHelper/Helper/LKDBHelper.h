@@ -39,12 +39,24 @@
 @property(strong,nonatomic)NSString* encryptionKey;
 
 /**
- *	@brief  execute database operations synchronously,not afraid of recursive deadlock  同步执行数据库操作 可递归调用
+ *	@brief  execute database operations synchronously,not afraid of recursive deadlock  
+            
+            同步执行数据库操作 可递归调用
  */
 -(void)executeDB:(void (^)(FMDatabase *db))block;
 
 -(BOOL)executeSQL:(NSString *)sql arguments:(NSArray *)args;
 -(NSString *)executeScalarWithSQL:(NSString *)sql arguments:(NSArray *)args;
+
+
+/**
+ *	@brief  execute database operations synchronously in a transaction
+            block return the YES commit transaction returns the NO rollback transaction
+ 
+            同步执行数据库操作  在事务内部  
+            block 返回 YES commit 事务    返回 NO  rollback 事务
+ */
+-(void)executeForTransaction:(BOOL (^)(LKDBHelper* helper))block;
 
 @end
 

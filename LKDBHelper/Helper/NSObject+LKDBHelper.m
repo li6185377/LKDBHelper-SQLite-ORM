@@ -167,4 +167,28 @@
 {
     return [self.class isExistsWithModel:self];
 }
+
+
++(void)insertToDBWithArray:(NSArray *)models filter:(void (^)(id model, BOOL inseted, BOOL * rollback))filter
+{
+    [[self getUsingLKDBHelper] executeForTransaction:^BOOL(LKDBHelper *helper) {
+        
+        BOOL isRollback = NO;
+        for (int i=0; i<models.count; i++)
+        {
+            id obj = [models objectAtIndex:i];
+            BOOL inseted = [helper insertToDB:obj];
+            if(filter)
+            {
+                filter(obj,inseted,&isRollback);
+            }
+            if(isRollback)
+            {
+                break;
+            }
+        }
+        return (isRollback == NO);
+    }];
+}
+
 @end

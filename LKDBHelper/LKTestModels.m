@@ -140,6 +140,7 @@
 {
     return @"name";
 }
+///复合主键  这个优先级最高
 +(NSArray *)getPrimaryKeyUnionArray
 {
     return @[@"name",@"MyAge"];

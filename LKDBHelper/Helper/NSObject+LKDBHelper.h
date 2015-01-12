@@ -72,4 +72,7 @@
 - (BOOL)deleteToDB;
 - (BOOL)isExistsFromDB;
 
+///begin translate for insert models  开始事务插入数组
++(void)insertToDBWithArray:(NSArray*)models filter:(void(^)(id model,BOOL inserted,BOOL*rollback))filter;
+
 @end

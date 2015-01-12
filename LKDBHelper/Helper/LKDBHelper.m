@@ -274,7 +274,26 @@ if([LKDBUtils checkStringIsEmpty:_model_tableName])\
     }];
     return scalar;
 }
-
+-(void)executeForTransaction:(BOOL (^)(LKDBHelper *))block
+{
+    LKDBHelper* helper = self;
+    [self executeDB:^(FMDatabase *db) {
+        [db beginTransaction];
+        BOOL isCommit = NO;
+        if(block)
+        {
+            isCommit = block(helper);
+        }
+        if(isCommit)
+        {
+            [db commit];
+        }
+        else
+        {
+            [db rollback];
+        }
+    }];
+}
 
 //splice 'where' 拼接where语句
 - (NSMutableArray *)extractQuery:(NSMutableString *)query where:(id)where
