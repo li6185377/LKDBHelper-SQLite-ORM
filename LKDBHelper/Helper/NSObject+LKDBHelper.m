@@ -168,6 +168,18 @@
     return [self.class isExistsWithModel:self];
 }
 
++(void)insertArrayByAsyncToDB:(NSArray *)models
+{
+    if(models.count > 0)
+    {
+        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+            for (id model in models)
+            {
+                [model saveToDB];
+            }
+        });
+    }
+}
 
 +(void)insertToDBWithArray:(NSArray *)models filter:(void (^)(id model, BOOL inseted, BOOL * rollback))filter
 {

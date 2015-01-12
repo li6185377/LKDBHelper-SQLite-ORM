@@ -72,6 +72,9 @@
 - (BOOL)deleteToDB;
 - (BOOL)isExistsFromDB;
 
+///异步插入数据 async insert array
++(void)insertArrayByAsyncToDB:(NSArray*)models;
+
 ///begin translate for insert models  开始事务插入数组
 +(void)insertToDBWithArray:(NSArray*)models filter:(void(^)(id model,BOOL inserted,BOOL*rollback))filter;
 
