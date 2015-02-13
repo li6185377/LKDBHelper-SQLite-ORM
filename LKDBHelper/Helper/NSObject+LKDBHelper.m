@@ -173,10 +173,7 @@
     if(models.count > 0)
     {
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
-            for (id model in models)
-            {
-                [model saveToDB];
-            }
+            [self insertToDBWithArray:models filter:nil];
         });
     }
 }

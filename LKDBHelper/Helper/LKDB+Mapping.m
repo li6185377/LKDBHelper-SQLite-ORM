@@ -9,27 +9,6 @@
 #import "LKDB+Mapping.h"
 #import "NSObject+LKModel.h"
 
-#pragma mark- 声明
-@interface LKDBProperty()
-{
-    __strong NSString* _type;
-    
-    __strong NSString* _sqlColumnName;
-    __strong NSString* _sqlColumnType;
-    
-    __strong NSString* _propertyName;
-    __strong NSString* _propertyType;
-}
-@property(copy,nonatomic)NSString* type;
-@property(copy,nonatomic)NSString* sqlColumnName;
-@property(copy,nonatomic)NSString* sqlColumnType;
-@property(copy,nonatomic)NSString* propertyName;
-@property(copy,nonatomic)NSString* propertyType;
-
--(id)initWithType:(NSString*)type cname:(NSString*)cname ctype:(NSString*)ctype pname:(NSString*)pname ptype:(NSString*)ptype;
-
-@end
-
 @interface LKModelInfos()
 {
     __strong NSMutableDictionary* _proNameDic;
@@ -43,6 +22,19 @@
 -(void)updateProperty:(LKDBProperty*)property propertyName:(NSString*)propertyName;
 @end
 
+
+#pragma mark- 声明属性
+@interface LKDBProperty()
+@property(copy,nonatomic)NSString* type;
+
+@property(copy,nonatomic)NSString* sqlColumnName;
+@property(copy,nonatomic)NSString* sqlColumnType;
+
+@property(copy,nonatomic)NSString* propertyName;
+@property(copy,nonatomic)NSString* propertyType;
+
+-(id)initWithType:(NSString*)type cname:(NSString*)cname ctype:(NSString*)ctype pname:(NSString*)pname ptype:(NSString*)ptype;
+@end
 #pragma mark- LKDBProperty
 @implementation LKDBProperty
 

@@ -16,10 +16,10 @@
     static LKDBHelper* db;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        NSString* dbpath = [NSHomeDirectory() stringByAppendingPathComponent:@"asd/asd.db"];
-        db = [[LKDBHelper alloc]initWithDBPath:dbpath];
+//        NSString* dbpath = [NSHomeDirectory() stringByAppendingPathComponent:@"asd/asd.db"];
+//        db = [[LKDBHelper alloc]initWithDBPath:dbpath];
         //or
-        //        db = [[LKDBHelper alloc]init];
+                db = [[LKDBHelper alloc]init];
     });
     return db;
 }
