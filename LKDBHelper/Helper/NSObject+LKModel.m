@@ -723,12 +723,12 @@ static char LKModelBase_Key_Inserting;
 }
 -(id)valueForUndefinedKey:(NSString *)key
 {
-    NSLog(@"你有get方法没实现");
+    NSLog(@"你有get方法没实现，key:%@",key);
     return nil;
 }
 -(void)setValue:(id)value forUndefinedKey:(NSString *)key
 {
-    NSLog(@"你有set方法没实现");
+    NSLog(@"你有set方法没实现，key:%@",key);
 }
 
 #pragma mark-

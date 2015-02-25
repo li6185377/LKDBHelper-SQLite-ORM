@@ -651,12 +651,12 @@
 
     [self executeDB:^(FMDatabase *db) {
         FMResultSet *set = [db executeQuery:@"select count(name) from sqlite_master where type='table' and name=?", tableName];
-        [set next];
-
-        if ([set longForColumnIndex:0] > 0) {
-            isTableCreated = YES;
+        if([set next])
+        {
+            if ([set intForColumnIndex:0] > 0) {
+                isTableCreated = YES;
+            }
         }
-
         [set close];
     }];
     return isTableCreated;
