@@ -68,17 +68,19 @@
 + (LKDBHelper *)dbHelperWithPath:(NSString *)dbFilePath save:(LKDBHelper *)helper
 {
     NSMutableArray *dbArray = [self dbHelperSingleArray];
-
-    if (helper) {
-        LKDBWeakObject *weakObj = [[LKDBWeakObject alloc] init];
-        weakObj.obj = helper;
-        [dbArray addObject:weakObj];
-    } else if (dbFilePath) {
-        LKDBHelper *instance = nil;
-        @synchronized(dbArray) {
+    LKDBHelper *instance = nil;
+    @synchronized(dbArray) {
+        if (helper)
+        {
+            LKDBWeakObject *weakObj = [[LKDBWeakObject alloc] init];
+            weakObj.obj = helper;
+            [dbArray addObject:weakObj];
+        }
+        else if (dbFilePath)
+        {
             for (NSInteger i = 0; i < dbArray.count; ) {
                 LKDBWeakObject *weakObj = [dbArray objectAtIndex:i];
-
+                
                 if (weakObj.obj == nil) {
                     [dbArray removeObjectAtIndex:i];
                     continue;
@@ -86,14 +88,12 @@
                     instance = weakObj.obj;
                     break;
                 }
-
+                
                 i++;
             }
         }
-        return instance;
     }
-
-    return nil;
+    return instance;
 }
 
 - (instancetype)init
@@ -421,10 +421,12 @@
 - (void)dealloc
 {
     NSArray *array = [LKDBHelper dbHelperSingleArray];
-
-    for (LKDBWeakObject *weakObject in array) {
-        if ([weakObject.obj isEqual:self]) {
-            weakObject.obj = nil;
+    
+    @synchronized(array) {
+        for (LKDBWeakObject *weakObject in array) {
+            if ([weakObject.obj isEqual:self]) {
+                weakObject.obj = nil;
+            }
         }
     }
 
@@ -517,7 +519,7 @@
                     [addColumePars appendFormat:@" %@ %@", LKSQL_Attribute_Default, property.defaultValue];
                 }
 
-                NSString * alertSQL = [NSString stringWithFormat:@"alter table %@ add column %@", tableName, addColumePars];
+                NSString *alertSQL = [NSString stringWithFormat:@"alter table %@ add column %@", tableName, addColumePars];
                 NSString *initColumnValue = [NSString stringWithFormat:@"update %@ set %@=%@", tableName, property.sqlColumnName, [property.sqlColumnType isEqualToString:LKSQL_Type_Text] ? @"''":@"0"];
 
                 BOOL success = [db executeUpdate:alertSQL];
@@ -651,12 +653,13 @@
 
     [self executeDB:^(FMDatabase *db) {
         FMResultSet *set = [db executeQuery:@"select count(name) from sqlite_master where type='table' and name=?", tableName];
-        if([set next])
-        {
+
+        if ([set next]) {
             if ([set intForColumnIndex:0] > 0) {
                 isTableCreated = YES;
             }
         }
+
         [set close];
     }];
     return isTableCreated;
@@ -1159,21 +1162,18 @@
         id value = [self modelValueWithProperty:property model:model];
 
         ///跳过 rowid = 0 的属性
-        if([property.sqlColumnName isEqualToString:@"rowid"])
-        {
+        if ([property.sqlColumnName isEqualToString:@"rowid"]) {
             int rowid = [value intValue];
-            if(rowid > 0)
-            {
+
+            if (rowid > 0) {
                 ///如果rowid 已经存在就不修改
-                NSString* rowidWhere = [NSString stringWithFormat:@"rowid=%d",rowid];
+                NSString *rowidWhere = [NSString stringWithFormat:@"rowid=%d", rowid];
                 NSInteger rowCount = [self rowCountWithTableName:db_tableName where:rowidWhere];
-                if(rowCount > 0)
-                {
+
+                if (rowCount > 0) {
                     continue;
                 }
-            }
-            else
-            {
+            } else {
                 continue;
             }
         }
