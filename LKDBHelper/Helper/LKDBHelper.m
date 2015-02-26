@@ -456,9 +456,9 @@
             NSString *dropTable = [NSString stringWithFormat:@"drop table %@", tableName];
             [db executeUpdate:dropTable];
         }
+        
+        [self.createdTableNames removeAllObjects];
     }];
-
-    [_createdTableNames removeAllObjects];
 }
 
 - (BOOL)dropTableWithClass:(Class)modelClass
@@ -474,7 +474,9 @@
 
     BOOL isDrop = [self executeSQL:dropTable arguments:nil];
 
+    [_threadLock lock];
     [_createdTableNames removeObject:tableName];
+    [_threadLock unlock];
 
     return isDrop;
 }
@@ -540,10 +542,13 @@
 - (BOOL)_createTableWithModelClass:(Class)modelClass tableName:(NSString *)tableName
 {
     if ([self getTableCreatedWithTableName:tableName]) {
+
         // 已创建表 就跳过
+        [_threadLock lock];
         if ([_createdTableNames containsObject:tableName] == NO) {
             [_createdTableNames addObject:tableName];
         }
+        [_threadLock unlock];
 
         [self fixSqlColumnsWithClass:modelClass tableName:tableName];
         return YES;
@@ -634,10 +639,12 @@
 
     BOOL isCreated = [self executeSQL:createTableSQL arguments:nil];
 
+    [_threadLock lock];
     if (isCreated) {
         [_createdTableNames addObject:tableName];
         [modelClass dbDidCreateTable:self tableName:tableName];
     }
+    [_threadLock unlock];
 
     return isCreated;
 }
@@ -1042,9 +1049,11 @@
     NSString *db_tableName = model.db_tableName ? :[modelClass getTableName];
 
     // 检测是否创建过表
+    [_threadLock lock];
     if ([_createdTableNames containsObject:db_tableName] == NO) {
         [self _createTableWithModelClass:modelClass tableName:db_tableName];
     }
+    [_threadLock unlock];
 
     // --
     LKModelInfos *infos = [modelClass getModelInfos];
@@ -1143,9 +1152,11 @@
     NSString *db_tableName = model.db_tableName ? :[modelClass getTableName];
 
     // 检测是否创建过表
+    [_threadLock lock];
     if ([_createdTableNames containsObject:db_tableName] == NO) {
         [self _createTableWithModelClass:modelClass tableName:db_tableName];
     }
+    [_threadLock unlock];
 
     LKModelInfos *infos = [modelClass getModelInfos];
 
