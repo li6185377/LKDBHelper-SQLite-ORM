@@ -158,28 +158,49 @@
     if (self.bindingQueue && [self.dbPath isEqualToString:filePath]) {
         return;
     }
-
+    NSFileManager* fileManager = [NSFileManager defaultManager];
     // 创建数据库目录
     NSRange lastComponent = [filePath rangeOfString:@"/" options:NSBackwardsSearch];
 
     if (lastComponent.length > 0) {
         NSString *dirPath = [filePath substringToIndex:lastComponent.location];
         BOOL isDir = NO;
-        BOOL isCreated = [[NSFileManager defaultManager] fileExistsAtPath:dirPath isDirectory:&isDir];
+        BOOL isCreated = [fileManager fileExistsAtPath:dirPath isDirectory:&isDir];
 
         if ((isCreated == NO) || (isDir == NO)) {
             NSError *error = nil;
-            BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:dirPath withIntermediateDirectories:YES attributes:nil error:&error];
+            BOOL success = [fileManager createDirectoryAtPath:dirPath withIntermediateDirectories:YES
+                                                                      attributes:@{NSFileProtectionKey:NSFileProtectionNone} error:&error];
 
             if (success == NO) {
-                NSLog(@"create dir error: %@", error.debugDescription);
+                LKErrorLog(@"create dir error: %@", error.debugDescription);
             }
         }
+        else
+        {
+            /**
+             *  @brief  Disk I/O error when device is locked
+             *          https://github.com/ccgus/fmdb/issues/262
+             */
+            [fileManager setAttributes:@{NSFileProtectionKey:NSFileProtectionNone} ofItemAtPath:dirPath error:nil];
+        }
     }
-
+    
     self.dbPath = filePath;
     [self.bindingQueue close];
-    self.bindingQueue = [[FMDatabaseQueue alloc]initWithPath:filePath];
+    
+#ifndef SQLITE_OPEN_FILEPROTECTION_NONE
+#define SQLITE_OPEN_FILEPROTECTION_NONE                                 0x00400000
+#endif
+    
+    self.bindingQueue = [[FMDatabaseQueue alloc]initWithPath:filePath
+                                                       flags:SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FILEPROTECTION_NONE];
+
+    if([fileManager fileExistsAtPath:filePath])
+    {
+        [fileManager setAttributes:@{NSFileProtectionKey:NSFileProtectionNone} ofItemAtPath:filePath error:nil];
+    }
+    
     _encryptionKey = nil;
 
 #ifdef DEBUG
