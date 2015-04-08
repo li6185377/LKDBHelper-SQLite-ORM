@@ -474,8 +474,11 @@
         [set close];
 
         for (NSString * tableName in dropTables) {
-            NSString *dropTable = [NSString stringWithFormat:@"drop table %@", tableName];
-            [db executeUpdate:dropTable];
+            if([tableName hasPrefix:@"sqlite_"] == NO)
+            {
+                NSString *dropTable = [NSString stringWithFormat:@"drop table %@", tableName];
+                [db executeUpdate:dropTable];
+            }
         }
         
         [self.createdTableNames removeAllObjects];
@@ -915,7 +918,10 @@
     }
 
     sql = [sql stringByReplacingOccurrencesOfString:@" @t " withString:replaceString];
-    sql = [sql stringByReplacingOccurrencesOfString:@" from " withString:@",rowid from "];
+    if([sql componentsSeparatedByString:@" from "].count == 2)
+    {
+        sql = [sql stringByReplacingOccurrencesOfString:@" from " withString:@",rowid from "];
+    }
 
     __block NSMutableArray *results = nil;
     [self executeDB:^(FMDatabase *db) {
