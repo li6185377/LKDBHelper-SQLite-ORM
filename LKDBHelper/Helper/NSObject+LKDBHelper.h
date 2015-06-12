@@ -57,6 +57,9 @@
  */
 +(NSMutableArray*)searchColumn:(id)columns where:(id)where orderBy:(NSString*)orderBy offset:(NSInteger)offset count:(NSInteger)count;
 +(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(NSInteger)offset count:(NSInteger)count;
++(NSMutableArray*)searchWithWhere:(id)where;
++(NSMutableArray*)searchWithSQL:(NSString*)sql;
+
 +(id)searchSingleWithWhere:(id)where orderBy:(NSString*)orderBy;
 
 +(BOOL)insertToDB:(NSObject*)model;

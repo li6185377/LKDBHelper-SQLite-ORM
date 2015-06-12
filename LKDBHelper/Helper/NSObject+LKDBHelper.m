@@ -66,8 +66,17 @@
 {
     return [[self getUsingLKDBHelper] search:self column:columns where:where orderBy:orderBy offset:offset count:count];
 }
-+(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(NSInteger)offset count:(NSInteger)count{
++(NSMutableArray*)searchWithWhere:(id)where orderBy:(NSString*)orderBy offset:(NSInteger)offset count:(NSInteger)count
+{
     return [[self getUsingLKDBHelper] search:self where:where orderBy:orderBy offset:offset count:count];
+}
++(NSMutableArray *)searchWithWhere:(id)where
+{
+    return [[self getUsingLKDBHelper] search:self where:where orderBy:nil offset:0 count:0];
+}
++(NSMutableArray *)searchWithSQL:(NSString *)sql
+{
+    return [[self getUsingLKDBHelper] searchWithSQL:sql toClass:self];
 }
 +(id)searchSingleWithWhere:(id)where orderBy:(NSString *)orderBy
 {

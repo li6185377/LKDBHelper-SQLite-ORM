@@ -911,18 +911,23 @@
 - (NSMutableArray *)searchWithSQL:(NSString *)sql toClass:(Class)modelClass
 {
     // replace @t to model table name
-    NSString *replaceString = [NSString stringWithFormat:@" %@ ", [modelClass getTableName]];
-
-    if ([sql hasSuffix:@" @t"]) {
+    NSString *replaceString = [[modelClass getTableName] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    
+    if([sql hasSuffix:@" @t"])
+    {
         sql = [sql stringByAppendingString:@" "];
     }
-
-    sql = [sql stringByReplacingOccurrencesOfString:@" @t " withString:replaceString];
     if([sql componentsSeparatedByString:@" from "].count == 2)
     {
-        sql = [sql stringByReplacingOccurrencesOfString:@" from " withString:@",rowid from "];
+        sql = [sql stringByReplacingOccurrencesOfString:@" from " withString:[NSString stringWithFormat:@",%@.rowid from ",replaceString]];
     }
-
+    sql = [sql stringByReplacingOccurrencesOfString:@" @t " withString:
+           [NSString stringWithFormat:@" %@ ",replaceString]];
+    sql = [sql stringByReplacingOccurrencesOfString:@" @t," withString:
+           [NSString stringWithFormat:@" %@,",replaceString]];
+    sql = [sql stringByReplacingOccurrencesOfString:@",@t " withString:
+           [NSString stringWithFormat:@",%@ ",replaceString]];
+    
     __block NSMutableArray *results = nil;
     [self executeDB:^(FMDatabase *db) {
         FMResultSet *set = [db executeQuery:sql];

@@ -144,7 +144,9 @@
     
     //查询   search
     NSMutableArray* searchResultArray = nil;
-
+    
+    [LKTest searchWithSQL:@"select * from @t,LKTestAddress"];
+    
     addText(@"\n search one: \n");
     ///同步搜索 执行sql语句 把结果变为LKTest对象
     ///Synchronous search executes the SQL statement put the results into a LKTest object
