@@ -166,11 +166,16 @@
         NSString *dirPath = [filePath substringToIndex:lastComponent.location];
         BOOL isDir = NO;
         BOOL isCreated = [fileManager fileExistsAtPath:dirPath isDirectory:&isDir];
-
+        
         if ((isCreated == NO) || (isDir == NO)) {
             NSError *error = nil;
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
+            NSDictionary* attributes = @{NSFileProtectionKey:NSFileProtectionNone};
+#else
+            NSDictionary* attributes = nil;
+#endif
             BOOL success = [fileManager createDirectoryAtPath:dirPath withIntermediateDirectories:YES
-                                                                      attributes:@{NSFileProtectionKey:NSFileProtectionNone} error:&error];
+                                                                      attributes:attributes error:&error];
 
             if (success == NO) {
                 LKErrorLog(@"create dir error: %@", error.debugDescription);
@@ -182,7 +187,9 @@
              *  @brief  Disk I/O error when device is locked
              *          https://github.com/ccgus/fmdb/issues/262
              */
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
             [fileManager setAttributes:@{NSFileProtectionKey:NSFileProtectionNone} ofItemAtPath:dirPath error:nil];
+#endif
         }
     }
     
@@ -195,11 +202,12 @@
     
     self.bindingQueue = [[FMDatabaseQueue alloc]initWithPath:filePath
                                                        flags:SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FILEPROTECTION_NONE];
-
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
     if([fileManager fileExistsAtPath:filePath])
     {
         [fileManager setAttributes:@{NSFileProtectionKey:NSFileProtectionNone} ofItemAtPath:filePath error:nil];
     }
+#endif
     
     _encryptionKey = nil;
 
