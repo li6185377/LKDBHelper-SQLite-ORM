@@ -33,13 +33,14 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    self.window.rootViewController = [UIViewController new];
     // Override point for customization after application launch.
     self.ms = [NSMutableString string];
     UITextView* textview = [[UITextView alloc]init];
     textview.frame = CGRectMake(0, 20, 320, self.window.bounds.size.height);
     textview.textColor = [UIColor blackColor];
     textview.delegate =self;
-    [self.window addSubview:textview];
+    [self.window.rootViewController.view addSubview:textview];
     self.tv = textview;
     [self.window makeKeyAndVisible];
     
