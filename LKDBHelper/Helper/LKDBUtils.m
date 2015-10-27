@@ -114,25 +114,21 @@
 {
     return [string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 }
-
 +(NSDateFormatter*)getDBDateFormat
 {
-    static NSDateFormatter* format;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        format = [[LKDateFormatter alloc]init];
-        format.dateFormat = @"yyyy-MM-dd HH:mm:ss";
-    });
-    return format;
+	static NSDateFormatter* format;
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		format = [[LKDateFormatter alloc]init];
+		format.dateFormat = @"yyyy-MM-dd HH:mm:ss.SSS";
+	});
+	return format;
 }
 +(NSString*)stringWithDate:(NSDate*)date
 {
-    NSDateFormatter* formatter = [self getDBDateFormat];
-    NSString* datestr = [formatter stringFromDate:date];
-    if(datestr.length > 19){
-        datestr = [datestr substringToIndex:19];
-    }
-    return datestr;
+	NSDateFormatter* formatter = [self getDBDateFormat];
+	NSString* datestr = [formatter stringFromDate:date];
+	return datestr;
 }
 +(NSDate *)dateWithString:(NSString *)str
 {
