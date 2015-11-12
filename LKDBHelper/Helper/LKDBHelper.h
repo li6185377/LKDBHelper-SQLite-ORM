@@ -120,6 +120,11 @@
  */
 -(NSMutableArray*)searchWithSQL:(NSString*)sql toClass:(Class)modelClass;
 
+/**
+ *  @brief don't do any of the operations with sql
+ */
+-(NSMutableArray*)searchWithRAWSQL:(NSString*)sql toClass:(Class)modelClass;
+
 -(void)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(NSInteger)offset count:(NSInteger)count callback:(void(^)(NSMutableArray* array))block;
 /**
     columns may NSArray or NSString   if query column count == 1  return single column string array

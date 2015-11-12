@@ -916,19 +916,20 @@
     return [self searchBaseWithParams:params];
 }
 
-- (NSMutableArray *)searchWithSQL:(NSString *)sql toClass:(Class)modelClass
+- (NSMutableArray *)searchWithSQL:(NSString *)sqlString toClass:(Class)modelClass
 {
     // replace @t to model table name
     NSString *replaceString = [[modelClass getTableName] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    
+    NSString* sql = sqlString.lowercaseString;
     if([sql hasSuffix:@" @t"])
     {
         sql = [sql stringByAppendingString:@" "];
     }
-    if([sql componentsSeparatedByString:@" from "].count == 2)
+    if([sql componentsSeparatedByString:@" from "].count == 2 && [sql.lowercaseString containsString:@" join "] == NO)
     {
         sql = [sql stringByReplacingOccurrencesOfString:@" from " withString:[NSString stringWithFormat:@",%@.rowid from ",replaceString]];
     }
+    
     sql = [sql stringByReplacingOccurrencesOfString:@" @t " withString:
            [NSString stringWithFormat:@" %@ ",replaceString]];
     sql = [sql stringByReplacingOccurrencesOfString:@" @t," withString:
@@ -936,6 +937,10 @@
     sql = [sql stringByReplacingOccurrencesOfString:@",@t " withString:
            [NSString stringWithFormat:@",%@ ",replaceString]];
     
+    return [self searchWithRAWSQL:sql toClass:modelClass];
+}
+-(NSMutableArray *)searchWithRAWSQL:(NSString *)sql toClass:(Class)modelClass
+{
     __block NSMutableArray *results = nil;
     [self executeDB:^(FMDatabase *db) {
         FMResultSet *set = [db executeQuery:sql];
