@@ -949,7 +949,7 @@
     if ([sql hasSuffix:@" @t"]) {
         sql = [sql stringByAppendingString:@" "];
     }
-    if ([sql componentsSeparatedByString:@" from "].count == 2 && [sql rangeOfString:@" join "].length > 0) {
+    if ([sql componentsSeparatedByString:@" from "].count == 2 && [sql rangeOfString:@" join "].length == 0) {
         sql = [sql stringByReplacingOccurrencesOfString:@" from " withString:[NSString stringWithFormat:@",%@.rowid from ", replaceString]];
     }
 
