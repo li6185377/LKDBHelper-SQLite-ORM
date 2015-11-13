@@ -199,7 +199,7 @@ static char LKModelBase_Key_Inserting;
 #else
         [value lockFocus];
         NSBitmapImageRep *srcImageRep = [NSBitmapImageRep imageRepWithData:[value TIFFRepresentation]];
-        NSData* datas = [srcImageRep representationUsingType:NSJPEGFileType properties:nil];
+        NSData* datas = [srcImageRep representationUsingType:NSJPEGFileType properties:@{}];
         [value unlockFocus];
 #endif
         [datas writeToFile:[self.class getDBImagePathWithName:filename] atomically:YES];

@@ -925,7 +925,7 @@
     {
         sql = [sql stringByAppendingString:@" "];
     }
-    if([sql componentsSeparatedByString:@" from "].count == 2 && [sql.lowercaseString containsString:@" join "] == NO)
+    if([sql componentsSeparatedByString:@" from "].count == 2 && [sql containsString:@" join "] == NO)
     {
         sql = [sql stringByReplacingOccurrencesOfString:@" from " withString:[NSString stringWithFormat:@",%@.rowid from ",replaceString]];
     }
