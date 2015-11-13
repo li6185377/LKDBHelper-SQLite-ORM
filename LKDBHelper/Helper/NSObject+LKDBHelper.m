@@ -189,9 +189,9 @@
 
 + (void)insertToDBWithArray:(NSArray*)models filter:(void (^)(id model, BOOL inserted, BOOL* rollback))filter completed:(void (^)(BOOL))completedBlock
 {
+    __block BOOL allInserted = YES;
     [[self getUsingLKDBHelper] executeForTransaction:^BOOL(LKDBHelper* helper) {
         BOOL isRollback = NO;
-        BOOL allInserted = YES;
         for (int i = 0; i < models.count; i++) {
             id obj = [models objectAtIndex:i];
             BOOL inserted = [helper insertToDB:obj];
@@ -204,11 +204,12 @@
                 break;
             }
         }
-        if (completedBlock) {
-            completedBlock(allInserted);
-        }
         return (isRollback == NO);
     }];
+    
+    if (completedBlock) {
+        completedBlock(allInserted);
+    }
 }
 
 @end
