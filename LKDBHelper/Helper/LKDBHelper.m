@@ -916,11 +916,10 @@
     return [self searchBaseWithParams:params];
 }
 
-- (NSMutableArray *)searchWithSQL:(NSString *)sqlString toClass:(Class)modelClass
+- (NSMutableArray *)searchWithSQL:(NSString *)sql toClass:(Class)modelClass
 {
     // replace @t to model table name
     NSString *replaceString = [[modelClass getTableName] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    NSString* sql = sqlString.lowercaseString;
     if([sql hasSuffix:@" @t"])
     {
         sql = [sql stringByAppendingString:@" "];
