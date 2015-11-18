@@ -625,10 +625,6 @@
 
         NSString* columnType = property.sqlColumnType;
 
-        if ([columnType isEqualToString:LKSQL_Type_Double]) {
-            columnType = LKSQL_Type_Text;
-        }
-
         [table_pars appendFormat:@"%@ %@", property.sqlColumnName, columnType];
 
         if ([property.sqlColumnType isEqualToString:LKSQL_Type_Text]) {
