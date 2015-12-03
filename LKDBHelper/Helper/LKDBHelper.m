@@ -958,9 +958,10 @@
 	
 	sql = [self replaceTableNameIfNeeded:sql withModelClass:modelClass];
 	
+	va_list *argsPoint = &args;
 	__block NSMutableArray *results = nil;
 	[self executeDB:^(FMDatabase *db) {
-		FMResultSet *set = [db executeQuery:sql withVAList:args];
+		FMResultSet *set = [db executeQuery:sql withVAList:*argsPoint];
 		results = [self executeResult:set Class:modelClass tableName:nil];
 		[set close];
 	}];
