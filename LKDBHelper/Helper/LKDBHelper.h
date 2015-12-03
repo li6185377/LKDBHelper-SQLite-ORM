@@ -120,6 +120,15 @@
  */
 -(NSMutableArray*)searchWithSQL:(NSString*)sql toClass:(Class)modelClass;
 
+/**
+ *  query sql, query finished result is an array(model instance collection)
+ *  you can use the "@t" replace Model TableName and replace all ? placeholders with the va_list
+ *  example:
+ NSMutableArray* array = [[LKDBHelper getUsingLKDBHelper] searc:[ModelClass class] withSQL:@"select rowid from name_table where name = ?", @"Swift"];
+ *
+ */
+-(NSMutableArray *)search:(Class)modelClass withSQL:(NSString *)sql,...;
+
 -(void)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(NSInteger)offset count:(NSInteger)count callback:(void(^)(NSMutableArray* array))block;
 /**
     columns may NSArray or NSString   if query column count == 1  return single column string array
