@@ -25,690 +25,587 @@ static char LKModelBase_Key_Inserting;
 
 @implementation NSObject (LKModel)
 
-+(LKDBHelper *)getUsingLKDBHelper
++ (LKDBHelper*)getUsingLKDBHelper
 {
     ///ios8 能获取系统类的属性了  所以没有办法判断属性数量来区分自定义类和系统类
     ///可能系统类的存取会不正确
     static LKDBHelper* helper;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        helper = [[LKDBHelper alloc]init];
+        helper = [[LKDBHelper alloc] init];
     });
     return helper;
 }
 #pragma mark Tabel Structure Function 表结构
-+(NSString *)getTableName
++ (NSString*)getTableName
 {
     return NSStringFromClass(self);
 }
 
-+(NSString *)getPrimaryKey
++ (NSString*)getPrimaryKey
 {
     return @"rowid";
 }
 
-+(NSArray *)getPrimaryKeyUnionArray
++ (NSArray*)getPrimaryKeyUnionArray
 {
     return nil;
 }
 
-
-+(void)columnAttributeWithProperty:(LKDBProperty *)property
++ (void)columnAttributeWithProperty:(LKDBProperty*)property
 {
     //overwrite
 }
 #pragma 属性
--(void)setRowid:(NSInteger)rowid
+- (void)setRowid:(NSInteger)rowid
 {
-    objc_setAssociatedObject(self, &LKModelBase_Key_RowID,[NSNumber numberWithInteger:rowid], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &LKModelBase_Key_RowID, [NSNumber numberWithInteger:rowid], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
--(NSInteger)rowid
+- (NSInteger)rowid
 {
     return [objc_getAssociatedObject(self, &LKModelBase_Key_RowID) integerValue];
 }
 
--(void)setDb_tableName:(NSString *)db_tableName
+- (void)setDb_tableName:(NSString*)db_tableName
 {
-    objc_setAssociatedObject(self, &LKModelBase_Key_TableName,db_tableName, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, &LKModelBase_Key_TableName, db_tableName, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
--(NSString *)db_tableName
+- (NSString*)db_tableName
 {
     NSString* tableName = objc_getAssociatedObject(self, &LKModelBase_Key_TableName);
-    if(tableName.length == 0)
-    {
+    if (tableName.length == 0) {
         tableName = [self.class getTableName];
     }
     return tableName;
 }
--(BOOL)db_inserting
+- (BOOL)db_inserting
 {
     return [objc_getAssociatedObject(self, &LKModelBase_Key_Inserting) boolValue];
 }
--(void)setDb_inserting:(BOOL)db_inserting
+- (void)setDb_inserting:(BOOL)db_inserting
 {
     NSNumber* number = nil;
-    if(db_inserting)
-    {
+    if (db_inserting) {
         number = [NSNumber numberWithBool:YES];
     }
-    objc_setAssociatedObject(self, &LKModelBase_Key_Inserting,number, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &LKModelBase_Key_Inserting, number, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 #pragma 无关紧要的
-+(NSString *)getDBImagePathWithName:(NSString *)filename
++ (NSString*)getDBImagePathWithName:(NSString*)filename
 {
-    NSString* dir = [NSString stringWithFormat:@"dbimg/%@",NSStringFromClass(self)];
+    NSString* dir = [NSString stringWithFormat:@"dbimg/%@", NSStringFromClass(self)];
     return [LKDBUtils getPathForDocuments:filename inDir:dir];
 }
-+(NSString*)getDBDataPathWithName:(NSString *)filename
++ (NSString*)getDBDataPathWithName:(NSString*)filename
 {
-    NSString* dir = [NSString stringWithFormat:@"dbdata/%@",NSStringFromClass(self)];
+    NSString* dir = [NSString stringWithFormat:@"dbdata/%@", NSStringFromClass(self)];
     return [LKDBUtils getPathForDocuments:filename inDir:dir];
 }
-+(NSDictionary *)getTableMapping
++ (NSDictionary*)getTableMapping
 {
     return nil;
 }
-#pragma mark- Table Data Function 表数据
-+(NSDateFormatter*)getModelDateFormatter
+#pragma mark - Table Data Function 表数据
++ (NSDateFormatter*)getModelDateFormatter
 {
     return nil;
 }
 
 ///get
--(id)modelGetValue:(LKDBProperty *)property
+- (id)modelGetValue:(LKDBProperty*)property
 {
     id value = [self valueForKey:property.propertyName];
     id returnValue = value;
-    if(value == nil)
-    {
+    if (value == nil) {
         return nil;
     }
-    else if([value isKindOfClass:[NSString class]])
-    {
+    else if ([value isKindOfClass:[NSString class]]) {
         returnValue = value;
     }
-    else if([value isKindOfClass:[NSNumber class]])
-    {
+    else if ([value isKindOfClass:[NSNumber class]]) {
         returnValue = [value stringValue];
     }
-    else if([value isKindOfClass:[NSDate class]])
-    {
+    else if ([value isKindOfClass:[NSDate class]]) {
         NSDateFormatter* formatter = [self.class getModelDateFormatter];
-        if(formatter){
+        if (formatter) {
             returnValue = [formatter stringFromDate:value];
         }
-        else{
+        else {
             returnValue = [LKDBUtils stringWithDate:value];
         }
         returnValue = [returnValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     }
-    else if([value isKindOfClass:[LKDBColor class]])
-    {
+    else if ([value isKindOfClass:[LKDBColor class]]) {
         LKDBColor* color = value;
-        CGFloat r,g,b,a;
+        CGFloat r, g, b, a;
         [color getRed:&r green:&g blue:&b alpha:&a];
-        returnValue = [NSString stringWithFormat:@"%.3f,%.3f,%.3f,%.3f",r,g,b,a];
+        returnValue = [NSString stringWithFormat:@"%.3f,%.3f,%.3f,%.3f", r, g, b, a];
     }
-    else if([value isKindOfClass:[NSValue class]])
-    {
+    else if ([value isKindOfClass:[NSValue class]]) {
         NSString* columnType = property.propertyType;
 #ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
-        if([columnType isEqualToString:@"CGRect"])
-        {
+        if ([columnType isEqualToString:@"CGRect"]) {
             returnValue = NSStringFromCGRect([value CGRectValue]);
         }
-        else if([columnType isEqualToString:@"CGPoint"])
-        {
+        else if ([columnType isEqualToString:@"CGPoint"]) {
             returnValue = NSStringFromCGPoint([value CGPointValue]);
         }
-        else if([columnType isEqualToString:@"CGSize"])
-        {
+        else if ([columnType isEqualToString:@"CGSize"]) {
             returnValue = NSStringFromCGSize([value CGSizeValue]);
         }
-        else if([columnType isEqualToString:@"_NSRange"])
-        {
+        else if ([columnType isEqualToString:@"_NSRange"]) {
             returnValue = NSStringFromRange([value rangeValue]);
         }
 #else
-        if([columnType hasSuffix:@"Rect"])
-        {
+        if ([columnType hasSuffix:@"Rect"]) {
             returnValue = NSStringFromRect([value rectValue]);
         }
-        else if([columnType hasSuffix:@"Point"])
-        {
+        else if ([columnType hasSuffix:@"Point"]) {
             returnValue = NSStringFromPoint([value pointValue]);
         }
-        else if([columnType hasSuffix:@"Size"])
-        {
+        else if ([columnType hasSuffix:@"Size"]) {
             returnValue = NSStringFromSize([value sizeValue]);
         }
-        else if([columnType hasSuffix:@"Range"])
-        {
+        else if ([columnType hasSuffix:@"Range"]) {
             returnValue = NSStringFromRange([value rangeValue]);
         }
 #endif
     }
-    else if([value isKindOfClass:[LKDBImage class]])
-    {
+    else if ([value isKindOfClass:[LKDBImage class]]) {
         long random = arc4random();
         long date = [[NSDate date] timeIntervalSince1970];
-        NSString* filename = [NSString stringWithFormat:@"img%ld%ld",date&0xFFFFF,random&0xFFF];
-        
+        NSString* filename = [NSString stringWithFormat:@"img%ld%ld", date & 0xFFFFF, random & 0xFFF];
+
 #ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
         NSData* datas = UIImageJPEGRepresentation(value, 1);
 #else
         [value lockFocus];
-        NSBitmapImageRep *srcImageRep = [NSBitmapImageRep imageRepWithData:[value TIFFRepresentation]];
-        NSData* datas = [srcImageRep representationUsingType:NSJPEGFileType properties:nil];
+        NSBitmapImageRep* srcImageRep = [NSBitmapImageRep imageRepWithData:[value TIFFRepresentation]];
+        NSData* datas = [srcImageRep representationUsingType:NSJPEGFileType properties:@{}];
         [value unlockFocus];
 #endif
-        [datas writeToFile:[self.class getDBImagePathWithName:filename] atomically:YES];
-        
+        [datas writeToFile:[self.class getDBImagePathWithName:filename]
+                atomically:YES];
+
         returnValue = filename;
     }
-    else if([value isKindOfClass:[NSData class]])
-    {
+    else if ([value isKindOfClass:[NSData class]]) {
         long random = arc4random();
         long date = [[NSDate date] timeIntervalSince1970];
-        NSString* filename = [NSString stringWithFormat:@"data%ld%ld",date&0xFFFFF,random&0xFFF];
-        
+        NSString* filename = [NSString stringWithFormat:@"data%ld%ld", date & 0xFFFFF, random & 0xFFF];
+
         [value writeToFile:[self.class getDBDataPathWithName:filename] atomically:YES];
-        
+
         returnValue = filename;
     }
-    else
-    {
-        if([value isKindOfClass:[NSArray class]])
-        {
+    else {
+        if ([value isKindOfClass:[NSArray class]]) {
             returnValue = [self db_jsonObjectFromArray:value];
         }
-        else if([value isKindOfClass:[NSDictionary class]])
-        {
+        else if ([value isKindOfClass:[NSDictionary class]]) {
             returnValue = [self db_jsonObjectFromDictionary:value];
         }
-        else
-        {
+        else {
             returnValue = [self db_jsonObjectFromModel:value];
         }
         returnValue = [self db_jsonStringFromObject:returnValue];
     }
-    
+
     return returnValue;
 }
 
 ///set
--(void)modelSetValue:(LKDBProperty *)property value:(id)value
+- (void)modelSetValue:(LKDBProperty*)property value:(id)value
 {
     ///参试获取属性的Class
     Class columnClass = NSClassFromString(property.propertyType);
-    
+
     id modelValue = nil;
-    
-    if(columnClass == nil)
-    {
+
+    if (columnClass == nil) {
         ///当找不到 class 时，就是 基础类型 int,float CGRect 之类的
-        
+
         NSString* columnType = property.propertyType;
-        if([LKSQL_Convert_FloatType rangeOfString:columnType].location != NSNotFound)
-        {
+        if ([LKSQL_Convert_FloatType rangeOfString:columnType].location != NSNotFound) {
             double number = [value doubleValue];
             modelValue = [NSNumber numberWithDouble:number];
         }
-        else if([LKSQL_Convert_IntType rangeOfString:columnType].location != NSNotFound)
-        {
-            if([columnType isEqualToString:@"long"])
-            {
+        else if ([LKSQL_Convert_IntType rangeOfString:columnType].location != NSNotFound) {
+            if ([columnType isEqualToString:@"long"]) {
                 long long number = [value longLongValue];
                 modelValue = [NSNumber numberWithLongLong:number];
             }
-            else
-            {
+            else {
                 NSInteger number = [value integerValue];
                 modelValue = [NSNumber numberWithInteger:number];
             }
         }
 #ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
-        else if([columnType isEqualToString:@"CGRect"])
-        {
+        else if ([columnType isEqualToString:@"CGRect"]) {
             CGRect rect = CGRectFromString(value);
             modelValue = [NSValue valueWithCGRect:rect];
         }
-        else if([columnType isEqualToString:@"CGPoint"])
-        {
+        else if ([columnType isEqualToString:@"CGPoint"]) {
             CGPoint point = CGPointFromString(value);
             modelValue = [NSValue valueWithCGPoint:point];
         }
-        else if([columnType isEqualToString:@"CGSize"])
-        {
+        else if ([columnType isEqualToString:@"CGSize"]) {
             CGSize size = CGSizeFromString(value);
             modelValue = [NSValue valueWithCGSize:size];
         }
-        else if([columnType isEqualToString:@"_NSRange"])
-        {
+        else if ([columnType isEqualToString:@"_NSRange"]) {
             NSRange range = NSRangeFromString(value);
             modelValue = [NSValue valueWithRange:range];
         }
 #else
-        else if([columnType hasSuffix:@"Rect"])
-        {
+        else if ([columnType hasSuffix:@"Rect"]) {
             NSRect rect = NSRectFromString(value);
             modelValue = [NSValue valueWithRect:rect];
         }
-        else if([columnType hasSuffix:@"Point"])
-        {
+        else if ([columnType hasSuffix:@"Point"]) {
             NSPoint point = NSPointFromString(value);
             modelValue = [NSValue valueWithPoint:point];
         }
-        else if([columnType hasSuffix:@"Size"])
-        {
+        else if ([columnType hasSuffix:@"Size"]) {
             NSSize size = NSSizeFromString(value);
             modelValue = [NSValue valueWithSize:size];
         }
-        else if([columnType hasSuffix:@"Range"])
-        {
+        else if ([columnType hasSuffix:@"Range"]) {
             NSRange range = NSRangeFromString(value);
             modelValue = [NSValue valueWithRange:range];
         }
 #endif
         ///如果都没有值 默认给个0
-        if(modelValue == nil)
-        {
+        if (modelValue == nil) {
             modelValue = [NSNumber numberWithInt:0];
         }
     }
-    else if([value length] == 0)
-    {
+    else if ([value length] == 0) {
         //为了不继续遍历
     }
-    else if([columnClass isSubclassOfClass:[NSString class]])
-    {
+    else if ([columnClass isSubclassOfClass:[NSString class]]) {
         modelValue = value;
     }
-    else if([columnClass isSubclassOfClass:[NSNumber class]])
-    {
+    else if ([columnClass isSubclassOfClass:[NSNumber class]]) {
         modelValue = [NSNumber numberWithDouble:[value doubleValue]];
     }
-    else if([columnClass isSubclassOfClass:[NSDate class]])
-    {
+    else if ([columnClass isSubclassOfClass:[NSDate class]]) {
         NSString* datestr = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSDateFormatter* formatter = [self.class getModelDateFormatter];
-        if(formatter){
+        if (formatter) {
             modelValue = [formatter dateFromString:datestr];
         }
-        else{
+        else {
             modelValue = [LKDBUtils dateWithString:datestr];
         }
     }
-    else if([columnClass isSubclassOfClass:[LKDBColor class]])
-    {
+    else if ([columnClass isSubclassOfClass:[LKDBColor class]]) {
         NSString* color = value;
         NSArray* array = [color componentsSeparatedByString:@","];
-        float r,g,b,a;
+        float r, g, b, a;
         r = [[array objectAtIndex:0] floatValue];
         g = [[array objectAtIndex:1] floatValue];
         b = [[array objectAtIndex:2] floatValue];
         a = [[array objectAtIndex:3] floatValue];
-        
+
         modelValue = [LKDBColor colorWithRed:r green:g blue:b alpha:a];
     }
-    else if([columnClass isSubclassOfClass:[LKDBImage class]])
-    {
+    else if ([columnClass isSubclassOfClass:[LKDBImage class]]) {
         NSString* filename = value;
         NSString* filepath = [self.class getDBImagePathWithName:filename];
-        if([LKDBUtils isFileExists:filepath])
-        {
+        if ([LKDBUtils isFileExists:filepath]) {
             LKDBImage* img = [[LKDBImage alloc] initWithContentsOfFile:filepath];
             modelValue = img;
         }
-        else
-        {
+        else {
             modelValue = nil;
         }
     }
-    else if([columnClass isSubclassOfClass:[NSData class]])
-    {
+    else if ([columnClass isSubclassOfClass:[NSData class]]) {
         NSString* filename = value;
         NSString* filepath = [self.class getDBDataPathWithName:filename];
-        if([LKDBUtils isFileExists:filepath])
-        {
+        if ([LKDBUtils isFileExists:filepath]) {
             NSData* data = [NSData dataWithContentsOfFile:filepath];
             modelValue = data;
         }
-        else
-        {
+        else {
             modelValue = nil;
         }
     }
-    else
-    {
+    else {
         modelValue = [self db_modelWithJsonValue:value];
-        if([modelValue isKindOfClass:columnClass] == NO)
-        {
+        if ([modelValue isKindOfClass:columnClass] == NO) {
             modelValue = nil;
         }
     }
-    
+
     [self setValue:modelValue forKey:property.propertyName];
 }
-#pragma mark- 对 model NSArray NSDictionary 进行支持
--(id)db_jsonObjectFromDictionary:(NSDictionary*)dic
+#pragma mark - 对 model NSArray NSDictionary 进行支持
+- (id)db_jsonObjectFromDictionary:(NSDictionary*)dic
 {
-    if([NSJSONSerialization isValidJSONObject:dic])
-    {
-        NSDictionary* bomb = @{LKDB_TypeKey:LKDB_TypeKey_JSON,LKDB_ValueKey:dic};
+    if ([NSJSONSerialization isValidJSONObject:dic]) {
+        NSDictionary* bomb = @{ LKDB_TypeKey : LKDB_TypeKey_JSON, LKDB_ValueKey : dic };
         return bomb;
     }
-    else
-    {
+    else {
         NSMutableDictionary* toDic = [NSMutableDictionary dictionary];
         NSArray* allKeys = dic.allKeys;
-        for (NSInteger i = 0; i<allKeys.count; i++)
-        {
+        for (NSInteger i = 0; i < allKeys.count; i++) {
             NSString* key = [allKeys objectAtIndex:i];
             id obj = [dic objectForKey:key];
             id jsonObject = [self db_jsonObjectWithObject:obj];
-            if(jsonObject)
-            {
+            if (jsonObject) {
                 [toDic setObject:jsonObject forKey:key];
             }
         }
-        
-        if(toDic.count)
-        {
-            NSDictionary* bomb = @{LKDB_TypeKey:LKDB_TypeKey_Combo,LKDB_ValueKey:toDic};
+
+        if (toDic.count) {
+            NSDictionary* bomb = @{ LKDB_TypeKey : LKDB_TypeKey_Combo, LKDB_ValueKey : toDic };
             return bomb;
         }
     }
     return nil;
-    
 }
--(id)db_jsonObjectFromArray:(NSArray*)array
+- (id)db_jsonObjectFromArray:(NSArray*)array
 {
-    if([NSJSONSerialization isValidJSONObject:array])
-    {
-        NSDictionary* bomb = @{LKDB_TypeKey:LKDB_TypeKey_JSON,LKDB_ValueKey:array};
+    if ([NSJSONSerialization isValidJSONObject:array]) {
+        NSDictionary* bomb = @{ LKDB_TypeKey : LKDB_TypeKey_JSON, LKDB_ValueKey : array };
         return bomb;
     }
-    else
-    {
+    else {
         NSMutableArray* toArray = [NSMutableArray array];
         NSInteger count = array.count;
-        for (NSInteger i = 0; i < count; i++)
-        {
+        for (NSInteger i = 0; i < count; i++) {
             id obj = [array objectAtIndex:i];
             id jsonObject = [self db_jsonObjectWithObject:obj];
-            if(jsonObject)
-            {
+            if (jsonObject) {
                 [toArray addObject:jsonObject];
             }
         }
-        
-        if(toArray.count)
-        {
-            NSDictionary* bomb = @{LKDB_TypeKey:LKDB_TypeKey_Combo,LKDB_ValueKey:toArray};
+
+        if (toArray.count) {
+            NSDictionary* bomb = @{ LKDB_TypeKey : LKDB_TypeKey_Combo, LKDB_ValueKey : toArray };
             return bomb;
         }
     }
     return nil;
 }
 ///目前只支持 model、NSString、NSNumber 简单类型
--(id)db_jsonObjectWithObject:(id)obj
+- (id)db_jsonObjectWithObject:(id)obj
 {
     id jsonObject = nil;
-    if ([obj isKindOfClass:[NSString class]] || [obj isKindOfClass:[NSNumber class]])
-    {
+    if ([obj isKindOfClass:[NSString class]] || [obj isKindOfClass:[NSNumber class]]) {
         jsonObject = obj;
     }
-    else if([obj isKindOfClass:[NSDate class]])
-    {
+    else if ([obj isKindOfClass:[NSDate class]]) {
         NSString* dateString = nil;
         NSDateFormatter* formatter = [self.class getModelDateFormatter];
-        if(formatter){
+        if (formatter) {
             dateString = [formatter stringFromDate:obj];
         }
-        else{
+        else {
             dateString = [LKDBUtils stringWithDate:obj];
         }
         dateString = [dateString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        if(dateString.length > 0)
-        {
-            jsonObject = @{LKDB_TypeKey:LKDB_TypeKey_Date,LKDB_ValueKey:dateString};
+        if (dateString.length > 0) {
+            jsonObject = @{ LKDB_TypeKey : LKDB_TypeKey_Date, LKDB_ValueKey : dateString };
         }
     }
-    else if([obj isKindOfClass:[NSArray class]])
-    {
+    else if ([obj isKindOfClass:[NSArray class]]) {
         jsonObject = [self db_jsonObjectFromArray:obj];
     }
-    else if([obj isKindOfClass:[NSDictionary class]])
-    {
+    else if ([obj isKindOfClass:[NSDictionary class]]) {
         jsonObject = [self db_jsonObjectFromArray:obj];
     }
-    else
-    {
+    else {
         jsonObject = [self db_jsonObjectFromModel:obj];
     }
-    
-    if(jsonObject == nil)
-    {
+
+    if (jsonObject == nil) {
         jsonObject = [obj description];
     }
     return jsonObject;
 }
 
--(id)db_jsonObjectFromModel:(NSObject*)model
+- (id)db_jsonObjectFromModel:(NSObject*)model
 {
     Class clazz = model.class;
     NSDictionary* jsonObject = nil;
-    if(model.rowid > 0)
-    {
+    if (model.rowid > 0) {
         [model updateToDB];
         jsonObject = [self db_readInfoWithModel:model class:clazz];
     }
-    else
-    {
-        if(model.db_inserting == NO && [clazz getModelInfos] > 0)
-        {
+    else {
+        if (model.db_inserting == NO && [clazz getModelInfos] > 0) {
             BOOL success = [model saveToDB];
-            if(success)
-            {
+            if (success) {
                 jsonObject = [self db_readInfoWithModel:model class:clazz];
             }
         }
     }
     return jsonObject;
 }
--(NSDictionary*)db_readInfoWithModel:(NSObject*)model class:(Class)clazz
+- (NSDictionary*)db_readInfoWithModel:(NSObject*)model class:(Class)clazz
 {
     NSMutableDictionary* jsonObject = [NSMutableDictionary dictionary];
     [jsonObject setObject:LKDB_TypeKey_Model forKey:LKDB_TypeKey];
     [jsonObject setObject:model.db_tableName forKey:LKDB_TableNameKey];
     [jsonObject setObject:NSStringFromClass(clazz) forKey:LKDB_ClassKey];
     [jsonObject setObject:@(model.rowid) forKey:LKDB_RowIdKey];
-    
+
     NSDictionary* dic = [model db_getPrimaryKeysValues];
-    if(dic.count > 0 && [NSJSONSerialization isValidJSONObject:dic])
-    {
+    if (dic.count > 0 && [NSJSONSerialization isValidJSONObject:dic]) {
         [jsonObject setObject:dic forKey:LKDB_PValueKey];
     }
     return jsonObject;
 }
 
--(NSString*)db_jsonStringFromObject:(NSObject*)jsonObject
+- (NSString*)db_jsonStringFromObject:(NSObject*)jsonObject
 {
-    if(jsonObject && [NSJSONSerialization isValidJSONObject:jsonObject])
-    {
+    if (jsonObject && [NSJSONSerialization isValidJSONObject:jsonObject]) {
         NSData* data = [NSJSONSerialization dataWithJSONObject:jsonObject options:0 error:nil];
-        if(data.length > 0)
-        {
-            NSString* jsonString = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+        if (data.length > 0) {
+            NSString* jsonString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
             return jsonString;
         }
     }
     return nil;
 }
--(id)db_modelWithJsonValue:(id)value
+- (id)db_modelWithJsonValue:(id)value
 {
     NSData* jsonData = nil;
-    if([value isKindOfClass:[NSString class]])
-    {
+    if ([value isKindOfClass:[NSString class]]) {
         jsonData = [value dataUsingEncoding:NSUTF8StringEncoding];
     }
-    else if([value isKindOfClass:[NSData class]])
-    {
+    else if ([value isKindOfClass:[NSData class]]) {
         jsonData = value;
     }
-    
-    if(jsonData.length > 0)
-    {
+
+    if (jsonData.length > 0) {
         NSDictionary* jsonDic = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:nil];
         return [self db_objectWithDictionary:jsonDic];
     }
     return nil;
 }
--(id)db_objectWithArray:(NSArray*)array
+- (id)db_objectWithArray:(NSArray*)array
 {
     NSMutableArray* toArray = nil;
-    
+
     NSInteger count = array.count;
-    for (NSInteger i=0; i<count; i++)
-    {
+    for (NSInteger i = 0; i < count; i++) {
         id value = [array objectAtIndex:i];
-        if([value isKindOfClass:[NSDictionary class]])
-        {
+        if ([value isKindOfClass:[NSDictionary class]]) {
             value = [self db_objectWithDictionary:value];
         }
-        else if([value isKindOfClass:[NSArray class]])
-        {
+        else if ([value isKindOfClass:[NSArray class]]) {
             value = [self db_objectWithArray:value];
         }
-        
-        if(value)
-        {
-            if (toArray == nil)
-            {
+
+        if (value) {
+            if (toArray == nil) {
                 toArray = [NSMutableArray array];
             }
             [toArray addObject:value];
         }
     }
-    
+
     return toArray;
 }
--(id)db_objectWithDictionary:(NSDictionary*)dic
+- (id)db_objectWithDictionary:(NSDictionary*)dic
 {
-    if(dic.count == 0)
-    {
+    if (dic.count == 0) {
         return nil;
     }
     NSString* type = [dic objectForKey:LKDB_TypeKey];
-    if(type)
-    {
-        if([type isEqualToString:LKDB_TypeKey_Model])
-        {
+    if (type) {
+        if ([type isEqualToString:LKDB_TypeKey_Model]) {
             Class clazz = NSClassFromString([dic objectForKey:LKDB_ClassKey]);
             NSInteger rowid = [[dic objectForKey:LKDB_RowIdKey] integerValue];
             NSString* tableName = [dic objectForKey:LKDB_TableNameKey];
-            
+
             NSString* where = nil;
-            
-            NSString* rowCountWhere = [NSString stringWithFormat:@"select count(rowid) from %@ where rowid=%ld limit 1",tableName,(long)rowid];
+
+            NSString* rowCountWhere = [NSString stringWithFormat:@"select count(rowid) from %@ where rowid=%ld limit 1", tableName, (long)rowid];
             NSInteger result = [[[clazz getUsingLKDBHelper] executeScalarWithSQL:rowCountWhere arguments:nil] integerValue];
-            if(result > 0)
-            {
-                where = [NSString stringWithFormat:@"select rowid,* from %@ where rowid=%ld limit 1",tableName,(long)rowid];
+            if (result > 0) {
+                where = [NSString stringWithFormat:@"select rowid,* from %@ where rowid=%ld limit 1", tableName, (long)rowid];
             }
-            else
-            {
+            else {
                 NSDictionary* pv = [dic objectForKey:LKDB_PValueKey];
-                if(pv.count > 0)
-                {
+                if (pv.count > 0) {
                     BOOL isNeedAddDot = NO;
-                    NSMutableString* sb = [NSMutableString stringWithFormat:@"select rowid,* from %@ where",tableName];
-                    
+                    NSMutableString* sb = [NSMutableString stringWithFormat:@"select rowid,* from %@ where", tableName];
+
                     NSArray* allKeys = pv.allKeys;
-                    for (NSString* key in allKeys)
-                    {
+                    for (NSString* key in allKeys) {
                         id obj = [pv objectForKey:key];
-                        if(isNeedAddDot)
-                        {
+                        if (isNeedAddDot) {
                             [sb appendString:@" and"];
                         }
-                        [sb appendFormat:@" %@ = '%@'",key,obj];
-                        
+                        [sb appendFormat:@" %@ = '%@'", key, obj];
+
                         isNeedAddDot = YES;
                     }
-                    
+
                     [sb appendString:@" limit 1"];
-                    
+
                     where = [NSString stringWithString:sb];
                 }
             }
-            
-            if(where)
-            {
+
+            if (where) {
                 NSArray* array = [[clazz getUsingLKDBHelper] searchWithSQL:where toClass:clazz];
-                if(array.count > 0)
-                {
+                if (array.count > 0) {
                     NSObject* result = [array objectAtIndex:0];
                     result.db_tableName = tableName;
                     return result;
                 }
             }
         }
-        else if([type isEqualToString:LKDB_TypeKey_JSON])
-        {
+        else if ([type isEqualToString:LKDB_TypeKey_JSON]) {
             id value = [dic objectForKey:LKDB_ValueKey];
             return value;
         }
-        else if([type isEqualToString:LKDB_TypeKey_Combo])
-        {
+        else if ([type isEqualToString:LKDB_TypeKey_Combo]) {
             id value = [dic objectForKey:LKDB_ValueKey];
-            if ([value isKindOfClass:[NSArray class]])
-            {
+            if ([value isKindOfClass:[NSArray class]]) {
                 return [self db_objectWithArray:value];
             }
-            else if([value isKindOfClass:[NSDictionary class]])
-            {
+            else if ([value isKindOfClass:[NSDictionary class]]) {
                 return [self db_objectWithDictionary:value];
             }
-            else
-            {
+            else {
                 return value;
             }
         }
-        else if([type isEqualToString:LKDB_TypeKey_Date])
-        {
+        else if ([type isEqualToString:LKDB_TypeKey_Date]) {
             NSString* datestr = [dic objectForKey:LKDB_ValueKey];
             NSDateFormatter* formatter = [self.class getModelDateFormatter];
-            if(formatter){
+            if (formatter) {
                 return [formatter dateFromString:datestr];
             }
-            else{
+            else {
                 return [LKDBUtils dateWithString:datestr];
             }
         }
     }
-    else
-    {
+    else {
         NSArray* allKeys = dic.allKeys;
         NSMutableDictionary* toDic = [NSMutableDictionary dictionary];
-        for (NSInteger i=0; i < allKeys.count; i++)
-        {
+        for (NSInteger i = 0; i < allKeys.count; i++) {
             NSString* key = [allKeys objectAtIndex:i];
             id value = [dic objectForKey:key];
-            
+
             id saveObj = value;
-            if([value isKindOfClass:[NSArray class]])
-            {
+            if ([value isKindOfClass:[NSArray class]]) {
                 saveObj = [self db_objectWithArray:value];
             }
-            else if([value isKindOfClass:[NSDictionary class]])
-            {
+            else if ([value isKindOfClass:[NSDictionary class]]) {
                 saveObj = [self db_objectWithDictionary:value];
             }
-            
-            if(saveObj)
-            {
+
+            if (saveObj) {
                 [toDic setObject:saveObj forKey:key];
             }
         }
@@ -716,199 +613,177 @@ static char LKModelBase_Key_Inserting;
     }
     return nil;
 }
-#pragma mark- your can overwrite
--(void)setNilValueForKey:(NSString *)key
+#pragma mark - your can overwrite
+- (void)setNilValueForKey:(NSString*)key
 {
     NSLog(@"nil 这种设置到了 int 等基础类型中");
 }
--(id)valueForUndefinedKey:(NSString *)key
+- (id)valueForUndefinedKey:(NSString*)key
 {
-    NSLog(@"你有get方法没实现，key:%@",key);
+    NSLog(@"你有get方法没实现，key:%@", key);
     return nil;
 }
--(void)setValue:(id)value forUndefinedKey:(NSString *)key
+- (void)setValue:(id)value forUndefinedKey:(NSString*)key
 {
-    NSLog(@"你有set方法没实现，key:%@",key);
+    NSLog(@"你有set方法没实现，key:%@", key);
 }
 
-#pragma mark-
--(void)userSetValueForModel:(LKDBProperty *)property value:(id)value{}
--(id)userGetValueForModel:(LKDBProperty *)property
+#pragma mark -
+- (void)userSetValueForModel:(LKDBProperty*)property value:(id)value
+{
+}
+- (id)userGetValueForModel:(LKDBProperty*)property
 {
     return nil;
 }
 
--(NSDictionary *)db_getPrimaryKeysValues
+- (NSDictionary*)db_getPrimaryKeysValues
 {
     LKModelInfos* infos = [self.class getModelInfos];
     NSArray* array = infos.primaryKeys;
     NSMutableDictionary* dic = [NSMutableDictionary dictionary];
-    for (NSString* pname in array)
-    {
+    for (NSString* pname in array) {
         LKDBProperty* property = [infos objectWithSqlColumnName:pname];
         id value = nil;
-        if([property.type isEqualToString:LKSQL_Mapping_UserCalculate])
-        {
+        if ([property.type isEqualToString:LKSQL_Mapping_UserCalculate]) {
             value = [self userGetValueForModel:property];
         }
-        else
-        {
+        else {
             value = [self modelGetValue:property];
         }
-        if(value)
-        {
+        if (value) {
             [dic setObject:value forKey:property.sqlColumnName];
         }
     }
     return dic;
 }
 //主键值 是否为空
--(BOOL)singlePrimaryKeyValueIsEmpty
+- (BOOL)singlePrimaryKeyValueIsEmpty
 {
     LKDBProperty* property = [self singlePrimaryKeyProperty];
-    if(property)
-    {
+    if (property) {
         id pkvalue = [self singlePrimaryKeyValue];
-        if([property.sqlColumnType isEqualToString:LKSQL_Type_Int])
-        {
-            if([pkvalue isKindOfClass:[NSString class]])
-            {
-                if([LKDBUtils checkStringIsEmpty:pkvalue])
+        if ([property.sqlColumnType isEqualToString:LKSQL_Type_Int]) {
+            if ([pkvalue isKindOfClass:[NSString class]]) {
+                if ([LKDBUtils checkStringIsEmpty:pkvalue])
                     return YES;
-                
-                if([pkvalue integerValue] == 0)
+
+                if ([pkvalue integerValue] == 0)
                     return YES;
-                
+
                 return NO;
             }
-            if([pkvalue isKindOfClass:[NSNumber class]])
-            {
-                if([pkvalue integerValue] == 0)
+            if ([pkvalue isKindOfClass:[NSNumber class]]) {
+                if ([pkvalue integerValue] == 0)
                     return YES;
                 else
                     return NO;
             }
             return YES;
         }
-        else
-        {
+        else {
             return (pkvalue == nil);
         }
     }
     return NO;
 }
--(LKDBProperty *)singlePrimaryKeyProperty
+- (LKDBProperty*)singlePrimaryKeyProperty
 {
     LKModelInfos* infos = [self.class getModelInfos];
-    if(infos.primaryKeys.count == 1)
-    {
+    if (infos.primaryKeys.count == 1) {
         NSString* name = [infos.primaryKeys objectAtIndex:0];
         return [infos objectWithSqlColumnName:name];
     }
     return nil;
 }
--(id)singlePrimaryKeyValue
+- (id)singlePrimaryKeyValue
 {
     LKDBProperty* property = [self singlePrimaryKeyProperty];
-    if(property)
-    {
-        if([property.type isEqualToString:LKSQL_Mapping_UserCalculate])
-        {
+    if (property) {
+        if ([property.type isEqualToString:LKSQL_Mapping_UserCalculate]) {
             return [self userGetValueForModel:property];
         }
-        else
-        {
+        else {
             return [self modelGetValue:property];
         }
     }
     return nil;
 }
-+(NSString *)db_rowidAliasName
++ (NSString*)db_rowidAliasName
 {
     LKModelInfos* infos = [self getModelInfos];
-    if(infos.primaryKeys.count == 1)
-    {
+    if (infos.primaryKeys.count == 1) {
         NSString* primaryType = [infos objectWithSqlColumnName:[infos.primaryKeys lastObject]].sqlColumnType;
-        if([primaryType isEqualToString:LKSQL_Type_Int])
-        {
+        if ([primaryType isEqualToString:LKSQL_Type_Int]) {
             return [infos.primaryKeys lastObject];
         }
     }
     return nil;
 }
 
-#pragma mark- get model property info
-+(LKModelInfos *)getModelInfos
+#pragma mark - get model property info
++ (LKModelInfos*)getModelInfos
 {
     static __strong NSMutableDictionary* oncePropertyDic;
     static __strong NSRecursiveLock* lock;
-    
+
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        lock = [[NSRecursiveLock alloc]init];
-        oncePropertyDic = [[NSMutableDictionary alloc]initWithCapacity:8];
+        lock = [[NSRecursiveLock alloc] init];
+        oncePropertyDic = [[NSMutableDictionary alloc] initWithCapacity:8];
     });
-    
+
     LKModelInfos* infos;
     [lock lock];
-    
+
     infos = [oncePropertyDic objectForKey:NSStringFromClass(self)];
-    if(infos == nil)
-    {
+    if (infos == nil) {
         NSMutableArray* pronames = [NSMutableArray array];
         NSMutableArray* protypes = [NSMutableArray array];
         NSDictionary* keymapping = [self getTableMapping];
-        
-        if ([self isContainSelf] && [self class] != [NSObject class])
-        {
+
+        if ([self isContainSelf] && [self class] != [NSObject class]) {
             [self getSelfPropertys:pronames protypes:protypes];
         }
-        
+
         NSArray* pkArray = [self getPrimaryKeyUnionArray];
-        if(pkArray.count == 0)
-        {
+        if (pkArray.count == 0) {
             pkArray = nil;
             NSString* pk = [self getPrimaryKey];
-            if([LKDBUtils checkStringIsEmpty:pk] == NO)
-            {
+            if ([LKDBUtils checkStringIsEmpty:pk] == NO) {
                 pkArray = [NSArray arrayWithObject:pk];
             }
         }
-        if([self isContainParent] && [self superclass] != [NSObject class])
-        {
+        if ([self isContainParent] && [self superclass] != [NSObject class]) {
             LKModelInfos* superInfos = [[self superclass] getModelInfos];
-            for (NSInteger i=0; i<superInfos.count; i++) {
+            for (NSInteger i = 0; i < superInfos.count; i++) {
                 LKDBProperty* db_p = [superInfos objectWithIndex:i];
-                if(db_p.propertyName && db_p.propertyType && [db_p.propertyName isEqualToString:@"rowid"]==NO)
-                {
+                if (db_p.propertyName && db_p.propertyType && [db_p.propertyName isEqualToString:@"rowid"] == NO) {
                     [pronames addObject:db_p.propertyName];
                     [protypes addObject:db_p.propertyType];
                 }
             }
         }
-        if (pronames.count > 0)
-        {
-            infos = [[LKModelInfos alloc]initWithKeyMapping:keymapping propertyNames:pronames propertyType:protypes primaryKeys:pkArray];
+        if (pronames.count > 0) {
+            infos = [[LKModelInfos alloc] initWithKeyMapping:keymapping propertyNames:pronames propertyType:protypes primaryKeys:pkArray];
         }
-        else
-        {
-            infos = [[LKModelInfos alloc]init];
+        else {
+            infos = [[LKModelInfos alloc] init];
         }
-        
+
         [oncePropertyDic setObject:infos forKey:NSStringFromClass(self)];
     }
-    
+
     [lock unlock];
     return infos;
-    
 }
 
-+(BOOL)isContainParent
++ (BOOL)isContainParent
 {
     return NO;
 }
 
-+(BOOL)isContainSelf
++ (BOOL)isContainSelf
 {
     return YES;
 }
@@ -919,37 +794,34 @@ static char LKModelBase_Key_Inserting;
  *	@param 	pronames 	保存属性名称
  *	@param 	protypes 	保存属性类型
  */
-+ (void)getSelfPropertys:(NSMutableArray *)pronames protypes:(NSMutableArray *)protypes
++ (void)getSelfPropertys:(NSMutableArray*)pronames protypes:(NSMutableArray*)protypes
 {
     unsigned int outCount = 0, i = 0;
-    objc_property_t *properties = class_copyPropertyList(self, &outCount);
-    
+    objc_property_t* properties = class_copyPropertyList(self, &outCount);
+
     for (i = 0; i < outCount; i++) {
         objc_property_t property = properties[i];
-        NSString *propertyName = [NSString stringWithCString:property_getName(property) encoding:NSUTF8StringEncoding];
-        
+        NSString* propertyName = [NSString stringWithCString:property_getName(property) encoding:NSUTF8StringEncoding];
+
         //取消rowid 的插入 //子类 已重载的属性 取消插入
-        if(propertyName.length == 0 || [propertyName isEqualToString:@"rowid"] ||
-           [pronames indexOfObject:propertyName] != NSNotFound)
-        {
+        if (propertyName.length == 0 || [propertyName isEqualToString:@"rowid"] ||
+            [pronames indexOfObject:propertyName] != NSNotFound) {
             continue;
         }
-        NSString *propertyType = [NSString stringWithCString: property_getAttributes(property) encoding:NSUTF8StringEncoding];
-        
+        NSString* propertyType = [NSString stringWithCString:property_getAttributes(property) encoding:NSUTF8StringEncoding];
+
         ///过滤只读属性
-        if ([propertyType rangeOfString:@",R,"].length > 0 || [propertyType hasSuffix:@",R"])
-        {
+        if ([propertyType rangeOfString:@",R,"].length > 0 || [propertyType hasSuffix:@",R"]) {
             NSString* firstWord = [[propertyName substringToIndex:1] uppercaseString];
             NSString* otherWord = [propertyName substringFromIndex:1];
-            NSString* setMethodString = [NSString stringWithFormat:@"set%@%@:",firstWord,otherWord];
+            NSString* setMethodString = [NSString stringWithFormat:@"set%@%@:", firstWord, otherWord];
             SEL setSEL = NSSelectorFromString(setMethodString);
             ///有set方法就不过滤了
-            if([self instancesRespondToSelector:setSEL] == NO)
-            {
+            if ([self instancesRespondToSelector:setSEL] == NO) {
                 continue;
             }
         }
-        
+
         /*
          c char
          i int
@@ -961,65 +833,52 @@ static char LKModelBase_Key_Inserting;
          ...  BOOL 获取到的表示 方式是 char
          .... ^i 表示  int*  一般都不会用到
          */
-        
+
         NSString* propertyClassName = nil;
         if ([propertyType hasPrefix:@"T@"]) {
-            
+
             NSRange range = [propertyType rangeOfString:@","];
-            if(range.location > 4 && range.location <= propertyType.length)
-            {
-                range = NSMakeRange(3,range.location - 4);
+            if (range.location > 4 && range.location <= propertyType.length) {
+                range = NSMakeRange(3, range.location - 4);
                 propertyClassName = [propertyType substringWithRange:range];
-                if([propertyClassName hasSuffix:@">"])
-                {
+                if ([propertyClassName hasSuffix:@">"]) {
                     NSRange categoryRange = [propertyClassName rangeOfString:@"<"];
-                    if (categoryRange.length>0)
-                    {
+                    if (categoryRange.length > 0) {
                         propertyClassName = [propertyClassName substringToIndex:categoryRange.location];
                     }
                 }
             }
         }
-        else if([propertyType hasPrefix:@"T{"])
-        {
+        else if ([propertyType hasPrefix:@"T{"]) {
             NSRange range = [propertyType rangeOfString:@"="];
-            if(range.location > 2 && range.location <= propertyType.length)
-            {
-                range = NSMakeRange(2, range.location-2);
+            if (range.location > 2 && range.location <= propertyType.length) {
+                range = NSMakeRange(2, range.location - 2);
                 propertyClassName = [propertyType substringWithRange:range];
             }
         }
-        else
-        {
+        else {
             propertyType = [propertyType lowercaseString];
-            if ([propertyType hasPrefix:@"ti"] || [propertyType hasPrefix:@"tb"])
-            {
+            if ([propertyType hasPrefix:@"ti"] || [propertyType hasPrefix:@"tb"]) {
                 propertyClassName = @"int";
             }
-            else if ([propertyType hasPrefix:@"tf"])
-            {
+            else if ([propertyType hasPrefix:@"tf"]) {
                 propertyClassName = @"float";
             }
-            else if([propertyType hasPrefix:@"td"])
-            {
+            else if ([propertyType hasPrefix:@"td"]) {
                 propertyClassName = @"double";
             }
-            else if([propertyType hasPrefix:@"tl"] || [propertyType hasPrefix:@"tq"])
-            {
+            else if ([propertyType hasPrefix:@"tl"] || [propertyType hasPrefix:@"tq"]) {
                 propertyClassName = @"long";
             }
-            else if ([propertyType hasPrefix:@"tc"])
-            {
+            else if ([propertyType hasPrefix:@"tc"]) {
                 propertyClassName = @"char";
             }
-            else if([propertyType hasPrefix:@"ts"])
-            {
+            else if ([propertyType hasPrefix:@"ts"]) {
                 propertyClassName = @"short";
             }
         }
-        
-        if([LKDBUtils checkStringIsEmpty:propertyClassName])
-        {
+
+        if ([LKDBUtils checkStringIsEmpty:propertyClassName]) {
             ///没找到具体的属性就放弃
             continue;
         }
@@ -1028,54 +887,51 @@ static char LKModelBase_Key_Inserting;
         [protypes addObject:propertyClassName];
     }
     free(properties);
-    if([self isContainParent] && [self superclass] != [NSObject class])
-    {
+    if ([self isContainParent] && [self superclass] != [NSObject class]) {
         [[self superclass] getSelfPropertys:pronames protypes:protypes];
     }
 }
 
 #pragma mark - log all property
--(NSMutableString *)getAllPropertysString
+- (NSMutableString*)getAllPropertysString
 {
     Class clazz = [self class];
     NSMutableString* sb = [NSMutableString stringWithFormat:@"\n <%@> :\n", NSStringFromClass(clazz)];
-    [sb appendFormat:@"rowid : %ld\n",(long)self.rowid];
+    [sb appendFormat:@"rowid : %ld\n", (long)self.rowid];
     [self mutableString:sb appendPropertyStringWithClass:clazz containParent:YES];
     return sb;
 }
--(NSString*)printAllPropertys
+- (NSString*)printAllPropertys
 {
     return [self printAllPropertysIsContainParent:NO];
 }
--(NSString *)printAllPropertysIsContainParent:(BOOL)containParent
+- (NSString*)printAllPropertysIsContainParent:(BOOL)containParent
 {
 #ifdef DEBUG
     Class clazz = [self class];
     NSMutableString* sb = [NSMutableString stringWithFormat:@"\n <%@> :\n", NSStringFromClass(clazz)];
-    [sb appendFormat:@"rowid : %ld\n",(long)self.rowid];
+    [sb appendFormat:@"rowid : %ld\n", (long)self.rowid];
     [self mutableString:sb appendPropertyStringWithClass:clazz containParent:containParent];
-    NSLog(@"%@",sb);
+    NSLog(@"%@", sb);
     return sb;
 #else
     return @"";
 #endif
 }
--(void)mutableString:(NSMutableString*)sb appendPropertyStringWithClass:(Class)clazz containParent:(BOOL)containParent
+- (void)mutableString:(NSMutableString*)sb appendPropertyStringWithClass:(Class)clazz containParent:(BOOL)containParent
 {
-    if (clazz == [NSObject class])
-    {
+    if (clazz == [NSObject class]) {
         return;
     }
     unsigned int outCount = 0, i = 0;
-    objc_property_t *properties = class_copyPropertyList(clazz, &outCount);
+    objc_property_t* properties = class_copyPropertyList(clazz, &outCount);
     for (i = 0; i < outCount; i++) {
         objc_property_t property = properties[i];
-        NSString *propertyName = [NSString stringWithCString:property_getName(property) encoding:NSUTF8StringEncoding];
-        [sb appendFormat:@" %@ : %@ \n",propertyName,[self valueForKey:propertyName]];
+        NSString* propertyName = [NSString stringWithCString:property_getName(property) encoding:NSUTF8StringEncoding];
+        [sb appendFormat:@" %@ : %@ \n", propertyName, [self valueForKey:propertyName]];
     }
     free(properties);
-    if(containParent)
-    {
+    if (containParent) {
         [self mutableString:sb appendPropertyStringWithClass:clazz.superclass containParent:containParent];
     }
 }
