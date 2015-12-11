@@ -219,12 +219,10 @@
 
     _encryptionKey = nil;
 
-#ifdef DEBUG
-    // debug 模式下  打印错误日志
+    // 不打印错误日志
     [_bindingQueue inDatabase:^(FMDatabase* db) {
-        db.logsErrors = YES;
+        db.logsErrors = NO;
     }];
-#endif
 }
 
 #pragma mark - core
@@ -239,11 +237,8 @@
         if (_bindingQueue == nil) {
             self.bindingQueue = [[FMDatabaseQueue alloc] initWithPath:_dbPath];
             [_bindingQueue inDatabase:^(FMDatabase* db) {
-#ifdef DEBUG
-                // debug 模式下  打印错误日志
-                db.logsErrors = YES;
-#endif
-
+                // 不打印错误日志
+                db.logsErrors = NO;
                 if (_encryptionKey.length > 0) {
                     [db setKey:_encryptionKey];
                 }
