@@ -58,11 +58,32 @@
 @end
 
 @implementation LKDBHelper
+@synthesize encryptionKey = _encryptionKey;
+
+static BOOL LKDBLogErrorEnable = NO;
++(void)setLogError:(BOOL)logError
+{
+    if (LKDBLogErrorEnable == logError) {
+        return;
+    }
+#ifdef DEBUG
+    LKDBLogErrorEnable = logError;
+    NSMutableArray* dbArray = [self dbHelperSingleArray];
+    @synchronized(dbArray)
+    {
+        [dbArray enumerateObjectsUsingBlock:^(LKDBWeakObject* weakObj, NSUInteger idx, BOOL *stop) {
+            [weakObj.obj executeDB:^(FMDatabase *db) {
+                db.logsErrors = LKDBLogErrorEnable;
+            }];
+        }];
+    }
+#endif
+}
+
 + (NSMutableArray*)dbHelperSingleArray
 {
     static __strong NSMutableArray* dbArray;
     static dispatch_once_t onceToken;
-
     dispatch_once(&onceToken, ^{
         dbArray = [NSMutableArray array];
     });
@@ -83,7 +104,6 @@
         else if (dbFilePath) {
             for (NSInteger i = 0; i < dbArray.count;) {
                 LKDBWeakObject* weakObj = [dbArray objectAtIndex:i];
-
                 if (weakObj.obj == nil) {
                     [dbArray removeObjectAtIndex:i];
                     continue;
@@ -92,7 +112,6 @@
                     instance = weakObj.obj;
                     break;
                 }
-
                 i++;
             }
         }
@@ -217,11 +236,11 @@
     }
 #endif
 
+    ///reset encryptionKey
     _encryptionKey = nil;
-
-    // 不打印错误日志
+    
     [_bindingQueue inDatabase:^(FMDatabase* db) {
-        db.logsErrors = NO;
+        db.logsErrors = LKDBLogErrorEnable;
     }];
 }
 
@@ -237,14 +256,12 @@
         if (_bindingQueue == nil) {
             self.bindingQueue = [[FMDatabaseQueue alloc] initWithPath:_dbPath];
             [_bindingQueue inDatabase:^(FMDatabase* db) {
-                // 不打印错误日志
-                db.logsErrors = NO;
+                db.logsErrors = LKDBLogErrorEnable;
                 if (_encryptionKey.length > 0) {
                     [db setKey:_encryptionKey];
                 }
             }];
         }
-
         [_bindingQueue inDatabase:^(FMDatabase* db) {
             self.usingdb = db;
             block(db);
@@ -353,55 +370,42 @@
 // dic where parse
 - (NSString*)dictionaryToSqlWhere:(NSDictionary*)dic andValues:(NSMutableArray*)values
 {
+    if (dic.count == 0) {
+        return @"";
+    }
+    
+
     NSMutableString* wherekey = [NSMutableString stringWithCapacity:0];
-
-    if ((dic != nil) && (dic.count > 0)) {
-        NSArray* keys = dic.allKeys;
-
-        for (NSInteger i = 0; i < keys.count; i++) {
-            NSString* key = [keys objectAtIndex:i];
-            id va = [dic objectForKey:key];
-
-            if ([va isKindOfClass:[NSArray class]]) {
-                NSArray* vlist = va;
-
-                if (vlist.count == 0) {
-                    continue;
+    [dic enumerateKeysAndObjectsUsingBlock:^(NSString* key, id obj, BOOL *stop) {
+        if ([obj isKindOfClass:[NSArray class]]) {
+            NSArray* vlist = obj;
+            if (vlist.count == 0) {
+                return;
+            }
+            if (wherekey.length > 0) {
+                [wherekey appendString:@" and"];
+            }
+            [wherekey appendFormat:@" %@ in(", key];
+            [vlist enumerateObjectsUsingBlock:^(id vlist_obj, NSUInteger idx, BOOL *stop) {
+                [wherekey appendString:@"?"];
+                if (idx > 0) {
+                    [wherekey appendString:@","];
                 }
-
-                if (wherekey.length > 0) {
-                    [wherekey appendString:@" and"];
-                }
-
-                [wherekey appendFormat:@" %@ in(", key];
-
-                for (NSInteger j = 0; j < vlist.count; j++) {
-                    [wherekey appendString:@"?"];
-
-                    if (j == vlist.count - 1) {
-                        [wherekey appendString:@")"];
-                    }
-                    else {
-                        [wherekey appendString:@","];
-                    }
-
-                    [values addObject:[vlist objectAtIndex:j]];
-                }
+                [values addObject:vlist_obj];
+            }];
+            [wherekey appendString:@")"];
+        }
+        else {
+            if (wherekey.length > 0) {
+                [wherekey appendFormat:@" and %@=?", key];
             }
             else {
-                if (wherekey.length > 0) {
-                    [wherekey appendFormat:@" and %@=?", key];
-                }
-                else {
-                    [wherekey appendFormat:@" %@=?", key];
-                }
-
-                [values addObject:va];
+                [wherekey appendFormat:@" %@=?", key];
             }
+            [values addObject:obj];
         }
-    }
-
-    return wherekey;
+    }];
+    return [wherekey copy];
 }
 
 // where sql statements about model primary keys
@@ -447,17 +451,32 @@
 }
 
 #pragma mark - set key
-- (void)setEncryptionKey:(NSString*)encryptionKey
+-(BOOL)setKey:(NSString *)key
 {
-    _encryptionKey = encryptionKey;
-
-    if (_bindingQueue && (encryptionKey.length > 0)) {
-        [self executeDB:^(FMDatabase* db) {
-            [db setKey:_encryptionKey];
+    _encryptionKey = [key copy];
+    __block BOOL success = NO;
+    if (_bindingQueue && (_encryptionKey.length > 0)) {
+        [self executeDB:^(FMDatabase *db) {
+           success = [db setKey:_encryptionKey];
         }];
     }
+    return success;
 }
-
+-(BOOL)rekey:(NSString *)key
+{
+    _encryptionKey = [key copy];
+    __block BOOL success = NO;
+    if (_bindingQueue && (_encryptionKey.length > 0)) {
+        [self executeDB:^(FMDatabase *db) {
+            success = [db rekey:_encryptionKey];
+        }];
+    }
+    return success;
+}
+-(NSString *)encryptionKey
+{
+    return _encryptionKey;
+}
 #pragma mark - dealloc
 - (void)dealloc
 {
@@ -749,7 +768,7 @@
 {
     if (callback) {
         LKDBCode_Async_Begin
-            NSInteger result = [sself rowCountWithTableName:[modelClass getTableName] where:where];
+        NSInteger result = [sself rowCountWithTableName:[modelClass getTableName] where:where];
         callback(result);
         LKDBCode_Async_End
     }
@@ -793,7 +812,7 @@
 {
     if (block) {
         LKDBCode_Async_Begin
-            LKDBQueryParams* params = [[LKDBQueryParams alloc] init];
+        LKDBQueryParams* params = [[LKDBQueryParams alloc] init];
         params.toClass = modelClass;
 
         if ([where isKindOfClass:[NSDictionary class]]) {
@@ -897,7 +916,7 @@
 {
     if (params.callback) {
         LKDBCode_Async_Begin
-            NSMutableArray* array = [sself searchBaseWithParams:params];
+        NSMutableArray* array = [sself searchBaseWithParams:params];
         params.callback(array);
         LKDBCode_Async_End return nil;
     }
@@ -1094,7 +1113,7 @@
 - (void)insertToDB:(NSObject*)model callback:(void (^)(BOOL))block
 {
     LKDBCode_Async_Begin
-        BOOL result = [sself insertBase:model];
+    BOOL result = [sself insertBase:model];
 
     if (block) {
         block(result);
@@ -1115,7 +1134,7 @@
 - (void)insertWhenNotExists:(NSObject*)model callback:(void (^)(BOOL))block
 {
     LKDBCode_Async_Begin
-        BOOL result = [sself insertWhenNotExists:model];
+    BOOL result = [sself insertWhenNotExists:model];
 
     if (block) {
         block(result);
@@ -1220,7 +1239,7 @@
 - (void)updateToDB:(NSObject*)model where:(id)where callback:(void (^)(BOOL))block
 {
     LKDBCode_Async_Begin
-        BOOL result = [sself updateToDBBase:model where:where];
+    BOOL result = [sself updateToDBBase:model where:where];
 
     if (block) {
         block(result);
@@ -1352,7 +1371,7 @@
 - (void)deleteToDB:(NSObject*)model callback:(void (^)(BOOL))block
 {
     LKDBCode_Async_Begin
-        BOOL isDeleted = [sself deleteToDBBase:model];
+    BOOL isDeleted = [sself deleteToDBBase:model];
 
     if (block) {
         block(isDeleted);
@@ -1412,7 +1431,7 @@
 - (void)deleteWithClass:(Class)modelClass where:(id)where callback:(void (^)(BOOL))block
 {
     LKDBCode_Async_Begin
-        BOOL isDeleted = [sself deleteWithTableName:[modelClass getTableName] where:where];
+    BOOL isDeleted = [sself deleteWithTableName:[modelClass getTableName] where:where];
 
     if (block) {
         block(isDeleted);
@@ -1552,6 +1571,15 @@
 @end
 
 @implementation LKDBHelper (Deprecated_Nonfunctional)
+-(void)setEncryptionKey:(NSString *)encryptionKey
+{
+    _encryptionKey = [encryptionKey copy];
+    if (_bindingQueue && (_encryptionKey.length > 0)) {
+        [self executeDB:^(FMDatabase* db) {
+            [db setKey:_encryptionKey];
+        }];
+    }
+}
 + (LKDBHelper*)sharedDBHelper
 {
     return [LKDBHelper getUsingLKDBHelper];

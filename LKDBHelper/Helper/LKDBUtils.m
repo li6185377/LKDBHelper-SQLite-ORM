@@ -9,7 +9,7 @@
 #import "LKDBUtils.h"
 
 @interface LKDateFormatter : NSDateFormatter
-@property (strong, nonatomic) NSLock* lock;
+@property (strong, nonatomic) NSRecursiveLock* lock;
 @end
 
 @implementation LKDateFormatter
@@ -17,7 +17,7 @@
 {
     self = [super init];
     if (self) {
-        self.lock = [[NSLock alloc] init];
+        self.lock = [[NSRecursiveLock alloc] init];
         self.generatesCalendarDates = YES;
         self.dateStyle = NSDateFormatterNoStyle;
         self.timeStyle = NSDateFormatterNoStyle;
@@ -136,6 +136,15 @@
     NSDateFormatter* formatter = [self getDBDateFormat];
     NSDate* date = [formatter dateFromString:str];
     return date;
+}
++(NSNumberFormatter *)numberFormatter
+{
+    static NSNumberFormatter* numberFormatter = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        numberFormatter = [[NSNumberFormatter alloc] init];
+    });
+    return numberFormatter;
 }
 @end
 

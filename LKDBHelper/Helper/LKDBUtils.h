@@ -32,6 +32,9 @@
 + (NSString*)stringWithDate:(NSDate*)date;
 ///把String 转换成Date
 + (NSDate*)dateWithString:(NSString*)str;
+///单例formatter
++ (NSNumberFormatter*)numberFormatter;
+
 @end
 
 #ifdef DEBUG

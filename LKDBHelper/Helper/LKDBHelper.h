@@ -6,18 +6,24 @@
 //  Copyright (c) 2012年 LJH. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import "FMDatabaseQueue.h"
 #import "FMDatabase.h"
+#import "FMDatabaseQueue.h"
+#import <Foundation/Foundation.h>
 
 #import "LKDBUtils.h"
 
 #import "LKDB+Mapping.h"
 
-#import "NSObject+LKModel.h"
 #import "NSObject+LKDBHelper.h"
+#import "NSObject+LKModel.h"
 
 @interface LKDBHelper : NSObject
+
+/**
+ *  @brief 是否打印数据库出错日志 默认 NO
+ */
++ (void)setLogError:(BOOL)logError;
+
 /**
  *	@brief  filepath the use of : "documents/db/" + fileName + ".db"
  *  refer:  FMDatabase.h  + (instancetype)databaseWithPath:(NSString*)inPath;
@@ -32,11 +38,19 @@
 - (instancetype)initWithDBPath:(NSString*)filePath;
 - (void)setDBPath:(NSString*)filePath;
 
-/** 
- *  @brief set and save encryption key.
- *  refer: FMDatabase.h  - (BOOL)setKey:(NSString*)key;
+/**
+ *  @brief current encryption key.
  */
-@property (strong, nonatomic) NSString* encryptionKey;
+@property (copy, readonly, nonatomic) NSString* encryptionKey;
+
+/**
+ *  @brief Set encryption key
+ refer: FMDatabase.h  - (BOOL)setKey:(NSString*)key;
+ *  invoking after the `LKDBHelper initialize` in YourModelClass.m `getUsingLKDBHelper` function
+ */
+- (BOOL)setKey:(NSString*)key;
+/// Reset encryption key
+- (BOOL)rekey:(NSString*)key;
 
 /**
  *	@brief  execute database operations synchronously,not afraid of recursive deadlock  
@@ -133,7 +147,7 @@
  NSMutableArray* array = [[LKDBHelper getUsingLKDBHelper] searc:[ModelClass class] withSQL:@"select rowid from name_table where name = ?", @"Swift"];
  *
  */
--(NSMutableArray *)search:(Class)modelClass withSQL:(NSString *)sql,...;
+- (NSMutableArray*)search:(Class)modelClass withSQL:(NSString*)sql, ...;
 
 /**
     columns may NSArray or NSString   if query column count == 1  return single column string array
@@ -242,5 +256,6 @@
 #pragma mark - deprecated
 + (LKDBHelper*)sharedDBHelper __deprecated_msg("Method deprecated. Use `[Model getUsingLKDBHelper]`");
 - (BOOL)createTableWithModelClass:(Class)modelClass __deprecated_msg("Now you can not call it. Will automatically determine whether you need to create");
+- (void)setEncryptionKey:(NSString*)encryptionKey __deprecated_msg("Method deprecated. Use `setKey: OR resetKey:` invoking after the `LKDBHelper initialize` in YourModelClass.m `getUsingLKDBHelper` function");
 #pragma mark -
 @end
