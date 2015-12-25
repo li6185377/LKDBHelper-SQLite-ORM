@@ -178,7 +178,7 @@
     addText(@"休息2秒 结束 \n rest for 2 seconds at the end");
     
     //异步 asynchronous
-    [globalHelper search:[LKTest class] where:nil orderBy:nil offset:0 count:100 callback:^(NSMutableArray *array) {
+    [globalHelper search:[LKTest class] where:@{@"name":@"zhan san",@"blah":@[@"1",@"3",@"5"]} orderBy:nil offset:0 count:100 callback:^(NSMutableArray *array) {
         
         addText(@"异步搜索 结束,  async search end");
         for (NSObject* obj in array) {
@@ -188,7 +188,7 @@
         sleep(1);
 
         ///修改    update object
-        LKTest* test2 = [array objectAtIndex:0];
+        LKTest* test2 = array.firstObject;
         test2.name = @"wang wu";
 
         [globalHelper updateToDB:test2 where:nil];

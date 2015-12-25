@@ -373,8 +373,6 @@ static BOOL LKDBLogErrorEnable = NO;
     if (dic.count == 0) {
         return @"";
     }
-    
-
     NSMutableString* wherekey = [NSMutableString stringWithCapacity:0];
     [dic enumerateKeysAndObjectsUsingBlock:^(NSString* key, id obj, BOOL *stop) {
         if ([obj isKindOfClass:[NSArray class]]) {
@@ -387,10 +385,10 @@ static BOOL LKDBLogErrorEnable = NO;
             }
             [wherekey appendFormat:@" %@ in(", key];
             [vlist enumerateObjectsUsingBlock:^(id vlist_obj, NSUInteger idx, BOOL *stop) {
-                [wherekey appendString:@"?"];
                 if (idx > 0) {
                     [wherekey appendString:@","];
                 }
+                [wherekey appendString:@"?"];
                 [values addObject:vlist_obj];
             }];
             [wherekey appendString:@")"];
@@ -1276,22 +1274,17 @@ static BOOL LKDBLogErrorEnable = NO;
 
     for (NSInteger i = 0; i < infos.count; i++) {
         LKDBProperty* property = [infos objectWithIndex:i];
-
         if ([LKDBUtils checkStringIsEmpty:property.sqlColumnName]) {
             continue;
         }
-
         id value = [self modelValueWithProperty:property model:model];
-
         ///跳过 rowid = 0 的属性
         if ([property.sqlColumnName isEqualToString:@"rowid"]) {
             int rowid = [value intValue];
-
             if (rowid > 0) {
                 ///如果rowid 已经存在就不修改
                 NSString* rowidWhere = [NSString stringWithFormat:@"rowid=%d", rowid];
                 NSInteger rowCount = [self rowCountWithTableName:db_tableName where:rowidWhere];
-
                 if (rowCount > 0) {
                     continue;
                 }
@@ -1300,18 +1293,14 @@ static BOOL LKDBLogErrorEnable = NO;
                 continue;
             }
         }
-
         if (updateKey.length > 0) {
             [updateKey appendString:@","];
         }
-
         [updateKey appendFormat:@"%@=?", property.sqlColumnName];
-
         [updateValues addObject:value];
     }
 
     NSMutableString* updateSQL = [NSMutableString stringWithFormat:@"update %@ set %@ where ", db_tableName, updateKey];
-
     // 添加where 语句
     if ([where isKindOfClass:[NSString class]] && ([LKDBUtils checkStringIsEmpty:where] == NO)) {
         [updateSQL appendString:where];
