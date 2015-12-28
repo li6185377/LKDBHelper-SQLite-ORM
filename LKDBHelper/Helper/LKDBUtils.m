@@ -47,6 +47,23 @@
 }
 @end
 
+@interface LKNumberFormatter : NSNumberFormatter
+
+@end
+
+@implementation LKNumberFormatter
+-(NSString *)stringFromNumber:(NSNumber *)number
+{
+    NSString* string = [number stringValue];
+    return string;
+}
+-(NSNumber *)numberFromString:(NSString *)string
+{
+    NSNumber* number = [super numberFromString:string];
+    return number;
+}
+@end
+
 @implementation LKDBUtils
 + (NSString*)getDocumentPath
 {
@@ -142,7 +159,7 @@
     static NSNumberFormatter* numberFormatter = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        numberFormatter = [[NSNumberFormatter alloc] init];
+        numberFormatter = [[LKNumberFormatter alloc] init];
     });
     return numberFormatter;
 }
