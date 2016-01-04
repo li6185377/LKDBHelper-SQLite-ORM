@@ -29,6 +29,8 @@
  @param ... A list of parameters that will be bound to the `?` placeholders in the SQL query.
 
  @return `int` value.
+ 
+ @note To use this method from Swift, you must include `FMDatabaseAdditionsVariadic.swift` in your project.
  */
 
 - (int)intForQuery:(NSString*)query, ...;
@@ -39,6 +41,8 @@
  @param ... A list of parameters that will be bound to the `?` placeholders in the SQL query.
 
  @return `long` value.
+ 
+ @note To use this method from Swift, you must include `FMDatabaseAdditionsVariadic.swift` in your project.
  */
 
 - (long)longForQuery:(NSString*)query, ...;
@@ -49,6 +53,8 @@
  @param ... A list of parameters that will be bound to the `?` placeholders in the SQL query.
 
  @return `BOOL` value.
+ 
+ @note To use this method from Swift, you must include `FMDatabaseAdditionsVariadic.swift` in your project.
  */
 
 - (BOOL)boolForQuery:(NSString*)query, ...;
@@ -59,6 +65,8 @@
  @param ... A list of parameters that will be bound to the `?` placeholders in the SQL query.
 
  @return `double` value.
+ 
+ @note To use this method from Swift, you must include `FMDatabaseAdditionsVariadic.swift` in your project.
  */
 
 - (double)doubleForQuery:(NSString*)query, ...;
@@ -69,6 +77,8 @@
  @param ... A list of parameters that will be bound to the `?` placeholders in the SQL query.
 
  @return `NSString` value.
+ 
+ @note To use this method from Swift, you must include `FMDatabaseAdditionsVariadic.swift` in your project.
  */
 
 - (NSString*)stringForQuery:(NSString*)query, ...;
@@ -79,6 +89,8 @@
  @param ... A list of parameters that will be bound to the `?` placeholders in the SQL query.
 
  @return `NSData` value.
+ 
+ @note To use this method from Swift, you must include `FMDatabaseAdditionsVariadic.swift` in your project.
  */
 
 - (NSData*)dataForQuery:(NSString*)query, ...;
@@ -89,6 +101,8 @@
  @param ... A list of parameters that will be bound to the `?` placeholders in the SQL query.
 
  @return `NSDate` value.
+ 
+ @note To use this method from Swift, you must include `FMDatabaseAdditionsVariadic.swift` in your project.
  */
 
 - (NSDate*)dateForQuery:(NSString*)query, ...;
@@ -195,8 +209,6 @@
 - (BOOL)validateSQL:(NSString*)sql error:(NSError**)error;
 
 
-#if SQLITE_VERSION_NUMBER >= 3007017
-
 ///-----------------------------------
 /// @name Application identifier tasks
 ///-----------------------------------
@@ -238,7 +250,6 @@
  */
 
 - (void)setApplicationIDString:(NSString*)string;
-#endif
 
 #endif
 

@@ -2,6 +2,12 @@
 #import "FMDatabase.h"
 #import "unistd.h"
 
+#if FMDB_SQLITE_STANDALONE
+#import <sqlite3/sqlite3.h>
+#else
+#import <sqlite3.h>
+#endif
+
 @interface FMDatabase ()
 - (void)resultSetDidClose:(FMResultSet *)resultSet;
 @end
@@ -314,9 +320,9 @@
         return nil;
     }
     
-    int dataSize = sqlite3_column_bytes([_statement statement], columnIdx);
     const char *dataBuffer = sqlite3_column_blob([_statement statement], columnIdx);
-    
+    int dataSize = sqlite3_column_bytes([_statement statement], columnIdx);
+
     if (dataBuffer == NULL) {
         return nil;
     }
@@ -334,10 +340,11 @@
     if (sqlite3_column_type([_statement statement], columnIdx) == SQLITE_NULL || (columnIdx < 0)) {
         return nil;
     }
-    
+  
+    const char *dataBuffer = sqlite3_column_blob([_statement statement], columnIdx);
     int dataSize = sqlite3_column_bytes([_statement statement], columnIdx);
     
-    NSData *data = [NSData dataWithBytesNoCopy:(void *)sqlite3_column_blob([_statement statement], columnIdx) length:(NSUInteger)dataSize freeWhenDone:NO];
+    NSData *data = [NSData dataWithBytesNoCopy:(void *)dataBuffer length:(NSUInteger)dataSize freeWhenDone:NO];
     
     return data;
 }

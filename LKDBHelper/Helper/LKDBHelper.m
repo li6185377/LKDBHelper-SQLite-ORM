@@ -7,6 +7,7 @@
 //
 
 #import "LKDBHelper.h"
+#import <sqlite3.h>
 
 #define LKDBCheck_tableNameIsInvalid(tableName)                           \
     if ([LKDBUtils checkStringIsEmpty:tableName]) {                       \
