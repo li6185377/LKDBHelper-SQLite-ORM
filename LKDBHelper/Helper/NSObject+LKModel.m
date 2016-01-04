@@ -435,6 +435,9 @@ static char LKModelBase_Key_Inserting;
                 jsonObject = [self db_readInfoWithModel:model class:clazz];
             }
         }
+        else {
+            NSAssert(NO, @"目前LKDB 还不支持 循环引用。  比如 A 持有 B，   B 持有 A，这种的存储");
+        }
     }
     return jsonObject;
 }
