@@ -14,13 +14,20 @@
 @property int postcode;
 @end
 
+@class LKTest;
 @interface LKTestForeign : LKTestForeignSuper
 @property NSInteger addid;
+
+@property(strong,nonatomic) LKTest* nestModel;
+
 @end
 
 
 
 @interface LKTest : NSObject
+
+@property(strong,nonatomic) LKTestForeign* nestModel;
+
 @property(copy,nonatomic)NSString* name;
 @property NSUInteger  age;
 @property BOOL isGirl;

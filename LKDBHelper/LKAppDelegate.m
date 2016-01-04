@@ -96,6 +96,10 @@
     
     test.data = [@"hahaha" dataUsingEncoding:NSUTF8StringEncoding];
     
+//    #error 目前LKDB  还不支持嵌套引用
+//    foreign.nestModel = test;
+//    test.nestModel = foreign;    
+    
     addText(@"%f",test.score);
     //同步 插入第一条 数据   synchronous insert the first
     [test saveToDB];
