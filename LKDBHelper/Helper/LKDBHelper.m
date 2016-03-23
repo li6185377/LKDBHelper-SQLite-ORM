@@ -507,7 +507,10 @@ static BOOL LKDBLogErrorEnable = NO;
         NSMutableArray* dropTables = [NSMutableArray arrayWithCapacity:0];
 
         while ([set next]) {
-            [dropTables addObject:[set stringForColumnIndex:0]];
+            NSString* tableName = [set stringForColumnIndex:0];
+            if (tableName) {
+                [dropTables addObject:tableName];
+            }
         }
 
         [set close];
@@ -1062,7 +1065,10 @@ static BOOL LKDBLogErrorEnable = NO;
 
     while ([set next]) {
         NSObject* bindingModel = [[modelClass alloc] init];
-
+        if (bindingModel == nil) {
+            continue;
+        }
+        
         for (int i = 0; i < columnCount; i++) {
             NSString* sqlName = [set columnNameForIndex:i];
             LKDBProperty* property = [infos objectWithSqlColumnName:sqlName];
@@ -1188,7 +1194,9 @@ static BOOL LKDBLogErrorEnable = NO;
         }
 
         id value = [self modelValueWithProperty:property model:model];
-
+        if (value == nil) {
+            continue;
+        }
         ///跳过 rowid = 0 的属性
         if ([property.sqlColumnName isEqualToString:@"rowid"] && ([value intValue] == 0)) {
             continue;
@@ -1279,6 +1287,9 @@ static BOOL LKDBLogErrorEnable = NO;
             continue;
         }
         id value = [self modelValueWithProperty:property model:model];
+        if (value == nil) {
+            continue;
+        }
         ///跳过 rowid = 0 的属性
         if ([property.sqlColumnName isEqualToString:@"rowid"]) {
             int rowid = [value intValue];
