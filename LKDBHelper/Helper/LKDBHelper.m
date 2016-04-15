@@ -724,13 +724,11 @@ static BOOL LKDBLogErrorEnable = NO;
 
     [self executeDB:^(FMDatabase* db) {
         FMResultSet* set = [db executeQuery:@"select count(name) from sqlite_master where type='table' and name=?", tableName];
-
         if ([set next]) {
             if ([set intForColumnIndex:0] > 0) {
                 isTableCreated = YES;
             }
         }
-
         [set close];
     }];
     return isTableCreated;
@@ -771,12 +769,13 @@ static BOOL LKDBLogErrorEnable = NO;
 
 - (void)rowCount:(Class)modelClass where:(id)where callback:(void (^)(NSInteger))callback
 {
-    if (callback) {
-        LKDBCode_Async_Begin
-        NSInteger result = [sself rowCountWithTableName:[modelClass getTableName] where:where];
-        callback(result);
-        LKDBCode_Async_End
+    if (!callback) {
+        return;
     }
+    LKDBCode_Async_Begin
+    NSInteger result = [sself rowCountWithTableName:[modelClass getTableName] where:where];
+    callback(result);
+    LKDBCode_Async_End
 }
 
 - (NSInteger)rowCountWithTableName:(NSString*)tableName where:(id)where
@@ -815,26 +814,27 @@ static BOOL LKDBLogErrorEnable = NO;
 
 - (void)search:(Class)modelClass where:(id)where orderBy:(NSString*)orderBy offset:(NSInteger)offset count:(NSInteger)count callback:(void (^)(NSMutableArray*))block
 {
-    if (block) {
-        LKDBCode_Async_Begin
-        LKDBQueryParams* params = [[LKDBQueryParams alloc] init];
-        params.toClass = modelClass;
-
-        if ([where isKindOfClass:[NSDictionary class]]) {
-            params.whereDic = where;
-        }
-        else if ([where isKindOfClass:[NSString class]]) {
-            params.where = where;
-        }
-
-        params.orderBy = orderBy;
-        params.offset = offset;
-        params.count = count;
-
-        NSMutableArray* array = [sself searchBaseWithParams:params];
-        block(array);
-        LKDBCode_Async_End
+    if (!block) {
+        return;
     }
+    LKDBCode_Async_Begin
+    LKDBQueryParams* params = [[LKDBQueryParams alloc] init];
+    params.toClass = modelClass;
+    
+    if ([where isKindOfClass:[NSDictionary class]]) {
+        params.whereDic = where;
+    }
+    else if ([where isKindOfClass:[NSString class]]) {
+        params.where = where;
+    }
+    
+    params.orderBy = orderBy;
+    params.offset = offset;
+    params.count = count;
+    
+    NSMutableArray* array = [sself searchBaseWithParams:params];
+    block(array);
+    LKDBCode_Async_End
 }
 
 - (NSMutableArray*)searchBaseWithParams:(LKDBQueryParams*)params
@@ -1252,7 +1252,6 @@ static BOOL LKDBLogErrorEnable = NO;
     if (block) {
         block(result);
     }
-
     LKDBCode_Async_End
 }
 
