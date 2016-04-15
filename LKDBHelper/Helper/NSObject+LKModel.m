@@ -342,16 +342,12 @@ static char LKModelBase_Key_Inserting;
     }
     else {
         NSMutableDictionary* toDic = [NSMutableDictionary dictionary];
-        NSArray* allKeys = dic.allKeys;
-        for (NSInteger i = 0; i < allKeys.count; i++) {
-            NSString* key = [allKeys objectAtIndex:i];
-            id obj = [dic objectForKey:key];
+        [dic enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
             id jsonObject = [self db_jsonObjectWithObject:obj];
             if (jsonObject) {
-                [toDic setObject:jsonObject forKey:key];
+                toDic[key] = jsonObject;
             }
-        }
-
+        }];
         if (toDic.count) {
             NSDictionary* bomb = @{ LKDB_TypeKey : LKDB_TypeKey_Combo, LKDB_ValueKey : toDic };
             return bomb;
@@ -444,14 +440,23 @@ static char LKModelBase_Key_Inserting;
 - (NSDictionary*)db_readInfoWithModel:(NSObject*)model class:(Class)clazz
 {
     NSMutableDictionary* jsonObject = [NSMutableDictionary dictionary];
-    [jsonObject setObject:LKDB_TypeKey_Model forKey:LKDB_TypeKey];
-    [jsonObject setObject:model.db_tableName forKey:LKDB_TableNameKey];
-    [jsonObject setObject:NSStringFromClass(clazz) forKey:LKDB_ClassKey];
-    [jsonObject setObject:@(model.rowid) forKey:LKDB_RowIdKey];
-
+    if (!model.db_tableName) {
+        NSAssert(NO, @"none table name");
+        return nil;
+    }
+    if (!NSStringFromClass(clazz)) {
+        NSAssert(NO, @"none class");
+        return nil;
+    }
+    
+    jsonObject[LKDB_TypeKey] = LKDB_TypeKey_Model;
+    jsonObject[LKDB_TableNameKey] = model.db_tableName;
+    jsonObject[LKDB_ClassKey] = NSStringFromClass(clazz);
+    jsonObject[LKDB_RowIdKey] = @(model.rowid);
+    
     NSDictionary* dic = [model db_getPrimaryKeysValues];
     if (dic.count > 0 && [NSJSONSerialization isValidJSONObject:dic]) {
-        [jsonObject setObject:dic forKey:LKDB_PValueKey];
+        jsonObject[LKDB_PValueKey] = dic;
     }
     return jsonObject;
 }
@@ -586,12 +591,9 @@ static char LKModelBase_Key_Inserting;
         }
     }
     else {
-        NSArray* allKeys = dic.allKeys;
+        
         NSMutableDictionary* toDic = [NSMutableDictionary dictionary];
-        for (NSInteger i = 0; i < allKeys.count; i++) {
-            NSString* key = [allKeys objectAtIndex:i];
-            id value = [dic objectForKey:key];
-
+        [dic enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
             id saveObj = value;
             if ([value isKindOfClass:[NSArray class]]) {
                 saveObj = [self db_objectWithArray:value];
@@ -599,11 +601,11 @@ static char LKModelBase_Key_Inserting;
             else if ([value isKindOfClass:[NSDictionary class]]) {
                 saveObj = [self db_objectWithDictionary:value];
             }
-
+            
             if (saveObj) {
-                [toDic setObject:saveObj forKey:key];
+                toDic[key] = saveObj;
             }
-        }
+        }];
         return toDic;
     }
     return nil;
@@ -637,7 +639,7 @@ static char LKModelBase_Key_Inserting;
     LKModelInfos* infos = [self.class getModelInfos];
     NSArray* array = infos.primaryKeys;
     NSMutableDictionary* dic = [NSMutableDictionary dictionary];
-    for (NSString* pname in array) {
+    [array enumerateObjectsUsingBlock:^(NSString* pname, NSUInteger idx, BOOL * _Nonnull stop) {
         LKDBProperty* property = [infos objectWithSqlColumnName:pname];
         id value = nil;
         if ([property.type isEqualToString:LKSQL_Mapping_UserCalculate]) {
@@ -647,9 +649,10 @@ static char LKModelBase_Key_Inserting;
             value = [self modelGetValue:property];
         }
         if (value) {
-            [dic setObject:value forKey:property.sqlColumnName];
+            dic[property.sqlColumnName] = value;
         }
-    }
+
+    }];
     return dic;
 }
 //主键值 是否为空
@@ -730,14 +733,14 @@ static char LKModelBase_Key_Inserting;
 
     LKModelInfos* infos;
     [lock lock];
-
-    infos = [oncePropertyDic objectForKey:NSStringFromClass(self)];
+    NSString* className = NSStringFromClass(self);
+    infos = [oncePropertyDic objectForKey:className];
     if (infos == nil) {
         NSMutableArray* pronames = [NSMutableArray array];
         NSMutableArray* protypes = [NSMutableArray array];
         NSDictionary* keymapping = [self getTableMapping];
 
-        if ([self isContainSelf] && [self class] != [NSObject class]) {
+        if ([self isContainSelf] && self != [NSObject class]) {
             [self getSelfPropertys:pronames protypes:protypes];
         }
 
@@ -765,8 +768,7 @@ static char LKModelBase_Key_Inserting;
         else {
             infos = [[LKModelInfos alloc] init];
         }
-
-        [oncePropertyDic setObject:infos forKey:NSStringFromClass(self)];
+        oncePropertyDic[className] = infos;
     }
 
     [lock unlock];

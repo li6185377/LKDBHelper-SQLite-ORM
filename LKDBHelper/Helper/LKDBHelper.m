@@ -606,8 +606,11 @@ static BOOL LKDBLogErrorEnable = NO;
 
 - (BOOL)_createTableWithModelClass:(Class)modelClass tableName:(NSString*)tableName
 {
+    if (!tableName.length) {
+        NSAssert(NO, @"none table name");
+        return NO;
+    }
     if ([self getTableCreatedWithTableName:tableName]) {
-
         // 已创建表 就跳过
         [_threadLock lock];
         if ([_createdTableNames containsObject:tableName] == NO) {
@@ -1068,7 +1071,6 @@ static BOOL LKDBLogErrorEnable = NO;
         if (bindingModel == nil) {
             continue;
         }
-        
         for (int i = 0; i < columnCount; i++) {
             NSString* sqlName = [set columnNameForIndex:i];
             LKDBProperty* property = [infos objectWithSqlColumnName:sqlName];
@@ -1100,7 +1102,6 @@ static BOOL LKDBLogErrorEnable = NO;
                 }
             }
         }
-
         bindingModel.db_tableName = tableName;
         [modelClass dbDidSeleted:bindingModel];
         [array addObject:bindingModel];
@@ -1574,28 +1575,20 @@ static BOOL LKDBLogErrorEnable = NO;
 @implementation LKDBHelper (Deprecated_Nonfunctional)
 -(void)setEncryptionKey:(NSString *)encryptionKey
 {
-    _encryptionKey = [encryptionKey copy];
-    if (_bindingQueue && (_encryptionKey.length > 0)) {
-        [self executeDB:^(FMDatabase* db) {
-            [db setKey:_encryptionKey];
-        }];
-    }
+    [self setKey:encryptionKey];
 }
 + (LKDBHelper*)sharedDBHelper
 {
     return [LKDBHelper getUsingLKDBHelper];
 }
-
 - (BOOL)createTableWithModelClass:(Class)modelClass
 {
     return [self _createTableWithModelClass:modelClass tableName:[modelClass getTableName]];
 }
-
 + (LKDBHelper*)getUsingLKDBHelper
 {
     return [[LKDBHelper alloc] init];
 }
-
 @end
 
 @implementation LKDBWeakObject
