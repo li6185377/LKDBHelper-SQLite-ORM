@@ -62,7 +62,7 @@
 @synthesize encryptionKey = _encryptionKey;
 
 static BOOL LKDBLogErrorEnable = NO;
-+(void)setLogError:(BOOL)logError
++ (void)setLogError:(BOOL)logError
 {
     if (LKDBLogErrorEnable == logError) {
         return;
@@ -72,8 +72,8 @@ static BOOL LKDBLogErrorEnable = NO;
     NSMutableArray* dbArray = [self dbHelperSingleArray];
     @synchronized(dbArray)
     {
-        [dbArray enumerateObjectsUsingBlock:^(LKDBWeakObject* weakObj, NSUInteger idx, BOOL *stop) {
-            [weakObj.obj executeDB:^(FMDatabase *db) {
+        [dbArray enumerateObjectsUsingBlock:^(LKDBWeakObject* weakObj, NSUInteger idx, BOOL* stop) {
+            [weakObj.obj executeDB:^(FMDatabase* db) {
                 db.logsErrors = LKDBLogErrorEnable;
             }];
         }];
@@ -222,6 +222,8 @@ static BOOL LKDBLogErrorEnable = NO;
         }
     }
 
+    [self.threadLock lock];
+
     self.dbPath = filePath;
     [self.bindingQueue close];
 
@@ -239,38 +241,43 @@ static BOOL LKDBLogErrorEnable = NO;
 
     ///reset encryptionKey
     _encryptionKey = nil;
-    
-    [_bindingQueue inDatabase:^(FMDatabase* db) {
+
+    [self.bindingQueue inDatabase:^(FMDatabase* db) {
         db.logsErrors = LKDBLogErrorEnable;
     }];
+    [self.threadLock unlock];
 }
 
 #pragma mark - core
 - (void)executeDB:(void (^)(FMDatabase* db))block
 {
-    [_threadLock lock];
+    if (!block) {
+        NSAssert(NO, @"block is nil!");
+        return;
+    }
+    [self.threadLock lock];
 
     if (self.usingdb != nil) {
         block(self.usingdb);
     }
     else {
-        if (_bindingQueue == nil) {
+        if (self.bindingQueue == nil) {
             self.bindingQueue = [[FMDatabaseQueue alloc] initWithPath:_dbPath];
-            [_bindingQueue inDatabase:^(FMDatabase* db) {
+            [self.bindingQueue inDatabase:^(FMDatabase* db) {
                 db.logsErrors = LKDBLogErrorEnable;
                 if (_encryptionKey.length > 0) {
                     [db setKey:_encryptionKey];
                 }
             }];
         }
-        [_bindingQueue inDatabase:^(FMDatabase* db) {
+        [self.bindingQueue inDatabase:^(FMDatabase* db) {
             self.usingdb = db;
             block(db);
             self.usingdb = nil;
         }];
     }
 
-    [_threadLock unlock];
+    [self.threadLock unlock];
 }
 
 - (BOOL)executeSQL:(NSString*)sql arguments:(NSArray*)args
@@ -375,7 +382,7 @@ static BOOL LKDBLogErrorEnable = NO;
         return @"";
     }
     NSMutableString* wherekey = [NSMutableString stringWithCapacity:0];
-    [dic enumerateKeysAndObjectsUsingBlock:^(NSString* key, id obj, BOOL *stop) {
+    [dic enumerateKeysAndObjectsUsingBlock:^(NSString* key, id obj, BOOL* stop) {
         if ([obj isKindOfClass:[NSArray class]]) {
             NSArray* vlist = obj;
             if (vlist.count == 0) {
@@ -385,7 +392,7 @@ static BOOL LKDBLogErrorEnable = NO;
                 [wherekey appendString:@" and"];
             }
             [wherekey appendFormat:@" %@ in(", key];
-            [vlist enumerateObjectsUsingBlock:^(id vlist_obj, NSUInteger idx, BOOL *stop) {
+            [vlist enumerateObjectsUsingBlock:^(id vlist_obj, NSUInteger idx, BOOL* stop) {
                 if (idx > 0) {
                     [wherekey appendString:@","];
                 }
@@ -450,37 +457,43 @@ static BOOL LKDBLogErrorEnable = NO;
 }
 
 #pragma mark - set key
--(BOOL)setKey:(NSString *)key
+- (BOOL)setKey:(NSString*)key
 {
+    [self.threadLock lock];
     _encryptionKey = [key copy];
     __block BOOL success = NO;
-    if (_bindingQueue && (_encryptionKey.length > 0)) {
-        [self executeDB:^(FMDatabase *db) {
-           success = [db setKey:_encryptionKey];
+    if (self.bindingQueue && _encryptionKey.length > 0) {
+        [self executeDB:^(FMDatabase* db) {
+            success = [db setKey:_encryptionKey];
         }];
     }
+    [self.threadLock unlock];
     return success;
 }
--(BOOL)rekey:(NSString *)key
+- (BOOL)rekey:(NSString*)key
 {
+    [self.threadLock lock];
     _encryptionKey = [key copy];
     __block BOOL success = NO;
-    if (_bindingQueue && (_encryptionKey.length > 0)) {
-        [self executeDB:^(FMDatabase *db) {
+    if (self.bindingQueue && _encryptionKey.length > 0) {
+        [self executeDB:^(FMDatabase* db) {
             success = [db rekey:_encryptionKey];
         }];
     }
+    [self.threadLock unlock];
     return success;
 }
--(NSString *)encryptionKey
+- (NSString*)encryptionKey
 {
-    return _encryptionKey;
+    [self.threadLock lock];
+    NSString* key = _encryptionKey;
+    [self.threadLock unlock];
+    return key;
 }
 #pragma mark - dealloc
 - (void)dealloc
 {
     NSArray* array = [LKDBHelper dbHelperSingleArray];
-
     @synchronized(array)
     {
         for (LKDBWeakObject* weakObject in array) {
@@ -772,10 +785,10 @@ static BOOL LKDBLogErrorEnable = NO;
     if (!callback) {
         return;
     }
-    LKDBCode_Async_Begin
+    LKDBCode_Async_Begin;
     NSInteger result = [sself rowCountWithTableName:[modelClass getTableName] where:where];
     callback(result);
-    LKDBCode_Async_End
+    LKDBCode_Async_End;
 }
 
 - (NSInteger)rowCountWithTableName:(NSString*)tableName where:(id)where
@@ -817,24 +830,24 @@ static BOOL LKDBLogErrorEnable = NO;
     if (!block) {
         return;
     }
-    LKDBCode_Async_Begin
+    LKDBCode_Async_Begin;
     LKDBQueryParams* params = [[LKDBQueryParams alloc] init];
     params.toClass = modelClass;
-    
+
     if ([where isKindOfClass:[NSDictionary class]]) {
         params.whereDic = where;
     }
     else if ([where isKindOfClass:[NSString class]]) {
         params.where = where;
     }
-    
+
     params.orderBy = orderBy;
     params.offset = offset;
     params.count = count;
-    
+
     NSMutableArray* array = [sself searchBaseWithParams:params];
     block(array);
-    LKDBCode_Async_End
+    LKDBCode_Async_End;
 }
 
 - (NSMutableArray*)searchBaseWithParams:(LKDBQueryParams*)params
@@ -920,10 +933,11 @@ static BOOL LKDBLogErrorEnable = NO;
 - (NSMutableArray*)searchWithParams:(LKDBQueryParams*)params
 {
     if (params.callback) {
-        LKDBCode_Async_Begin
+        LKDBCode_Async_Begin;
         NSMutableArray* array = [sself searchBaseWithParams:params];
         params.callback(array);
-        LKDBCode_Async_End return nil;
+        LKDBCode_Async_End;
+        return nil;
     }
     else {
         return [self searchBaseWithParams:params];
@@ -957,36 +971,36 @@ static BOOL LKDBLogErrorEnable = NO;
     return [self searchBaseWithParams:params];
 }
 
-- (NSString *)replaceTableNameIfNeeded:(NSString *)sql withModelClass:(Class)modelClass
+- (NSString*)replaceTableNameIfNeeded:(NSString*)sql withModelClass:(Class)modelClass
 {
-	// replace @t to model table name
-	NSString* replaceString = [[modelClass getTableName] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-	if ([sql hasSuffix:@" @t"]) {
-		sql = [sql stringByAppendingString:@" "];
-	}
-	if ([sql componentsSeparatedByString:@" from "].count == 2 && [sql rangeOfString:@" join "].length == 0) {
-		sql = [sql stringByReplacingOccurrencesOfString:@" from " withString:[NSString stringWithFormat:@",%@.rowid from ", replaceString]];
-	}
-	
-	sql = [sql stringByReplacingOccurrencesOfString:@" @t "
-										 withString:
-		   [NSString stringWithFormat:@" %@ ", replaceString]];
-	sql = [sql stringByReplacingOccurrencesOfString:@" @t,"
-										 withString:
-		   [NSString stringWithFormat:@" %@,", replaceString]];
-	sql = [sql stringByReplacingOccurrencesOfString:@",@t "
-										 withString:
-		   [NSString stringWithFormat:@",%@ ", replaceString]];
-	
-	return sql;
+    // replace @t to model table name
+    NSString* replaceString = [[modelClass getTableName] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if ([sql hasSuffix:@" @t"]) {
+        sql = [sql stringByAppendingString:@" "];
+    }
+    if ([sql componentsSeparatedByString:@" from "].count == 2 && [sql rangeOfString:@" join "].length == 0) {
+        sql = [sql stringByReplacingOccurrencesOfString:@" from " withString:[NSString stringWithFormat:@",%@.rowid from ", replaceString]];
+    }
+
+    sql = [sql stringByReplacingOccurrencesOfString:@" @t "
+                                         withString:
+                                             [NSString stringWithFormat:@" %@ ", replaceString]];
+    sql = [sql stringByReplacingOccurrencesOfString:@" @t,"
+                                         withString:
+                                             [NSString stringWithFormat:@" %@,", replaceString]];
+    sql = [sql stringByReplacingOccurrencesOfString:@",@t "
+                                         withString:
+                                             [NSString stringWithFormat:@",%@ ", replaceString]];
+
+    return sql;
 }
 
 - (NSMutableArray*)searchWithSQL:(NSString*)sql toClass:(Class)modelClass
 {
-	sql = [self replaceTableNameIfNeeded:sql withModelClass:modelClass];
+    sql = [self replaceTableNameIfNeeded:sql withModelClass:modelClass];
     return [self searchWithRAWSQL:sql toClass:modelClass];
 }
-		
+
 - (NSMutableArray*)searchWithRAWSQL:(NSString*)sql toClass:(Class)modelClass
 {
     __block NSMutableArray* results = nil;
@@ -1000,21 +1014,21 @@ static BOOL LKDBLogErrorEnable = NO;
 
 - (NSMutableArray*)search:(Class)modelClass withSQL:(NSString*)sql, ...
 {
-	va_list args;
-	va_start(args, sql);
-	
-	sql = [self replaceTableNameIfNeeded:sql withModelClass:modelClass];
-	
-	va_list *argsPoint = &args;
-	__block NSMutableArray *results = nil;
-	[self executeDB:^(FMDatabase *db) {
-		FMResultSet *set = [db executeQuery:sql withVAList:*argsPoint];
-		results = [self executeResult:set Class:modelClass tableName:nil];
-		[set close];
-	}];
-	
-	va_end(args);
-	return results;
+    va_list args;
+    va_start(args, sql);
+
+    sql = [self replaceTableNameIfNeeded:sql withModelClass:modelClass];
+
+    va_list* argsPoint = &args;
+    __block NSMutableArray* results = nil;
+    [self executeDB:^(FMDatabase* db) {
+        FMResultSet* set = [db executeQuery:sql withVAList:*argsPoint];
+        results = [self executeResult:set Class:modelClass tableName:nil];
+        [set close];
+    }];
+
+    va_end(args);
+    return results;
 }
 
 - (void)sqlString:(NSMutableString*)sql groupBy:(NSString*)groupBy orderBy:(NSString*)orderby offset:(NSInteger)offset count:(NSInteger)count
@@ -1118,14 +1132,12 @@ static BOOL LKDBLogErrorEnable = NO;
 
 - (void)insertToDB:(NSObject*)model callback:(void (^)(BOOL))block
 {
-    LKDBCode_Async_Begin
+    LKDBCode_Async_Begin;
     BOOL result = [sself insertBase:model];
-
     if (block) {
         block(result);
     }
-
-    LKDBCode_Async_End
+    LKDBCode_Async_End;
 }
 
 - (BOOL)insertWhenNotExists:(NSObject*)model
@@ -1139,14 +1151,12 @@ static BOOL LKDBLogErrorEnable = NO;
 
 - (void)insertWhenNotExists:(NSObject*)model callback:(void (^)(BOOL))block
 {
-    LKDBCode_Async_Begin
+    LKDBCode_Async_Begin;
     BOOL result = [sself insertWhenNotExists:model];
-
     if (block) {
         block(result);
     }
-
-    LKDBCode_Async_End
+    LKDBCode_Async_End;
 }
 
 - (BOOL)insertBase:(NSObject*)model
@@ -1246,13 +1256,12 @@ static BOOL LKDBLogErrorEnable = NO;
 
 - (void)updateToDB:(NSObject*)model where:(id)where callback:(void (^)(BOOL))block
 {
-    LKDBCode_Async_Begin
+    LKDBCode_Async_Begin;
     BOOL result = [sself updateToDBBase:model where:where];
-
     if (block) {
         block(result);
     }
-    LKDBCode_Async_End
+    LKDBCode_Async_End;
 }
 
 - (BOOL)updateToDBBase:(NSObject*)model where:(id)where
@@ -1371,14 +1380,12 @@ static BOOL LKDBLogErrorEnable = NO;
 
 - (void)deleteToDB:(NSObject*)model callback:(void (^)(BOOL))block
 {
-    LKDBCode_Async_Begin
+    LKDBCode_Async_Begin;
     BOOL isDeleted = [sself deleteToDBBase:model];
-
     if (block) {
         block(isDeleted);
     }
-
-    LKDBCode_Async_End
+    LKDBCode_Async_End;
 }
 
 - (BOOL)deleteToDBBase:(NSObject*)model
@@ -1431,14 +1438,12 @@ static BOOL LKDBLogErrorEnable = NO;
 
 - (void)deleteWithClass:(Class)modelClass where:(id)where callback:(void (^)(BOOL))block
 {
-    LKDBCode_Async_Begin
+    LKDBCode_Async_Begin;
     BOOL isDeleted = [sself deleteWithTableName:[modelClass getTableName] where:where];
-
     if (block) {
         block(isDeleted);
     }
-
-    LKDBCode_Async_End
+    LKDBCode_Async_End;
 }
 
 - (BOOL)deleteWithTableName:(NSString*)tableName where:(id)where
@@ -1572,7 +1577,7 @@ static BOOL LKDBLogErrorEnable = NO;
 @end
 
 @implementation LKDBHelper (Deprecated_Nonfunctional)
--(void)setEncryptionKey:(NSString *)encryptionKey
+- (void)setEncryptionKey:(NSString*)encryptionKey
 {
     [self setKey:encryptionKey];
 }
