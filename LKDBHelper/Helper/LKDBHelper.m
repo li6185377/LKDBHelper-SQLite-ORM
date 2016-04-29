@@ -552,9 +552,9 @@ static BOOL LKDBLogErrorEnable = NO;
 
     BOOL isDrop = [self executeSQL:dropTable arguments:nil];
 
-    [_threadLock lock];
-    [_createdTableNames removeObject:tableName];
-    [_threadLock unlock];
+    [self.threadLock lock];
+    [self.createdTableNames removeObject:tableName];
+    [self.threadLock unlock];
 
     return isDrop;
 }
@@ -625,11 +625,11 @@ static BOOL LKDBLogErrorEnable = NO;
     }
     if ([self getTableCreatedWithTableName:tableName]) {
         // 已创建表 就跳过
-        [_threadLock lock];
-        if ([_createdTableNames containsObject:tableName] == NO) {
-            [_createdTableNames addObject:tableName];
+        [self.threadLock lock];
+        if ([self.createdTableNames containsObject:tableName] == NO) {
+            [self.createdTableNames addObject:tableName];
         }
-        [_threadLock unlock];
+        [self.threadLock unlock];
 
         [self fixSqlColumnsWithClass:modelClass tableName:tableName];
         return YES;
@@ -716,12 +716,12 @@ static BOOL LKDBLogErrorEnable = NO;
 
     BOOL isCreated = [self executeSQL:createTableSQL arguments:nil];
 
-    [_threadLock lock];
+    [self.threadLock lock];
     if (isCreated) {
-        [_createdTableNames addObject:tableName];
+        [self.createdTableNames addObject:tableName];
         [modelClass dbDidCreateTable:self tableName:tableName];
     }
-    [_threadLock unlock];
+    [self.threadLock unlock];
 
     return isCreated;
 }
@@ -867,6 +867,13 @@ static BOOL LKDBLogErrorEnable = NO;
         LKErrorLog(@"you search pars:%@! \n tableName is empty", params.getAllPropertysString);
         return nil;
     }
+    
+    // 检测是否创建过表
+    [self.threadLock lock];
+    if ([self.createdTableNames containsObject:db_tableName] == NO) {
+        [self _createTableWithModelClass:params.toClass tableName:db_tableName];
+    }
+    [self.threadLock unlock];
 
     NSString* columnsString = nil;
     NSUInteger columnCount = 0;
@@ -1176,11 +1183,11 @@ static BOOL LKDBLogErrorEnable = NO;
     NSString* db_tableName = model.db_tableName ?: [modelClass getTableName];
 
     // 检测是否创建过表
-    [_threadLock lock];
-    if ([_createdTableNames containsObject:db_tableName] == NO) {
+    [self.threadLock lock];
+    if ([self.createdTableNames containsObject:db_tableName] == NO) {
         [self _createTableWithModelClass:modelClass tableName:db_tableName];
     }
-    [_threadLock unlock];
+    [self.threadLock unlock];
 
     // --
     LKModelInfos* infos = [modelClass getModelInfos];
@@ -1279,11 +1286,11 @@ static BOOL LKDBLogErrorEnable = NO;
     NSString* db_tableName = model.db_tableName ?: [modelClass getTableName];
 
     // 检测是否创建过表
-    [_threadLock lock];
-    if ([_createdTableNames containsObject:db_tableName] == NO) {
+    [self.threadLock lock];
+    if ([self.createdTableNames containsObject:db_tableName] == NO) {
         [self _createTableWithModelClass:modelClass tableName:db_tableName];
     }
-    [_threadLock unlock];
+    [self.threadLock unlock];
 
     LKModelInfos* infos = [modelClass getModelInfos];
 
