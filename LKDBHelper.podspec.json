@@ -9,8 +9,8 @@
     "Jianghuai Li": "li6185377@163.com"
   },
   "source": {
-    "git": "https://github.com/li6185377/LKDBHelper-SQLite-ORM.git",
-    "tag": "2.1.7"
+    "git": "https://github.com/goodbless/LKDBHelper-SQLite-ORM.git",
+    "branch": "gongke"
   },
   "platforms": {
     "ios": "4.3",
