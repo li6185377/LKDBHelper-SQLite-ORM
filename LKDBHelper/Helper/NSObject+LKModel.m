@@ -884,9 +884,6 @@ static char LKModelBase_Key_Inserting;
         [protypes addObject:propertyClassName];
     }
     free(properties);
-    if ([self isContainParent] && [self superclass] != [NSObject class]) {
-        [[self superclass] getSelfPropertys:pronames protypes:protypes];
-    }
 }
 
 #pragma mark - log all property
