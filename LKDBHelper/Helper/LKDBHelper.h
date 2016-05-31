@@ -6,9 +6,9 @@
 //  Copyright (c) 2012年 LJH. All rights reserved.
 //
 
-#import "FMDatabase.h"
-#import "FMDatabaseQueue.h"
 #import <Foundation/Foundation.h>
+#import <FMDB/FMDatabase.h>
+#import <FMDB/FMDatabaseQueue.h>
 
 #import "LKDBUtils.h"
 
