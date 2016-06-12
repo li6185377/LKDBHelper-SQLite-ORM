@@ -9,7 +9,7 @@
 #import "LKDBUtils.h"
 
 @interface LKDateFormatter : NSDateFormatter
-@property (strong, nonatomic) NSRecursiveLock* lock;
+@property (nonatomic, strong) NSRecursiveLock* lock;
 @end
 
 @implementation LKDateFormatter

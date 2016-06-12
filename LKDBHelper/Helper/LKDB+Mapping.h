@@ -39,27 +39,27 @@
 @interface LKDBProperty : NSObject
 
 ///保存的方式
-@property (readonly, copy, nonatomic) NSString* type;
+@property (nonatomic, copy, readonly) NSString* type;
 
 ///保存到数据的  列名
-@property (readonly, copy, nonatomic) NSString* sqlColumnName;
+@property (nonatomic, copy, readonly) NSString* sqlColumnName;
 ///保存到数据的类型
-@property (readonly, copy, nonatomic) NSString* sqlColumnType;
+@property (nonatomic, copy, readonly) NSString* sqlColumnType;
 
 ///属性名
-@property (readonly, copy, nonatomic) NSString* propertyName;
+@property (nonatomic, copy, readonly) NSString* propertyName;
 ///属性的类型
-@property (readonly, copy, nonatomic) NSString* propertyType;
+@property (nonatomic, copy, readonly) NSString* propertyType;
 
 ///属性的Protocol
 //@property(readonly,copy,nonatomic)NSString* propertyProtocol;
 
 ///creating table's column
-@property BOOL isUnique;
-@property BOOL isNotNull;
-@property (copy, nonatomic) NSString* defaultValue;
-@property (copy, nonatomic) NSString* checkValue;
-@property NSInteger length;
+@property (nonatomic, assign) BOOL isUnique;
+@property (nonatomic, assign) BOOL isNotNull;
+@property (nonatomic, copy) NSString* defaultValue;
+@property (nonatomic, copy) NSString* checkValue;
+@property (nonatomic, assign) NSInteger length;
 
 - (BOOL)isUserCalculate;
 @end
@@ -68,8 +68,8 @@
 
 - (id)initWithKeyMapping:(NSDictionary*)keyMapping propertyNames:(NSArray*)propertyNames propertyType:(NSArray*)propertyType primaryKeys:(NSArray*)primaryKeys;
 
-@property (readonly, nonatomic) NSUInteger count;
-@property (readonly, nonatomic) NSArray* primaryKeys;
+@property (nonatomic, readonly) NSUInteger count;
+@property (nonatomic, readonly) NSArray* primaryKeys;
 
 - (LKDBProperty*)objectWithIndex:(NSInteger)index;
 - (LKDBProperty*)objectWithPropertyName:(NSString*)propertyName;

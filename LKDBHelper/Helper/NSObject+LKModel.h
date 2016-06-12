@@ -26,17 +26,17 @@
 /**
  *  if you set it will use it as a table name
  */
-@property (copy, nonatomic) NSString* db_tableName;
+@property (nonatomic, copy) NSString* db_tableName;
 
 /**
  *  the model is inserting ..
  */
-@property (readonly, nonatomic) BOOL db_inserting;
+@property (nonatomic, readonly) BOOL db_inserting;
 
 /**
  *  sqlite comes with rowid
  */
-@property NSInteger rowid;
+@property (nonatomic, assign) NSInteger rowid;
 
 /**
  *  overwrite in your models, if your table has primary key

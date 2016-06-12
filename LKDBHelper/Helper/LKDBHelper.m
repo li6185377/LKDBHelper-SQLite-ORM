@@ -44,18 +44,15 @@
 @end
 
 @interface LKDBWeakObject : NSObject
-@property (LKDBWeak, nonatomic) LKDBHelper* obj;
+@property (nonatomic, LKDBWeak) LKDBHelper* obj;
 @end
 
 @interface LKDBHelper ()
-
-@property (strong, nonatomic) NSMutableArray* createdTableNames;
-
-@property (LKDBWeak, nonatomic) FMDatabase* usingdb;
-@property (strong, nonatomic) FMDatabaseQueue* bindingQueue;
-@property (copy, nonatomic) NSString* dbPath;
-
-@property (strong, nonatomic) NSRecursiveLock* threadLock;
+@property (nonatomic, LKDBWeak) FMDatabase* usingdb;
+@property (nonatomic, strong) FMDatabaseQueue* bindingQueue;
+@property (nonatomic, copy) NSString* dbPath;
+@property (nonatomic, strong) NSMutableArray* createdTableNames;
+@property (nonatomic, strong) NSRecursiveLock* threadLock;
 @end
 
 @implementation LKDBHelper
@@ -204,13 +201,12 @@ static BOOL LKDBLogErrorEnable = NO;
                                   withIntermediateDirectories:YES
                                                    attributes:attributes
                                                         error:&error];
-
             if (success == NO) {
                 LKErrorLog(@"create dir error: %@", error.debugDescription);
             }
         }
         else {
-/**
+            /**
              *  @brief  Disk I/O error when device is locked
              *          https://github.com/ccgus/fmdb/issues/262
              */
@@ -226,11 +222,11 @@ static BOOL LKDBLogErrorEnable = NO;
 
     self.dbPath = filePath;
     [self.bindingQueue close];
+    [self.createdTableNames removeAllObjects];
 
 #ifndef SQLITE_OPEN_FILEPROTECTION_NONE
 #define SQLITE_OPEN_FILEPROTECTION_NONE 0x00400000
 #endif
-
     self.bindingQueue = [[FMDatabaseQueue alloc] initWithPath:filePath
                                                         flags:SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FILEPROTECTION_NONE];
 #ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
@@ -238,7 +234,7 @@ static BOOL LKDBLogErrorEnable = NO;
         [fileManager setAttributes:@{ NSFileProtectionKey : NSFileProtectionNone } ofItemAtPath:filePath error:nil];
     }
 #endif
-
+    
     ///reset encryptionKey
     _encryptionKey = nil;
 
@@ -263,6 +259,7 @@ static BOOL LKDBLogErrorEnable = NO;
     else {
         if (self.bindingQueue == nil) {
             self.bindingQueue = [[FMDatabaseQueue alloc] initWithPath:_dbPath];
+            [self.createdTableNames removeAllObjects];
             [self.bindingQueue inDatabase:^(FMDatabase* db) {
                 db.logsErrors = LKDBLogErrorEnable;
                 if (_encryptionKey.length > 0) {

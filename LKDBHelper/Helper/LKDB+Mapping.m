@@ -23,13 +23,13 @@
 
 #pragma mark - 声明属性
 @interface LKDBProperty ()
-@property (copy, nonatomic) NSString* type;
+@property (nonatomic, copy) NSString* type;
 
-@property (copy, nonatomic) NSString* sqlColumnName;
-@property (copy, nonatomic) NSString* sqlColumnType;
+@property (nonatomic, copy) NSString* sqlColumnName;
+@property (nonatomic, copy) NSString* sqlColumnType;
 
-@property (copy, nonatomic) NSString* propertyName;
-@property (copy, nonatomic) NSString* propertyType;
+@property (nonatomic, copy) NSString* propertyName;
+@property (nonatomic, copy) NSString* propertyType;
 
 - (id)initWithType:(NSString*)type cname:(NSString*)cname ctype:(NSString*)ctype pname:(NSString*)pname ptype:(NSString*)ptype;
 @end

@@ -95,22 +95,22 @@ extern NSString* LKSQLTypeFromObjcType(NSString* objcType);
 @interface LKDBQueryParams : NSObject
 
 ///columns or array
-@property (strong, nonatomic) NSString* columns;
-@property (strong, nonatomic) NSArray* columnArray;
+@property (nonatomic, copy) NSString* columns;
+@property (nonatomic, copy) NSArray* columnArray;
 
-@property (strong, nonatomic) NSString* tableName;
+@property (nonatomic, copy) NSString* tableName;
 
 ///where or dic
-@property (strong, nonatomic) NSString* where;
-@property (strong, nonatomic) NSDictionary* whereDic;
+@property (nonatomic, copy) NSString* where;
+@property (nonatomic, copy) NSDictionary* whereDic;
 
-@property (strong, nonatomic) NSString* groupBy;
-@property (strong, nonatomic) NSString* orderBy;
+@property (nonatomic, copy) NSString* groupBy;
+@property (nonatomic, copy) NSString* orderBy;
 
-@property (assign, nonatomic) NSInteger offset;
-@property (assign, nonatomic) NSInteger count;
+@property (nonatomic, assign) NSInteger offset;
+@property (nonatomic, assign) NSInteger count;
 
-@property (assign, nonatomic) Class toClass;
+@property (nonatomic, assign) Class toClass;
 
-@property (copy, nonatomic) void (^callback)(NSMutableArray* results);
+@property (nonatomic, copy) void (^callback)(NSMutableArray* results);
 @end
