@@ -27,14 +27,14 @@ Requirements
 If you are using CocoaPods, then, just add this line to your PodFile<br>
 
 ```objective-c
-pod 'LKDBHelper', :head
+pod 'LKDBHelper'
 ```
 
 If you are using Encryption, Order can not be wrong<br>
 
 ```objective-c
-pod 'FMDB/SQLCipher',:head
-pod 'LKDBHelper',:head
+pod 'FMDB/SQLCipher'
+pod 'LKDBHelper'
 ```
 
 @property(strong,nonatomic)NSString* encryptionKey;
