@@ -106,7 +106,7 @@ pod 'LKDBHelper'
     test.blah = @[@"0",@[@1],@{@"2":@2},foreign];
     test.hoho = @{@"array":test.blah,@"foreign":foreign,@"normal":@123456,@"date":[NSDate date]};
     
-    //异步 插入第一条 数据   Insert the first
+    //同步 插入第一条 数据   Insert the first
     [test saveToDB];
     //or
     //[globalHelper insertToDB:test];
