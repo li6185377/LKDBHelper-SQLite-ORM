@@ -425,7 +425,7 @@ static char LKModelBase_Key_Inserting;
         jsonObject = [self db_readInfoWithModel:model class:clazz];
     }
     else {
-        if (model.db_inserting == NO && [clazz getModelInfos] > 0) {
+        if (model.db_inserting == NO && [clazz getModelInfos].count > 0) {
             BOOL success = [model saveToDB];
             if (success) {
                 jsonObject = [self db_readInfoWithModel:model class:clazz];
