@@ -1,2 +1,4 @@
-platform :osx,10.6
+platform :osx, 10.6
+target 'LKDB-Demo' do
 pod 'LKDBHelper'
+end

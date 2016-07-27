@@ -22,6 +22,7 @@ class LKTestForeign: LKTestForeignSuper {
 class LKTest: NSObject {
     var address:LKTestForeign?
     var name:NSString?
+    var url:NSURL?
     var age:Int = 0
     var isGirl:Bool = false
     var blah: NSArray?

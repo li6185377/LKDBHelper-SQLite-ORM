@@ -65,6 +65,7 @@
     
     test.name = @"zhan san";
     test.age = 16;
+    test.url = [NSURL URLWithString:@"http://xx"];
     
     //外键 foreign key
     test.address = foreign;

@@ -1,2 +1,4 @@
 platform :ios,4.3
+target 'iOS-Demo' do
 pod 'LKDBHelper'
+end

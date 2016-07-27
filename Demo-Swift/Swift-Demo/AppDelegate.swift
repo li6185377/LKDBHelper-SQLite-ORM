@@ -62,6 +62,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UITextViewDelegate {
         
         test.name = "zhan san"
         test.age = 16
+        test.url = NSURL(string: "http://zzzz");
         
         //外键  foreign key
         var foreign = LKTestForeign.init()
