@@ -28,6 +28,7 @@
 
 @property(strong,nonatomic) LKTestForeign* nestModel;
 
+@property(copy, nonatomic) NSURL* url;
 @property(copy,nonatomic)NSString* name;
 @property NSUInteger  age;
 @property BOOL isGirl;

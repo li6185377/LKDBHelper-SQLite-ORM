@@ -72,6 +72,7 @@
     LKTest* test = [[LKTest alloc]init];
     test.name = @"zhan san";
     test.age = 16;
+    test.url = [NSURL URLWithString:@"http://url"];
     
     //外键  foreign key
     LKTestForeign* foreign = [[LKTestForeign alloc]init];
