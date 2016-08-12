@@ -76,7 +76,6 @@
     
     //外键  foreign key
     LKTestForeign* foreign = [[LKTestForeign alloc]init];
-    foreign.address = @":asdasdasdsadasdsdas";
     foreign.postcode  = 123341;
     foreign.addid = 213214;
     
