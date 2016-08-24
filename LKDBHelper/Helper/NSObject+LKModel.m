@@ -23,6 +23,10 @@ static char LKModelBase_Key_RowID;
 static char LKModelBase_Key_TableName;
 static char LKModelBase_Key_Inserting;
 
+@interface LKDBHelper (LKDBHelper_LKModel)
++ (BOOL)nullIsEmpty;
+@end
+
 @implementation NSObject (LKModel)
 
 + (LKDBHelper*)getUsingLKDBHelper
@@ -322,7 +326,9 @@ static char LKModelBase_Key_Inserting;
         //不继续遍历
     }
     else if ([columnClass isSubclassOfClass:[NSString class]]) {
-        modelValue = [value copy];
+        if (![LKDBHelper nullIsEmpty] || value.length > 0) {
+            modelValue = [value copy];
+        }
     }
     else if ([columnClass isSubclassOfClass:[NSNumber class]]) {
         modelValue = [[LKDBUtils numberFormatter] numberFromString:value];

@@ -77,6 +77,15 @@ static BOOL LKDBLogErrorEnable = NO;
     }
 #endif
 }
+static BOOL LKDBNullIsEmptyString = NO;
++ (void)setNullToEmpty:(BOOL)empty
+{
+    LKDBNullIsEmptyString = empty;
+}
++ (BOOL)nullIsEmpty
+{
+    return LKDBNullIsEmptyString;
+}
 
 + (NSMutableArray*)dbHelperSingleArray
 {
@@ -595,12 +604,18 @@ static BOOL LKDBLogErrorEnable = NO;
                 if (property.defaultValue) {
                     [addColumePars appendFormat:@" %@ %@", LKSQL_Attribute_Default, property.defaultValue];
                 }
-
-                NSString* alertSQL = [NSString stringWithFormat:@"alter table %@ add column %@", tableName, addColumePars];
-                NSString* initColumnValue = [NSString stringWithFormat:@"update %@ set %@=%@", tableName, property.sqlColumnName, [property.sqlColumnType isEqualToString:LKSQL_Type_Text] ? @"null" : @"0"];
-
+                NSString *alertSQL = [NSString stringWithFormat:@"alter table %@ add column %@", tableName, addColumePars];
+                NSString *defaultValue = @"0";
+                if ([property.sqlColumnType isEqualToString:LKSQL_Type_Text]) {
+                    if (LKDBNullIsEmptyString) {
+                        defaultValue = @"";
+                    }
+                    else {
+                        defaultValue = @"null";
+                    }
+                }
+                NSString* initColumnValue = [NSString stringWithFormat:@"update %@ set %@=%@", tableName, property.sqlColumnName, defaultValue];
                 BOOL success = [db executeUpdate:alertSQL];
-
                 if (success) {
                     [db executeUpdate:initColumnValue];
                     [alterAddColumns addObject:property];
@@ -760,7 +775,12 @@ static BOOL LKDBLogErrorEnable = NO;
     }
 
     if (value == nil) {
-        value = [NSNull null];
+        if (LKDBNullIsEmptyString) {
+            value = @"";
+        }
+        else {
+            value = [NSNull null];
+        }
     }
     
     return value;

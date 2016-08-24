@@ -20,9 +20,14 @@
 @interface LKDBHelper : NSObject
 
 /**
- *  @brief 是否打印数据库出错日志 默认 NO
+ *  @brief Log error message, Default: NO
  */
 + (void)setLogError:(BOOL)logError;
+
+/**
+ *  @brief null is '' , Default: NO
+ */
++ (void)setNullToEmpty:(BOOL)empty;
 
 /**
  *	@brief  filepath the use of : "documents/db/" + fileName + ".db"
