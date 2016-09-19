@@ -124,7 +124,7 @@ static char LKModelBase_Key_Inserting;
         return nil;
     }
     else if ([value isKindOfClass:[NSString class]]) {
-        returnValue = value;
+        returnValue = [value copy];
     }
     else if ([value isKindOfClass:[NSNumber class]]) {
         returnValue = [[LKDBUtils numberFormatter] stringFromNumber:value];
@@ -327,7 +327,7 @@ static char LKModelBase_Key_Inserting;
     }
     else if ([columnClass isSubclassOfClass:[NSString class]]) {
         if (![LKDBHelper nullIsEmpty] || value.length > 0) {
-            modelValue = [value copy];
+            modelValue = [columnClass stringWithString:value];
         }
     }
     else if ([columnClass isSubclassOfClass:[NSNumber class]]) {
@@ -374,7 +374,20 @@ static char LKModelBase_Key_Inserting;
     }
     else {
         modelValue = [self db_modelWithJsonValue:value];
-        if (![modelValue isKindOfClass:columnClass]) {
+        BOOL isValid = NO;
+        if ([modelValue isKindOfClass:[NSArray class]] && [columnClass isSubclassOfClass:[NSArray class]]) {
+            isValid = YES;
+            modelValue = [columnClass arrayWithArray:modelValue];
+        }
+        else if ([modelValue isKindOfClass:[NSDictionary class]] && [columnClass isSubclassOfClass:[NSDictionary class]]) {
+            isValid = YES;
+            modelValue = [columnClass dictionaryWithDictionary:modelValue];
+        }
+        else if ([modelValue isKindOfClass:columnClass]) {
+            isValid = YES;
+        }
+        ///如果类型不对 则设置为空
+        if (!isValid) {
             modelValue = nil;
         }
     }
