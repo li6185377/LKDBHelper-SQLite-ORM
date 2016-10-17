@@ -20,20 +20,20 @@ class LKTestForeign: LKTestForeignSuper {
 }
 
 class LKTest: NSObject {
-    var address:LKTestForeign?
-    var name:NSString?
-    var url:NSURL?
-    var age:Int = 0
-    var isGirl:Bool = false
+    var address: LKTestForeign?
+    var name: String?
+    var url: URL?
+    var age: Int = 0
+    var isGirl: Bool = false
     var blah: NSArray?
-    var hoho:NSDictionary?
-    var like:u_char = 0
-    var img:UIImage?
-    var color:UIColor?
-    var frame:CGRect = CGRectZero
-    var size:CGSize = CGSizeZero
-    var range:NSRange = NSMakeRange(0, 0)
-    var point:CGPoint = CGPointZero
+    var hoho: NSDictionary?
+    var like: u_char = 0
+    var img: UIImage?
+    var color: UIColor?
+    var frame: CGRect = CGRect.zero
+    var size: CGSize = CGSize.zero
+    var range: NSRange = NSMakeRange(0, 0)
+    var point: CGPoint = CGPoint.zero
     
     override static func getPrimaryKey() -> String {
         return "name"
