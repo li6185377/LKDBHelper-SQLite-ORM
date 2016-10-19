@@ -184,6 +184,9 @@
     
     addText(@"休息2秒 结束 \n rest for 2 seconds at the end");
     
+    NSArray *array = [globalHelper searchWithSQL:@"select * from LKTestTable" toClass:nil];
+    NSLog(@"%@",array);
+    
     //异步 asynchronous
     [globalHelper search:[LKTest class] where:@{@"name":@"zhan san",@"blah":@[@"1",@"3",@"5"]} orderBy:nil offset:0 count:100 callback:^(NSMutableArray *array) {
         
