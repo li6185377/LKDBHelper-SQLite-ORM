@@ -49,7 +49,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UITextViewDelegate {
   
   func test() {
     self.add("示例 开始 example start \n\n")
-    let globalHelper = LKTest.getUsingLKDBHelper()!
+    let globalHelper = LKTest.getUsingLKDBHelper()
     
     ///删除所有表   delete all table
     globalHelper.dropAllTable()
@@ -68,7 +68,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UITextViewDelegate {
     let foreign = LKTestForeign.init()
     foreign.address = ":asdasdasdsadasdsdas"
     foreign.postcode = 123341
-    foreign.addid = 213214
+    foreign.addid = 213.12312
     
     test.address = foreign
     
@@ -89,26 +89,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UITextViewDelegate {
     
     //事物  transaction
     globalHelper.execute { (_helper) -> Bool in
-      
-      guard let helper = _helper else {
-        return false
-      }
-      test.name = "1"
-      var insertSucceed = helper.insert(toDB: test);
-      
-      test.name = "2"
-      insertSucceed = helper.insert(toDB: test);
-      
-      test.name = "1"
-      test.rowid = 0
-      insertSucceed = helper.insert(toDB: test);
-      
-      if insertSucceed == false {
-        return false
-      }
-      else {
-        return true
-      }
+        let helper = _helper
+        test.name = "1"
+        var insertSucceed = helper.insert(toDB: test);
+        
+        test.name = "2"
+        insertSucceed = helper.insert(toDB: test);
+        
+        test.name = "1"
+        test.rowid = 0
+        insertSucceed = helper.insert(toDB: test);
+        
+        if insertSucceed == false {
+            return false
+        }
+        else {
+            return true
+        }
     }
     
     self.add("同步插入 完成!  Insert completed synchronization")

@@ -12,11 +12,20 @@ import LKDBHelper
 class LKTestForeignSuper: NSObject {
     var address:NSString? = nil
     var postcode:Int = 0
+    
+    override var description: String {
+        return "address:\(address) postcode:\(postcode)";
+    }
 }
 
 class LKTestForeign: LKTestForeignSuper {
-    var addid:Int = 0
+    var addid:Float = 0
     var testModel:LKTest? = nil
+    
+    override var description: String {
+        let desc = super.description;
+        return desc + " addid:\(addid) testModel:\(testModel)";
+    }
 }
 
 class LKTest: NSObject {
