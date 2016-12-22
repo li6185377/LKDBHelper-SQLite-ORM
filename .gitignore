@@ -23,6 +23,7 @@ xcuserdata
 *.xcuserstate
 *.xcscmblueprint
 .idea
+.DS_Store
 
 ## Obj-C/Swift specific
 *.hmap
