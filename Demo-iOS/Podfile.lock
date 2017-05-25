@@ -2,7 +2,7 @@ PODS:
   - FMDB (2.6.2):
     - FMDB/standard (= 2.6.2)
   - FMDB/standard (2.6.2)
-  - LKDBHelper (2.4.1):
+  - LKDBHelper (2.4.2):
     - FMDB
 
 DEPENDENCIES:
@@ -10,12 +10,12 @@ DEPENDENCIES:
 
 EXTERNAL SOURCES:
   LKDBHelper:
-    :path: "../"
+    :path: ../
 
 SPEC CHECKSUMS:
   FMDB: 854a0341b4726e53276f2a8996f06f1b80f9259a
-  LKDBHelper: 531581fa6a7d0f14236cc028ce0d277bca73436a
+  LKDBHelper: ab67373b32f47463bf5f838d730f225824f4492a
 
 PODFILE CHECKSUM: fc4bc4781b371bfd5b721f772757085a673d5280
 
-COCOAPODS: 1.2.0
+COCOAPODS: 1.1.1
