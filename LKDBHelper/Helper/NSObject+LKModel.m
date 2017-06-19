@@ -6,8 +6,8 @@
 //  Copyright (c) 2013年 ljh. All rights reserved.
 //
 
-#import "NSObject+LKModel.h"
 #import "LKDBHelper.h"
+#import "NSObject+LKModel.h"
 #import <objc/runtime.h>
 
 #ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
@@ -123,60 +123,47 @@ static char LKModelBase_Key_Inserting;
     id returnValue = value;
     if (value == nil) {
         return nil;
-    }
-    else if ([value isKindOfClass:[NSString class]]) {
+    } else if ([value isKindOfClass:[NSString class]]) {
         returnValue = [value copy];
-    }
-    else if ([value isKindOfClass:[NSNumber class]]) {
+    } else if ([value isKindOfClass:[NSNumber class]]) {
         returnValue = [[LKDBUtils numberFormatter] stringFromNumber:value];
-    }
-    else if ([value isKindOfClass:[NSDate class]]) {
+    } else if ([value isKindOfClass:[NSDate class]]) {
         NSDateFormatter *formatter = [self.class getModelDateFormatter];
         if (formatter) {
             returnValue = [formatter stringFromDate:value];
-        }
-        else {
+        } else {
             returnValue = [LKDBUtils stringWithDate:value];
         }
         returnValue = [returnValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    }
-    else if ([value isKindOfClass:[LKDBColor class]]) {
+    } else if ([value isKindOfClass:[LKDBColor class]]) {
         LKDBColor *color = value;
         CGFloat r, g, b, a;
         [color getRed:&r green:&g blue:&b alpha:&a];
         returnValue = [NSString stringWithFormat:@"%.3f,%.3f,%.3f,%.3f", r, g, b, a];
-    }
-    else if ([value isKindOfClass:[NSValue class]]) {
+    } else if ([value isKindOfClass:[NSValue class]]) {
         NSString *columnType = property.propertyType;
 #ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
         if ([columnType isEqualToString:@"CGRect"]) {
             returnValue = NSStringFromCGRect([value CGRectValue]);
-        }
-        else if ([columnType isEqualToString:@"CGPoint"]) {
+        } else if ([columnType isEqualToString:@"CGPoint"]) {
             returnValue = NSStringFromCGPoint([value CGPointValue]);
-        }
-        else if ([columnType isEqualToString:@"CGSize"]) {
+        } else if ([columnType isEqualToString:@"CGSize"]) {
             returnValue = NSStringFromCGSize([value CGSizeValue]);
-        }
-        else if ([columnType isEqualToString:@"_NSRange"]) {
+        } else if ([columnType isEqualToString:@"_NSRange"]) {
             returnValue = NSStringFromRange([value rangeValue]);
         }
 #else
         if ([columnType hasSuffix:@"Rect"]) {
             returnValue = NSStringFromRect([value rectValue]);
-        }
-        else if ([columnType hasSuffix:@"Point"]) {
+        } else if ([columnType hasSuffix:@"Point"]) {
             returnValue = NSStringFromPoint([value pointValue]);
-        }
-        else if ([columnType hasSuffix:@"Size"]) {
+        } else if ([columnType hasSuffix:@"Size"]) {
             returnValue = NSStringFromSize([value sizeValue]);
-        }
-        else if ([columnType hasSuffix:@"Range"]) {
+        } else if ([columnType hasSuffix:@"Range"]) {
             returnValue = NSStringFromRange([value rangeValue]);
         }
 #endif
-    }
-    else if ([value isKindOfClass:[LKDBImage class]]) {
+    } else if ([value isKindOfClass:[LKDBImage class]]) {
         long random = arc4random();
         long date = [[NSDate date] timeIntervalSince1970];
         NSString *filename = [NSString stringWithFormat:@"img%ld%ld", date & 0xFFFFF, random & 0xFFF];
@@ -193,8 +180,7 @@ static char LKModelBase_Key_Inserting;
                 atomically:YES];
 
         returnValue = filename;
-    }
-    else if ([value isKindOfClass:[NSData class]]) {
+    } else if ([value isKindOfClass:[NSData class]]) {
         long random = arc4random();
         long date = [[NSDate date] timeIntervalSince1970];
         NSString *filename = [NSString stringWithFormat:@"data%ld%ld", date & 0xFFFFF, random & 0xFFF];
@@ -202,18 +188,14 @@ static char LKModelBase_Key_Inserting;
         [value writeToFile:[self.class getDBDataPathWithName:filename] atomically:YES];
 
         returnValue = filename;
-    }
-    else if ([value isKindOfClass:[NSURL class]]) {
+    } else if ([value isKindOfClass:[NSURL class]]) {
         returnValue = [value absoluteString];
-    }
-    else {
+    } else {
         if ([value isKindOfClass:[NSArray class]]) {
             returnValue = [self db_jsonObjectFromArray:value];
-        }
-        else if ([value isKindOfClass:[NSDictionary class]]) {
+        } else if ([value isKindOfClass:[NSDictionary class]]) {
             returnValue = [self db_jsonObjectFromDictionary:value];
-        }
-        else {
+        } else {
             returnValue = [self db_jsonObjectFromModel:value];
         }
         returnValue = [self db_jsonStringFromObject:returnValue];
@@ -237,8 +219,7 @@ static char LKModelBase_Key_Inserting;
             if (value) {
                 modelValue = [[LKDBUtils numberFormatter] numberFromString:value];
             }
-        }
-        else if ([LKSQL_Convert_IntType rangeOfString:columnType].location != NSNotFound) {
+        } else if ([LKSQL_Convert_IntType rangeOfString:columnType].location != NSNotFound) {
             if (value) {
                 modelValue = [[LKDBUtils numberFormatter] numberFromString:value];
             }
@@ -248,35 +229,28 @@ static char LKModelBase_Key_Inserting;
             if (value) {
                 CGRect rect = CGRectFromString(value);
                 modelValue = [NSValue valueWithCGRect:rect];
-            }
-            else {
+            } else {
                 modelValue = [NSValue valueWithCGRect:CGRectZero];
             }
-        }
-        else if ([columnType isEqualToString:@"CGPoint"]) {
+        } else if ([columnType isEqualToString:@"CGPoint"]) {
             if (value) {
                 CGPoint point = CGPointFromString(value);
                 modelValue = [NSValue valueWithCGPoint:point];
-            }
-            else {
+            } else {
                 modelValue = [NSValue valueWithCGPoint:CGPointZero];
             }
-        }
-        else if ([columnType isEqualToString:@"CGSize"]) {
+        } else if ([columnType isEqualToString:@"CGSize"]) {
             if (value) {
                 CGSize size = CGSizeFromString(value);
                 modelValue = [NSValue valueWithCGSize:size];
-            }
-            else {
+            } else {
                 modelValue = [NSValue valueWithCGSize:CGSizeZero];
             }
-        }
-        else if ([columnType isEqualToString:@"_NSRange"]) {
+        } else if ([columnType isEqualToString:@"_NSRange"]) {
             if (value) {
                 NSRange range = NSRangeFromString(value);
                 modelValue = [NSValue valueWithRange:range];
-            }
-            else {
+            } else {
                 modelValue = [NSValue valueWithRange:NSMakeRange(0, 0)];
             }
         }
@@ -285,35 +259,28 @@ static char LKModelBase_Key_Inserting;
             if (value) {
                 NSRect rect = NSRectFromString(value);
                 modelValue = [NSValue valueWithRect:rect];
-            }
-            else {
+            } else {
                 modelValue = [NSValue valueWithRect:NSZeroRect];
             }
-        }
-        else if ([columnType hasSuffix:@"Point"]) {
+        } else if ([columnType hasSuffix:@"Point"]) {
             if (value) {
                 NSPoint point = NSPointFromString(value);
                 modelValue = [NSValue valueWithPoint:point];
-            }
-            else {
+            } else {
                 modelValue = [NSValue valueWithPoint:NSZeroPoint];
             }
-        }
-        else if ([columnType hasSuffix:@"Size"]) {
+        } else if ([columnType hasSuffix:@"Size"]) {
             if (value) {
                 NSSize size = NSSizeFromString(value);
                 modelValue = [NSValue valueWithSize:size];
-            }
-            else {
+            } else {
                 modelValue = [NSValue valueWithSize:NSZeroSize];
             }
-        }
-        else if ([columnType hasSuffix:@"Range"]) {
+        } else if ([columnType hasSuffix:@"Range"]) {
             if (value) {
                 NSRange range = NSRangeFromString(value);
                 modelValue = [NSValue valueWithRange:range];
-            }
-            else {
+            } else {
                 modelValue = [NSValue valueWithRange:NSMakeRange(0, 0)];
             }
         }
@@ -322,29 +289,23 @@ static char LKModelBase_Key_Inserting;
         if (modelValue == nil) {
             modelValue = @0;
         }
-    }
-    else if (!value || ![value isKindOfClass:[NSString class]]) {
+    } else if (!value || ![value isKindOfClass:[NSString class]]) {
         //不继续遍历
-    }
-    else if ([columnClass isSubclassOfClass:[NSString class]]) {
+    } else if ([columnClass isSubclassOfClass:[NSString class]]) {
         if (![LKDBHelper nullIsEmpty] || value.length > 0) {
             modelValue = [columnClass stringWithString:value];
         }
-    }
-    else if ([columnClass isSubclassOfClass:[NSNumber class]]) {
+    } else if ([columnClass isSubclassOfClass:[NSNumber class]]) {
         modelValue = [[LKDBUtils numberFormatter] numberFromString:value];
-    }
-    else if ([columnClass isSubclassOfClass:[NSDate class]]) {
+    } else if ([columnClass isSubclassOfClass:[NSDate class]]) {
         NSString *datestr = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSDateFormatter *formatter = [self.class getModelDateFormatter];
         if (formatter) {
             modelValue = [formatter dateFromString:datestr];
-        }
-        else {
+        } else {
             modelValue = [LKDBUtils dateWithString:datestr];
         }
-    }
-    else if ([columnClass isSubclassOfClass:[LKDBColor class]]) {
+    } else if ([columnClass isSubclassOfClass:[LKDBColor class]]) {
         NSString *colorString = value;
         NSArray *array = [colorString componentsSeparatedByString:@","];
         float r, g, b, a;
@@ -352,39 +313,33 @@ static char LKModelBase_Key_Inserting;
         g = [[array objectAtIndex:1] floatValue];
         b = [[array objectAtIndex:2] floatValue];
         a = [[array objectAtIndex:3] floatValue];
-        
+
         modelValue = [LKDBColor colorWithRed:r green:g blue:b alpha:a];
-    }
-    else if ([columnClass isSubclassOfClass:[LKDBImage class]]) {
+    } else if ([columnClass isSubclassOfClass:[LKDBImage class]]) {
         NSString *filename = value;
         NSString *filepath = [self.class getDBImagePathWithName:filename];
         if ([LKDBUtils isFileExists:filepath]) {
             modelValue = [[LKDBImage alloc] initWithContentsOfFile:filepath];
         }
-    }
-    else if ([columnClass isSubclassOfClass:[NSData class]]) {
+    } else if ([columnClass isSubclassOfClass:[NSData class]]) {
         NSString *filename = value;
         NSString *filepath = [self.class getDBDataPathWithName:filename];
         if ([LKDBUtils isFileExists:filepath]) {
             modelValue = [NSData dataWithContentsOfFile:filepath];
         }
-    }
-    else if ([columnClass isSubclassOfClass:[NSURL class]]) {
+    } else if ([columnClass isSubclassOfClass:[NSURL class]]) {
         NSString *urlString = value;
         modelValue = [NSURL URLWithString:urlString];
-    }
-    else {
+    } else {
         modelValue = [self db_modelWithJsonValue:value];
         BOOL isValid = NO;
         if ([modelValue isKindOfClass:[NSArray class]] && [columnClass isSubclassOfClass:[NSArray class]]) {
             isValid = YES;
             modelValue = [columnClass arrayWithArray:modelValue];
-        }
-        else if ([modelValue isKindOfClass:[NSDictionary class]] && [columnClass isSubclassOfClass:[NSDictionary class]]) {
+        } else if ([modelValue isKindOfClass:[NSDictionary class]] && [columnClass isSubclassOfClass:[NSDictionary class]]) {
             isValid = YES;
             modelValue = [columnClass dictionaryWithDictionary:modelValue];
-        }
-        else if ([modelValue isKindOfClass:columnClass]) {
+        } else if ([modelValue isKindOfClass:columnClass]) {
             isValid = YES;
         }
         ///如果类型不对 则设置为空
@@ -399,19 +354,18 @@ static char LKModelBase_Key_Inserting;
 - (id)db_jsonObjectFromDictionary:(NSDictionary *)dic
 {
     if ([NSJSONSerialization isValidJSONObject:dic]) {
-        NSDictionary *bomb = @{ LKDB_TypeKey : LKDB_TypeKey_JSON, LKDB_ValueKey : dic };
+        NSDictionary *bomb = @{LKDB_TypeKey: LKDB_TypeKey_JSON, LKDB_ValueKey: dic};
         return bomb;
-    }
-    else {
+    } else {
         NSMutableDictionary *toDic = [NSMutableDictionary dictionary];
-        [dic enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        [dic enumerateKeysAndObjectsUsingBlock:^(id _Nonnull key, id _Nonnull obj, BOOL *_Nonnull stop) {
             id jsonObject = [self db_jsonObjectWithObject:obj];
             if (jsonObject) {
                 toDic[key] = jsonObject;
             }
         }];
         if (toDic.count) {
-            NSDictionary *bomb = @{ LKDB_TypeKey : LKDB_TypeKey_Combo, LKDB_ValueKey : toDic };
+            NSDictionary *bomb = @{LKDB_TypeKey: LKDB_TypeKey_Combo, LKDB_ValueKey: toDic};
             return bomb;
         }
     }
@@ -420,10 +374,9 @@ static char LKModelBase_Key_Inserting;
 - (id)db_jsonObjectFromArray:(NSArray *)array
 {
     if ([NSJSONSerialization isValidJSONObject:array]) {
-        NSDictionary *bomb = @{ LKDB_TypeKey : LKDB_TypeKey_JSON, LKDB_ValueKey : array };
+        NSDictionary *bomb = @{LKDB_TypeKey: LKDB_TypeKey_JSON, LKDB_ValueKey: array};
         return bomb;
-    }
-    else {
+    } else {
         NSMutableArray *toArray = [NSMutableArray array];
         NSInteger count = array.count;
         for (NSInteger i = 0; i < count; i++) {
@@ -435,7 +388,7 @@ static char LKModelBase_Key_Inserting;
         }
 
         if (toArray.count) {
-            NSDictionary *bomb = @{ LKDB_TypeKey : LKDB_TypeKey_Combo, LKDB_ValueKey : toArray };
+            NSDictionary *bomb = @{LKDB_TypeKey: LKDB_TypeKey_Combo, LKDB_ValueKey: toArray};
             return bomb;
         }
     }
@@ -447,28 +400,23 @@ static char LKModelBase_Key_Inserting;
     id jsonObject = nil;
     if ([obj isKindOfClass:[NSString class]] || [obj isKindOfClass:[NSNumber class]]) {
         jsonObject = obj;
-    }
-    else if ([obj isKindOfClass:[NSDate class]]) {
+    } else if ([obj isKindOfClass:[NSDate class]]) {
         NSString *dateString = nil;
         NSDateFormatter *formatter = [self.class getModelDateFormatter];
         if (formatter) {
             dateString = [formatter stringFromDate:obj];
-        }
-        else {
+        } else {
             dateString = [LKDBUtils stringWithDate:obj];
         }
         dateString = [dateString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         if (dateString.length > 0) {
-            jsonObject = @{ LKDB_TypeKey : LKDB_TypeKey_Date, LKDB_ValueKey : dateString };
+            jsonObject = @{LKDB_TypeKey: LKDB_TypeKey_Date, LKDB_ValueKey: dateString};
         }
-    }
-    else if ([obj isKindOfClass:[NSArray class]]) {
+    } else if ([obj isKindOfClass:[NSArray class]]) {
         jsonObject = [self db_jsonObjectFromArray:obj];
-    }
-    else if ([obj isKindOfClass:[NSDictionary class]]) {
+    } else if ([obj isKindOfClass:[NSDictionary class]]) {
         jsonObject = [self db_jsonObjectFromArray:obj];
-    }
-    else {
+    } else {
         jsonObject = [self db_jsonObjectFromModel:obj];
     }
 
@@ -485,15 +433,13 @@ static char LKModelBase_Key_Inserting;
     if (model.rowid > 0) {
         [model updateToDB];
         jsonObject = [self db_readInfoWithModel:model class:clazz];
-    }
-    else {
+    } else {
         if (model.db_inserting == NO && [clazz getModelInfos].count > 0) {
             BOOL success = [model saveToDB];
             if (success) {
                 jsonObject = [self db_readInfoWithModel:model class:clazz];
             }
-        }
-        else {
+        } else {
             NSAssert(NO, @"目前LKDB 还不支持 循环引用。  比如 A 持有 B，   B 持有 A，这种的存储");
         }
     }
@@ -510,12 +456,12 @@ static char LKModelBase_Key_Inserting;
         NSAssert(NO, @"none class");
         return nil;
     }
-    
+
     jsonObject[LKDB_TypeKey] = LKDB_TypeKey_Model;
     jsonObject[LKDB_TableNameKey] = model.db_tableName;
     jsonObject[LKDB_ClassKey] = NSStringFromClass(clazz);
     jsonObject[LKDB_RowIdKey] = @(model.rowid);
-    
+
     NSDictionary *dic = [model db_getPrimaryKeysValues];
     if (dic.count > 0 && [NSJSONSerialization isValidJSONObject:dic]) {
         jsonObject[LKDB_PValueKey] = dic;
@@ -523,7 +469,7 @@ static char LKModelBase_Key_Inserting;
     return jsonObject;
 }
 
-- (NSString *)db_jsonStringFromObject:(NSObject *)jsonObject
+    - (NSString *)db_jsonStringFromObject : (NSObject *)jsonObject
 {
     if (jsonObject && [NSJSONSerialization isValidJSONObject:jsonObject]) {
         NSData *data = [NSJSONSerialization dataWithJSONObject:jsonObject options:0 error:nil];
@@ -539,8 +485,7 @@ static char LKModelBase_Key_Inserting;
     NSData *jsonData = nil;
     if ([value isKindOfClass:[NSString class]]) {
         jsonData = [value dataUsingEncoding:NSUTF8StringEncoding];
-    }
-    else if ([value isKindOfClass:[NSData class]]) {
+    } else if ([value isKindOfClass:[NSData class]]) {
         jsonData = value;
     }
 
@@ -559,8 +504,7 @@ static char LKModelBase_Key_Inserting;
         id value = [array objectAtIndex:i];
         if ([value isKindOfClass:[NSDictionary class]]) {
             value = [self db_objectWithDictionary:value];
-        }
-        else if ([value isKindOfClass:[NSArray class]]) {
+        } else if ([value isKindOfClass:[NSArray class]]) {
             value = [self db_objectWithArray:value];
         }
 
@@ -592,8 +536,7 @@ static char LKModelBase_Key_Inserting;
             NSInteger result = [[[clazz getUsingLKDBHelper] executeScalarWithSQL:rowCountWhere arguments:nil] integerValue];
             if (result > 0) {
                 where = [NSString stringWithFormat:@"select rowid,* from %@ where rowid=%ld limit 1", tableName, (long)rowid];
-            }
-            else {
+            } else {
                 NSDictionary *pv = [dic objectForKey:LKDB_PValueKey];
                 if (pv.count > 0) {
                     BOOL isNeedAddDot = NO;
@@ -624,46 +567,38 @@ static char LKModelBase_Key_Inserting;
                     return result;
                 }
             }
-        }
-        else if ([type isEqualToString:LKDB_TypeKey_JSON]) {
+        } else if ([type isEqualToString:LKDB_TypeKey_JSON]) {
             id value = [dic objectForKey:LKDB_ValueKey];
             return value;
-        }
-        else if ([type isEqualToString:LKDB_TypeKey_Combo]) {
+        } else if ([type isEqualToString:LKDB_TypeKey_Combo]) {
             id value = [dic objectForKey:LKDB_ValueKey];
             if ([value isKindOfClass:[NSArray class]]) {
                 return [self db_objectWithArray:value];
-            }
-            else if ([value isKindOfClass:[NSDictionary class]]) {
+            } else if ([value isKindOfClass:[NSDictionary class]]) {
                 return [self db_objectWithDictionary:value];
-            }
-            else {
+            } else {
                 return value;
             }
-        }
-        else if ([type isEqualToString:LKDB_TypeKey_Date]) {
+        } else if ([type isEqualToString:LKDB_TypeKey_Date]) {
             NSString *datestr = [dic objectForKey:LKDB_ValueKey];
             NSDateFormatter *formatter = [self.class getModelDateFormatter];
             if (formatter) {
                 return [formatter dateFromString:datestr];
-            }
-            else {
+            } else {
                 return [LKDBUtils dateWithString:datestr];
             }
         }
-    }
-    else {
-        
+    } else {
+
         NSMutableDictionary *toDic = [NSMutableDictionary dictionary];
-        [dic enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
+        [dic enumerateKeysAndObjectsUsingBlock:^(id _Nonnull key, id _Nonnull value, BOOL *_Nonnull stop) {
             id saveObj = value;
             if ([value isKindOfClass:[NSArray class]]) {
                 saveObj = [self db_objectWithArray:value];
-            }
-            else if ([value isKindOfClass:[NSDictionary class]]) {
+            } else if ([value isKindOfClass:[NSDictionary class]]) {
                 saveObj = [self db_objectWithDictionary:value];
             }
-            
+
             if (saveObj) {
                 toDic[key] = saveObj;
             }
@@ -701,13 +636,12 @@ static char LKModelBase_Key_Inserting;
     LKModelInfos *infos = [self.class getModelInfos];
     NSArray *array = infos.primaryKeys;
     NSMutableDictionary *dic = [NSMutableDictionary dictionary];
-    [array enumerateObjectsUsingBlock:^(NSString *pname, NSUInteger idx, BOOL * _Nonnull stop) {
+    [array enumerateObjectsUsingBlock:^(NSString *pname, NSUInteger idx, BOOL *_Nonnull stop) {
         LKDBProperty *property = [infos objectWithSqlColumnName:pname];
         id value = nil;
         if ([property.type isEqualToString:LKSQL_Mapping_UserCalculate]) {
             value = [self userGetValueForModel:property];
-        }
-        else {
+        } else {
             value = [self modelGetValue:property];
         }
         if (value) {
@@ -740,8 +674,7 @@ static char LKModelBase_Key_Inserting;
                     return NO;
             }
             return YES;
-        }
-        else {
+        } else {
             return (pkvalue == nil);
         }
     }
@@ -762,8 +695,7 @@ static char LKModelBase_Key_Inserting;
     if (property) {
         if ([property.type isEqualToString:LKSQL_Mapping_UserCalculate]) {
             return [self userGetValueForModel:property];
-        }
-        else {
+        } else {
             return [self modelGetValue:property];
         }
     }
@@ -826,8 +758,7 @@ static char LKModelBase_Key_Inserting;
         }
         if (pronames.count > 0) {
             infos = [[LKModelInfos alloc] initWithKeyMapping:keymapping propertyNames:pronames propertyType:protypes primaryKeys:pkArray];
-        }
-        else {
+        } else {
             infos = [[LKModelInfos alloc] init];
         }
         oncePropertyDic[className] = infos;
@@ -907,32 +838,25 @@ static char LKModelBase_Key_Inserting;
                     }
                 }
             }
-        }
-        else if ([propertyType hasPrefix:@"T{"]) {
+        } else if ([propertyType hasPrefix:@"T{"]) {
             NSRange range = [propertyType rangeOfString:@"="];
             if (range.location > 2 && range.location <= propertyType.length) {
                 range = NSMakeRange(2, range.location - 2);
                 propertyClassName = [propertyType substringWithRange:range];
             }
-        }
-        else {
+        } else {
             propertyType = [propertyType lowercaseString];
             if ([propertyType hasPrefix:@"ti"] || [propertyType hasPrefix:@"tb"]) {
                 propertyClassName = @"int";
-            }
-            else if ([propertyType hasPrefix:@"tf"]) {
+            } else if ([propertyType hasPrefix:@"tf"]) {
                 propertyClassName = @"float";
-            }
-            else if ([propertyType hasPrefix:@"td"]) {
+            } else if ([propertyType hasPrefix:@"td"]) {
                 propertyClassName = @"double";
-            }
-            else if ([propertyType hasPrefix:@"tl"] || [propertyType hasPrefix:@"tq"]) {
+            } else if ([propertyType hasPrefix:@"tl"] || [propertyType hasPrefix:@"tq"]) {
                 propertyClassName = @"long";
-            }
-            else if ([propertyType hasPrefix:@"tc"]) {
+            } else if ([propertyType hasPrefix:@"tc"]) {
                 propertyClassName = @"char";
-            }
-            else if ([propertyType hasPrefix:@"ts"]) {
+            } else if ([propertyType hasPrefix:@"ts"]) {
                 propertyClassName = @"short";
             }
         }

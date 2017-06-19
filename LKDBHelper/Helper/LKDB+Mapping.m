@@ -74,8 +74,7 @@
     LKDBProperty *property = [infos objectWithSqlColumnName:columnName];
     if (property) {
         [property enableUserCalculate];
-    }
-    else {
+    } else {
         [infos addDBPropertyWithType:LKSQL_Mapping_UserCalculate cname:columnName ctype:LKSQL_Type_Text pname:columnName ptype:@"NSString"];
     }
 }
@@ -115,11 +114,9 @@
     if (column) {
         [infos updateProperty:column propertyName:propertyName];
         column.propertyType = property.propertyType;
-    }
-    else if ([property.sqlColumnName isEqualToString:property.propertyName]) {
+    } else if ([property.sqlColumnName isEqualToString:property.propertyName]) {
         [infos updateProperty:property sqlColumnName:columnName];
-    }
-    else {
+    } else {
         [infos addDBPropertyWithType:LKSQL_Mapping_Binding cname:columnName ctype:LKSQL_Type_Text pname:propertyName ptype:property.propertyType];
     }
 }
@@ -169,14 +166,12 @@
                 if ([mappingValue isEqualToString:LKSQL_Mapping_UserCalculate]) {
                     type = LKSQL_Mapping_UserCalculate;
                     column_type = LKSQL_Type_Text;
-                }
-                else {
+                } else {
 
                     if ([mappingValue isEqualToString:LKSQL_Mapping_Inherit] || [mappingValue isEqualToString:LKSQL_Mapping_Binding]) {
                         type = LKSQL_Mapping_Inherit;
                         property_name = column_name;
-                    }
-                    else {
+                    } else {
                         type = LKSQL_Mapping_Binding;
                         property_name = mappingValue;
                     }
@@ -191,8 +186,7 @@
 
                 [self addDBPropertyWithType:type cname:column_name ctype:column_type pname:property_name ptype:property_type];
             }
-        }
-        else {
+        } else {
             for (NSInteger i = 0; i < propertyNames.count; i++) {
 
                 type = LKSQL_Mapping_Inherit;

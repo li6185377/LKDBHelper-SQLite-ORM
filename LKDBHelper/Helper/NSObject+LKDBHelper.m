@@ -167,8 +167,7 @@
 {
     if (self.rowid > 0) {
         return [self.class updateToDB:self where:nil];
-    }
-    else {
+    } else {
         return [self saveToDB];
     }
 }
@@ -193,7 +192,7 @@
     [self insertArrayByAsyncToDB:models completed:nil];
 }
 
-+ (void)insertArrayByAsyncToDB:(NSArray *)models completed:(void (^ _Nullable)(BOOL))completedBlock
++ (void)insertArrayByAsyncToDB:(NSArray *)models completed:(void (^_Nullable)(BOOL))completedBlock
 {
     if (models.count > 0) {
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
@@ -226,7 +225,7 @@
         }
         return (isRollback == NO);
     }];
-    
+
     if (completedBlock) {
         completedBlock(allInserted);
     }

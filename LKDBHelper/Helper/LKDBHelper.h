@@ -6,12 +6,12 @@
 //  Copyright (c) 2012年 LJH. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import <FMDB/FMDB.h>
-#import "LKDBUtils.h"
 #import "LKDB+Mapping.h"
+#import "LKDBUtils.h"
 #import "NSObject+LKDBHelper.h"
 #import "NSObject+LKModel.h"
+#import <FMDB/FMDB.h>
+#import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -176,7 +176,7 @@ NS_ASSUME_NONNULL_BEGIN
        orderBy:(nullable NSString *)orderBy
         offset:(NSInteger)offset
          count:(NSInteger)count
-      callback:(void (^)(NSMutableArray * _Nullable array))block;
+      callback:(void (^)(NSMutableArray *_Nullable array))block;
 
 ///return first model or nil
 - (nullable id)searchSingle:(Class)modelClass where:(nullable id)where orderBy:(nullable NSString *)orderBy;

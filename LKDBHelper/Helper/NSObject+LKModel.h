@@ -53,7 +53,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  联合主键
  *  @return
  */
-+ (nullable  NSArray *)getPrimaryKeyUnionArray;
++ (nullable NSArray *)getPrimaryKeyUnionArray;
 
 /**
  *  overwrite in your models set column attribute
@@ -81,7 +81,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *	@return     property the data after conversion
  */
-- (nullable  id)userGetValueForModel:(LKDBProperty *)property;
+- (nullable id)userGetValueForModel:(LKDBProperty *)property;
 
 /***
  *	@brief	overwrite in your models,return insert sqlite table data

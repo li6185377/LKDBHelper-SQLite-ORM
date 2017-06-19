@@ -56,7 +56,7 @@
 {
     NSString *string = [number stringValue];
     if (!string) {
-        string = [NSString stringWithFormat:@"%lf",[number doubleValue]];
+        string = [NSString stringWithFormat:@"%lf", [number doubleValue]];
     }
     return string;
 }
