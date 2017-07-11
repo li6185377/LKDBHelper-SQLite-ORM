@@ -415,7 +415,7 @@ static char LKModelBase_Key_Inserting;
     } else if ([obj isKindOfClass:[NSArray class]]) {
         jsonObject = [self db_jsonObjectFromArray:obj];
     } else if ([obj isKindOfClass:[NSDictionary class]]) {
-        jsonObject = [self db_jsonObjectFromArray:obj];
+        jsonObject = [self db_jsonObjectFromDictionary:obj];
     } else {
         jsonObject = [self db_jsonObjectFromModel:obj];
     }
