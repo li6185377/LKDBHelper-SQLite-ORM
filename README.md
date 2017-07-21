@@ -8,7 +8,7 @@ QQ群号 113767274  有什么问题或者改进的地方大家一起讨论
 
 简书：不定时更新  [http://www.jianshu.com/users/376b950a20ec](http://www.jianshu.com/users/376b950a20ec/latest_articles)
 
-#Big Upgrade 2.0
+# Big Upgrade 2.0
 
 Supported  __NSArray__,__NSDictionary__, __ModelClass__, __NSNumber__, __NSString__, __NSDate__, __NSData__, __UIColor__, __UIImage__, __CGRect__, __CGPoint__, __CGSize__, __NSRange__, __int__,__char__,__float__, __double__, __long__.. attribute to insert and select automation.
 
@@ -23,7 +23,7 @@ Requirements
 * ARC only
 * FMDB(https://github.com/ccgus/fmdb)
 
-##Adding to your project
+## Adding to your project
 
 If you are using CocoaPods, then, just add this line to your PodFile<br>
 
@@ -40,9 +40,9 @@ pod 'LKDBHelper'
 
 @property(strong,nonatomic)NSString* encryptionKey;
 
-##Basic usage
+## Basic usage
 
-1 . Create a new Objective-C class for your data model
+1. Create a new Objective-C class for your data model
 
 ```objective-c
 @interface LKTest : NSObject
@@ -57,7 +57,7 @@ pod 'LKDBHelper'
 @property char like;
 ...
 ```
-2 . in the *.m file, overwirte getTableName function  (option)
+2. in the *.m file, overwirte getTableName function  (option)
 
 ```objective-c
 +(NSString *)getTableName
@@ -65,7 +65,7 @@ pod 'LKDBHelper'
     return @"LKTestTable";
 }
 ```
-3 . in the *.m file, overwirte callback function (option)
+3. in the *.m file, overwirte callback function (option)
 
 ```objective-c
 @interface NSObject(LKDBHelper_Delegate)
@@ -88,7 +88,7 @@ pod 'LKDBHelper'
 @end
 
 ```
-4 . Initialize your model with data and insert to database  
+4. Initialize your model with data and insert to database  
 
 ```objective-c
     LKTestForeign* foreign = [[LKTestForeign alloc]init];
@@ -113,7 +113,7 @@ pod 'LKDBHelper'
     //[globalHelper insertToDB:test];
     
 ```
-5 . select 、 delete 、 update 、 isExists 、 rowCount ...
+5. select 、 delete 、 update 、 isExists 、 rowCount ...
 
 ```objective-c
     select:
@@ -142,7 +142,7 @@ pod 'LKDBHelper'
         
      
 ```
-6 . Description of parameters "where"
+6. Description of parameters "where"
 
 ```objective-c
  For example: 
@@ -161,7 +161,7 @@ pod 'LKDBHelper'
         For example: @"date >= '2013-04-01 00:00:00'"
 ```
 
-##table mapping
+## table mapping
 
 overwirte getTableMapping Function (option)
 
@@ -178,7 +178,7 @@ overwirte getTableMapping Function (option)
 }
 ```
 
-##table update (option)
+## table update (option)
 
 ```objective-c
 +(void)dbDidAlterTable:(LKDBHelper *)helper tableName:(NSString *)tableName addColumns:(NSArray *)columns
@@ -214,7 +214,7 @@ overwirte getTableMapping Function (option)
 }
 ```
 
-##demo screenshot
+## demo screenshot
 ![demo screenshot](https://github.com/li6185377/LKDBHelper-SQLite-ORM/raw/master/screenshot/Snip20130620_8.png)
 <br>table test data<br>
 ![](https://github.com/li6185377/LKDBHelper-SQLite-ORM/raw/master/screenshot/Snip20130620_6.png)
