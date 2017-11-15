@@ -9,6 +9,12 @@
 #import "LKDBHelper.h"
 #import <sqlite3.h>
 
+#ifndef SQLITE_OPEN_FILEPROTECTION_NONE
+#define SQLITE_OPEN_FILEPROTECTION_NONE 0x00400000
+#endif
+
+#define LKDBOpenFlags (SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX | SQLITE_OPEN_SHAREDCACHE | SQLITE_OPEN_FILEPROTECTION_NONE)
+
 #define LKDBCheck_tableNameIsInvalid(tableName)                           \
     if ([LKDBUtils checkStringIsEmpty:tableName]) {                       \
         LKErrorLog(@" \n Fail!Fail!Fail!Fail! \n with TableName is nil"); \
@@ -101,26 +107,32 @@ static BOOL LKDBNullIsEmptyString = NO;
 {
     NSMutableArray *dbArray = [self dbHelperSingleArray];
     LKDBHelper *instance = nil;
-    @synchronized(dbArray)
-    {
-        if (helper) {
-            LKDBWeakObject *weakObj = [[LKDBWeakObject alloc] init];
-            weakObj.obj = helper;
-            [dbArray addObject:weakObj];
-        } else if (dbFilePath) {
-            for (NSInteger i = 0; i < dbArray.count;) {
-                LKDBWeakObject *weakObj = [dbArray objectAtIndex:i];
-                if (weakObj.obj == nil) {
-                    [dbArray removeObjectAtIndex:i];
-                    continue;
-                } else if ([weakObj.obj.dbPath isEqualToString:dbFilePath]) {
-                    instance = weakObj.obj;
-                    break;
-                }
-                i++;
+    dbFilePath = dbFilePath.lowercaseString;
+    
+    NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
+    BOOL hasCached = NO;
+    
+    for (NSInteger i = 0; i < dbArray.count; i++) {
+        LKDBWeakObject *weakObj = [dbArray objectAtIndex:i];
+        if ([weakObj.obj.dbPath.lowercaseString isEqualToString:dbFilePath]) {
+            if (helper) {
+                hasCached = YES;
+            } else {
+                instance = weakObj.obj;
             }
+        } else if (!weakObj.obj){
+            [indexSet addIndex:i];
         }
     }
+    
+    [dbArray removeObjectsAtIndexes:indexSet];
+    
+    if (!hasCached && helper) {
+        LKDBWeakObject *weakObj = [[LKDBWeakObject alloc] init];
+        weakObj.obj = helper;
+        [dbArray addObject:weakObj];
+    }
+    
     return instance;
 }
 
@@ -141,23 +153,21 @@ static BOOL LKDBNullIsEmptyString = NO;
         self = nil;
         return nil;
     }
-
-    LKDBHelper *helper = [LKDBHelper dbHelperWithPath:filePath save:nil];
-
-    if (helper) {
-        self = helper;
-    } else {
-        self = [super init];
-
-        if (self) {
-            self.threadLock = [[NSRecursiveLock alloc] init];
-            self.createdTableNames = [NSMutableArray array];
-
-            [self setDBPath:filePath];
-            [LKDBHelper dbHelperWithPath:nil save:self];
+    @synchronized([LKDBHelper class]) {
+        LKDBHelper *helper = [LKDBHelper dbHelperWithPath:filePath save:nil];
+        if (helper) {
+            self = helper;
+        } else {
+            self = [super init];
+            if (self) {
+                self.threadLock = [[NSRecursiveLock alloc] init];
+                self.createdTableNames = [NSMutableArray array];
+                
+                [self setDBPath:filePath];
+                [LKDBHelper dbHelperWithPath:nil save:self];
+            }
         }
     }
-
     return self;
 }
 
@@ -227,17 +237,9 @@ static BOOL LKDBNullIsEmptyString = NO;
     self.dbPath = filePath;
     [self.bindingQueue close];
     [self.createdTableNames removeAllObjects];
-
-#ifndef SQLITE_OPEN_FILEPROTECTION_NONE
-#define SQLITE_OPEN_FILEPROTECTION_NONE 0x00400000
-#endif
+    
     self.bindingQueue = [[FMDatabaseQueue alloc] initWithPath:filePath
-                                                        flags:SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FILEPROTECTION_NONE];
-#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
-    if ([fileManager fileExistsAtPath:filePath]) {
-        [fileManager setAttributes:@{ NSFileProtectionKey: NSFileProtectionNone } ofItemAtPath:filePath error:nil];
-    }
-#endif
+                                                        flags:LKDBOpenFlags];
 
     ///reset encryptionKey
     _encryptionKey = nil;
@@ -245,6 +247,13 @@ static BOOL LKDBNullIsEmptyString = NO;
     [self.bindingQueue inDatabase:^(FMDatabase *db) {
         db.logsErrors = LKDBLogErrorEnable;
     }];
+    [self.threadLock unlock];
+}
+
+- (void)closeDB {
+    [self.threadLock lock];
+    [self.bindingQueue close];
+    self.bindingQueue = nil;
     [self.threadLock unlock];
 }
 
@@ -261,7 +270,8 @@ static BOOL LKDBNullIsEmptyString = NO;
         block(self.usingdb);
     } else {
         if (self.bindingQueue == nil) {
-            self.bindingQueue = [[FMDatabaseQueue alloc] initWithPath:_dbPath];
+            self.bindingQueue = [[FMDatabaseQueue alloc] initWithPath:self.dbPath
+                                                                flags:LKDBOpenFlags];
             [self.createdTableNames removeAllObjects];
             [self.bindingQueue inDatabase:^(FMDatabase *db) {
                 db.logsErrors = LKDBLogErrorEnable;
