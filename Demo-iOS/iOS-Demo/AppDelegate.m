@@ -177,10 +177,11 @@
     
     
     ///
-    addText(@"休息2秒 开始  为了说明 是异步插入的\n"
+    addText(@"休息25秒, 为了说明 是异步插入的\n, 测试自动关闭数据库连接的可用性"
             "rest for 2 seconds to start is asynchronous inserted to illustrate");
     
-    sleep(2);
+    /// 测试 自动关闭数据库连接
+    sleep(25);
     
     addText(@"休息2秒 结束 \n rest for 2 seconds at the end");
     

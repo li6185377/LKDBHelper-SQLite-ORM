@@ -59,6 +59,11 @@
 @property (nonatomic, copy) NSString *dbPath;
 @property (nonatomic, strong) NSMutableArray *createdTableNames;
 @property (nonatomic, strong) NSRecursiveLock *threadLock;
+
+@property (nonatomic, assign) NSInteger lastExecuteDBTime;
+@property (nonatomic, assign) BOOL runingAutoCloseTimer;
+@property (nonatomic, assign) NSInteger autoCloseDBDelayTime;
+
 @end
 
 @implementation LKDBHelper
@@ -162,6 +167,9 @@ static BOOL LKDBNullIsEmptyString = NO;
             if (self) {
                 self.threadLock = [[NSRecursiveLock alloc] init];
                 self.createdTableNames = [NSMutableArray array];
+                self.lastExecuteDBTime = [[NSDate date] timeIntervalSince1970];
+                self.autoCloseDBDelayTime = 20;
+                [self startAutoCloseTimer];
                 
                 [self setDBPath:filePath];
                 [LKDBHelper dbHelperWithPath:nil save:self];
@@ -265,14 +273,13 @@ static BOOL LKDBNullIsEmptyString = NO;
         return;
     }
     [self.threadLock lock];
-
+    
     if (self.usingdb != nil) {
         block(self.usingdb);
     } else {
         if (self.bindingQueue == nil) {
             self.bindingQueue = [[FMDatabaseQueue alloc] initWithPath:self.dbPath
                                                                 flags:LKDBOpenFlags];
-            [self.createdTableNames removeAllObjects];
             [self.bindingQueue inDatabase:^(FMDatabase *db) {
                 db.logsErrors = LKDBLogErrorEnable;
                 if (_encryptionKey.length > 0) {
@@ -286,8 +293,43 @@ static BOOL LKDBNullIsEmptyString = NO;
             self.usingdb = nil;
         }];
     }
-
+    
+    self.lastExecuteDBTime = [[NSDate date] timeIntervalSince1970];
+    
+    if (!self.runingAutoCloseTimer) {
+        [self startAutoCloseTimer];
+    }
+    
     [self.threadLock unlock];
+}
+
+- (void)setAutoCloseDBTime:(NSInteger)time {
+    if (time < 10) {
+        time = 10;
+    }
+    self.autoCloseDBDelayTime = time;
+}
+
+- (void)startAutoCloseTimer {
+    self.runingAutoCloseTimer = YES;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.autoCloseDBDelayTime * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
+        [self.threadLock lock];
+        self.runingAutoCloseTimer = NO;
+        BOOL hasClosed = [self autoCloseDBConnection];
+        if (!hasClosed) {
+            [self startAutoCloseTimer];
+        }
+        [self.threadLock unlock];
+    });
+}
+
+- (BOOL)autoCloseDBConnection {
+    NSInteger now = [[NSDate date] timeIntervalSince1970];
+    if (now - self.lastExecuteDBTime > 10) {
+        [self closeDB];
+        return YES;
+    }
+    return NO;
 }
 
 - (BOOL)executeSQL:(NSString *)sql arguments:(NSArray *)args

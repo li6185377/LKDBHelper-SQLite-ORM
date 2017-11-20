@@ -48,6 +48,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)closeDB;
 
 /**
+ *    @brief  当数据库无操作 多少秒后 自动关闭数据库连接, 区间 [10 ~ int_max]  默认：20秒
+ */
+- (void)setAutoCloseDBTime:(NSInteger)time;
+
+/**
  *  @brief current encryption key.
  */
 @property (nullable, nonatomic, copy, readonly) NSString *encryptionKey;
