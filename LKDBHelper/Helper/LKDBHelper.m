@@ -255,6 +255,13 @@ static BOOL LKDBNullIsEmptyString = NO;
     [self.bindingQueue inDatabase:^(FMDatabase *db) {
         db.logsErrors = LKDBLogErrorEnable;
     }];
+    
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
+    if ([fileManager fileExistsAtPath:filePath]) {
+        [fileManager setAttributes:@{ NSFileProtectionKey: NSFileProtectionNone } ofItemAtPath:filePath error:nil];
+    }
+#endif
+    
     [self.threadLock unlock];
 }
 
