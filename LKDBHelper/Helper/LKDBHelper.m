@@ -602,6 +602,11 @@ static BOOL LKDBNullIsEmptyString = NO;
 {
     LKDBCheck_tableNameIsInvalid(tableName);
 
+    // 检测是否创建过表
+    if ([self getTableCreatedWithTableName:tableName] == NO) {
+        return YES;
+    }
+    
     NSString *dropTable = [NSString stringWithFormat:@"drop table %@", tableName];
 
     BOOL isDrop = [self executeSQL:dropTable arguments:nil];
@@ -1423,13 +1428,31 @@ static BOOL LKDBNullIsEmptyString = NO;
 
 - (BOOL)updateToDB:(Class)modelClass set:(NSString *)sets where:(id)where
 {
-    return [self updateToDBWithTableName:[modelClass getTableName] set:sets where:where];
+    return [self _updateToDBWithTableName:nil set:sets where:where modelClass:modelClass];
 }
 
 - (BOOL)updateToDBWithTableName:(NSString *)tableName set:(NSString *)sets where:(id)where
 {
-    LKDBCheck_tableNameIsInvalid(tableName);
+    return [self _updateToDBWithTableName:tableName set:sets where:where modelClass:nil];
+}
 
+- (BOOL)_updateToDBWithTableName:(NSString *)tableName set:(NSString *)sets where:(id)where modelClass:(Class)modelClass
+{
+    if (!tableName) {
+        tableName = [modelClass getTableName];
+    }
+    
+    LKDBCheck_tableNameIsInvalid(tableName);
+    
+    if (modelClass) {
+        // 检测是否创建过表
+        [self.threadLock lock];
+        if ([self.createdTableNames containsObject:tableName] == NO) {
+            [self _createTableWithModelClass:modelClass tableName:tableName];
+        }
+        [self.threadLock unlock];
+    }
+    
     NSMutableString *updateSQL = [NSMutableString stringWithFormat:@"update %@ set %@ ", tableName, sets];
     NSMutableArray *updateValues = [self extractQuery:updateSQL where:where];
 
@@ -1468,6 +1491,13 @@ static BOOL LKDBNullIsEmptyString = NO;
 
     NSString *db_tableName = model.db_tableName ?: [modelClass getTableName];
 
+    // 检测是否创建过表
+    [self.threadLock lock];
+    if ([self.createdTableNames containsObject:db_tableName] == NO) {
+        [self _createTableWithModelClass:modelClass tableName:db_tableName];
+    }
+    [self.threadLock unlock];
+    
     NSMutableString *deleteSQL = [NSMutableString stringWithFormat:@"delete from %@ where ", db_tableName];
     NSMutableArray *parsArray = [NSMutableArray array];
 
@@ -1498,13 +1528,13 @@ static BOOL LKDBNullIsEmptyString = NO;
 
 - (BOOL)deleteWithClass:(Class)modelClass where:(id)where
 {
-    return [self deleteWithTableName:[modelClass getTableName] where:where];
+    return [self _deleteWithTableName:nil where:where modelClass:modelClass];
 }
 
 - (void)deleteWithClass:(Class)modelClass where:(id)where callback:(void (^)(BOOL))block
 {
     LKDBCode_Async_Begin;
-    BOOL isDeleted = [sself deleteWithTableName:[modelClass getTableName] where:where];
+    BOOL isDeleted = [sself _deleteWithTableName:nil where:where modelClass:modelClass];
     if (block) {
         block(isDeleted);
     }
@@ -1513,8 +1543,26 @@ static BOOL LKDBNullIsEmptyString = NO;
 
 - (BOOL)deleteWithTableName:(NSString *)tableName where:(id)where
 {
-    LKDBCheck_tableNameIsInvalid(tableName);
+    return [self _deleteWithTableName:tableName where:where modelClass:nil];
+}
 
+- (BOOL)_deleteWithTableName:(NSString *)tableName where:(id)where modelClass:(Class)modelClass
+{
+    if (!tableName) {
+        tableName = [modelClass getTableName];
+    }
+    
+    LKDBCheck_tableNameIsInvalid(tableName);
+    
+    if (modelClass) {
+        // 检测是否创建过表
+        [self.threadLock lock];
+        if ([self.createdTableNames containsObject:tableName] == NO) {
+            [self _createTableWithModelClass:modelClass tableName:tableName];
+        }
+        [self.threadLock unlock];
+    }
+    
     NSMutableString *deleteSQL = [NSMutableString stringWithFormat:@"delete from %@", tableName];
     NSMutableArray *values = [self extractQuery:deleteSQL where:where];
 
@@ -1556,10 +1604,7 @@ static BOOL LKDBNullIsEmptyString = NO;
 
 + (void)clearTableData:(Class)modelClass
 {
-    [[modelClass getUsingLKDBHelper] executeDB:^(FMDatabase *db) {
-        NSString *delete = [NSString stringWithFormat:@"DELETE FROM %@", [modelClass getTableName]];
-        [db executeUpdate:delete];
-    }];
+    [[modelClass getUsingLKDBHelper] deleteWithClass:modelClass where:nil];
 }
 
 + (void)clearNoneImage:(Class)modelClass columns:(NSArray *)columns
