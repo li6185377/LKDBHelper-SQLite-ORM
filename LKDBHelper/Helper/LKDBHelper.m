@@ -285,6 +285,7 @@ static BOOL LKDBNullIsEmptyString = NO;
         block(self.usingdb);
     } else {
         if (self.bindingQueue == nil) {
+            [self.createdTableNames removeAllObjects];
             self.bindingQueue = [[FMDatabaseQueue alloc] initWithPath:self.dbPath
                                                                 flags:LKDBOpenFlags];
             [self.bindingQueue inDatabase:^(FMDatabase *db) {
