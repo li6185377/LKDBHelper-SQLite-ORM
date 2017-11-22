@@ -1,4 +1,4 @@
-platform :ios,4.3
+platform :ios,5.0
 target 'iOS-Demo' do
 pod 'LKDBHelper', :path => '../'
 end

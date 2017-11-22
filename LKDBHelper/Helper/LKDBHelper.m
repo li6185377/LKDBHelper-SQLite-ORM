@@ -22,7 +22,7 @@
     }
 
 #define LKDBCode_Async_Begin             \
-    __LKDBWeak LKDBHelper *wself = self; \
+    __weak LKDBHelper *wself = self; \
     [self asyncBlock :^{__strong LKDBHelper *sself = wself;           \
                         if (sself) {
 
@@ -50,11 +50,11 @@
 @end
 
 @interface LKDBWeakObject : NSObject
-@property (nonatomic, LKDBWeak) LKDBHelper *obj;
+@property (nonatomic, weak) LKDBHelper *obj;
 @end
 
 @interface LKDBHelper ()
-@property (nonatomic, LKDBWeak) FMDatabase *usingdb;
+@property (nonatomic, weak) FMDatabase *usingdb;
 @property (nonatomic, strong) FMDatabaseQueue *bindingQueue;
 @property (nonatomic, copy) NSString *dbPath;
 @property (nonatomic, strong) NSMutableArray *createdTableNames;
@@ -320,7 +320,9 @@ static BOOL LKDBNullIsEmptyString = NO;
 
 - (void)startAutoCloseTimer {
     self.runingAutoCloseTimer = YES;
+    __weak LKDBHelper *wself = self;
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.autoCloseDBDelayTime * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
+        __strong LKDBHelper *self = wself;
         [self.threadLock lock];
         self.runingAutoCloseTimer = NO;
         BOOL hasClosed = [self autoCloseDBConnection];

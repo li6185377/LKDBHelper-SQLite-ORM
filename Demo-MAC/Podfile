@@ -1,4 +1,4 @@
-platform :osx, 10.6
+platform :osx, 10.7
 target 'LKDB-Demo' do
 pod 'LKDBHelper', :path => '../'
 end
