@@ -665,7 +665,7 @@ static BOOL LKDBNullIsEmptyString = NO;
                 NSString *defaultValue = property.defaultValue ?: @"0";
                 if ([property.sqlColumnType isEqualToString:LKSQL_Type_Text]) {
                     if (LKDBNullIsEmptyString) {
-                        defaultValue = @"";
+                        defaultValue = @"''";
                     } else {
                         defaultValue = @"null";
                     }
