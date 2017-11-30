@@ -168,8 +168,6 @@ static BOOL LKDBNullIsEmptyString = NO;
                 self.threadLock = [[NSRecursiveLock alloc] init];
                 self.createdTableNames = [NSMutableArray array];
                 self.lastExecuteDBTime = [[NSDate date] timeIntervalSince1970];
-                self.autoCloseDBDelayTime = 20;
-                [self startAutoCloseTimer];
                 
                 [self setDBPath:filePath];
                 [LKDBHelper dbHelperWithPath:nil save:self];
@@ -304,7 +302,7 @@ static BOOL LKDBNullIsEmptyString = NO;
     
     self.lastExecuteDBTime = [[NSDate date] timeIntervalSince1970];
     
-    if (!self.runingAutoCloseTimer) {
+    if (self.autoCloseDBDelayTime > 0) {
         [self startAutoCloseTimer];
     }
     
@@ -312,13 +310,19 @@ static BOOL LKDBNullIsEmptyString = NO;
 }
 
 - (void)setAutoCloseDBTime:(NSInteger)time {
-    if (time < 10) {
-        time = 10;
+    if (time < 0) {
+        time = 0;
     }
     self.autoCloseDBDelayTime = time;
+    if (time > 0) {
+        [self startAutoCloseTimer];
+    }
 }
 
 - (void)startAutoCloseTimer {
+    if (self.runingAutoCloseTimer) {
+        return;
+    }
     self.runingAutoCloseTimer = YES;
     __weak LKDBHelper *wself = self;
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.autoCloseDBDelayTime * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
@@ -326,7 +330,7 @@ static BOOL LKDBNullIsEmptyString = NO;
         [self.threadLock lock];
         self.runingAutoCloseTimer = NO;
         BOOL hasClosed = [self autoCloseDBConnection];
-        if (!hasClosed) {
+        if (!hasClosed && self.autoCloseDBDelayTime > 0) {
             [self startAutoCloseTimer];
         }
         [self.threadLock unlock];
@@ -335,7 +339,7 @@ static BOOL LKDBNullIsEmptyString = NO;
 
 - (BOOL)autoCloseDBConnection {
     NSInteger now = [[NSDate date] timeIntervalSince1970];
-    if (now - self.lastExecuteDBTime > 10) {
+    if (now - self.lastExecuteDBTime > 5) {
         [self closeDB];
         return YES;
     }
@@ -844,7 +848,7 @@ static BOOL LKDBNullIsEmptyString = NO;
 #pragma mark - row count operation
 - (NSInteger)rowCount:(Class)modelClass where:(id)where
 {
-    return [self rowCountWithTableName:[modelClass getTableName] where:where];
+    return [self _rowCountWithTableName:nil where:where modelClass:modelClass];
 }
 
 - (void)rowCount:(Class)modelClass where:(id)where callback:(void (^)(NSInteger))callback
@@ -853,14 +857,32 @@ static BOOL LKDBNullIsEmptyString = NO;
         return;
     }
     LKDBCode_Async_Begin;
-    NSInteger result = [sself rowCountWithTableName:[modelClass getTableName] where:where];
+    NSInteger result = [sself _rowCountWithTableName:nil where:where modelClass:modelClass];
     callback(result);
     LKDBCode_Async_End;
 }
 
 - (NSInteger)rowCountWithTableName:(NSString *)tableName where:(id)where
 {
+    return [self _rowCountWithTableName:tableName where:where modelClass:nil];
+}
+
+- (NSInteger)_rowCountWithTableName:(NSString *)tableName where:(id)where modelClass:(Class)modelClass
+{
+    if (!tableName) {
+        tableName = [modelClass getTableName];
+    }
+    
     LKDBCheck_tableNameIsInvalid(tableName);
+    
+    if (modelClass) {
+        // 检测是否创建过表
+        [self.threadLock lock];
+        if ([self.createdTableNames containsObject:tableName] == NO) {
+            [self _createTableWithModelClass:modelClass tableName:tableName];
+        }
+        [self.threadLock unlock];
+    }
 
     NSMutableString *rowCountSql = [NSMutableString stringWithFormat:@"select count(rowid) from %@", tableName];
 
@@ -1041,9 +1063,23 @@ static BOOL LKDBNullIsEmptyString = NO;
     if (!modelClass) {
         return sql;
     }
+    
+    NSString *tableName = [modelClass getTableName];
+    if (!tableName) {
+        return sql;
+    }
+    
+    if (modelClass) {
+        // 检测是否创建过表
+        [self.threadLock lock];
+        if ([self.createdTableNames containsObject:tableName] == NO) {
+            [self _createTableWithModelClass:modelClass tableName:tableName];
+        }
+        [self.threadLock unlock];
+    }
 
     // replace @t to model table name
-    NSString *replaceString = [[modelClass getTableName] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    NSString *replaceString = [tableName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if ([sql hasSuffix:@" @t"]) {
         sql = [sql stringByAppendingString:@" "];
     }
