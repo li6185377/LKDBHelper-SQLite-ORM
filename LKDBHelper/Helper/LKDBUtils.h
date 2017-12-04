@@ -11,6 +11,10 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface LKDBUtils : NSObject
+
+// 创建文件路径所需要的文件夹
++ (BOOL)createDirectoryWithFilePath:(NSString *)filePath;
+
 ///返回根目录路径 "document"
 + (NSString *)getDocumentPath;
 ///返回 "document/dir/" 文件夹路径

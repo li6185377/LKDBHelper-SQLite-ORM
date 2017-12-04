@@ -71,6 +71,56 @@
 @end
 
 @implementation LKDBUtils
+
++ (BOOL)createDirectoryWithFilePath:(NSString *)filePath
+{
+    NSString *dirPath = filePath.stringByDeletingLastPathComponent;
+    if (!dirPath) {
+        return NO;
+    }
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    BOOL isDir = NO;
+    BOOL isCreated = [fileManager fileExistsAtPath:dirPath isDirectory:&isDir];
+    
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
+    NSDictionary *attributes = @{NSFileProtectionKey: NSFileProtectionNone};
+#else
+    NSDictionary *attributes = nil;
+#endif
+    
+    if (!isCreated || !isDir) {
+        NSError *error = nil;
+        BOOL success = [fileManager createDirectoryAtPath:dirPath
+                              withIntermediateDirectories:YES
+                                               attributes:attributes
+                                                    error:&error];
+        if (!success) {
+            LKErrorLog(@"create dir error: %@", error.debugDescription);
+            /// 下个主线程继续尝试次
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [fileManager createDirectoryAtPath:dirPath
+                       withIntermediateDirectories:YES
+                                        attributes:attributes
+                                             error:nil];
+            });
+        }
+        return success;
+    } else {
+        /**
+         *  @brief  Disk I/O error when device is locked
+         *          https://github.com/ccgus/fmdb/issues/262
+         */
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
+        [fileManager setAttributes:attributes
+                      ofItemAtPath:dirPath
+                             error:nil];
+#endif
+        return YES;
+    }
+}
+
 + (NSString *)getDocumentPath
 {
 #ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
