@@ -832,7 +832,9 @@ static BOOL LKDBNullIsEmptyString = NO;
     }
     LKDBCode_Async_Begin;
     NSInteger result = [sself _rowCountWithTableName:nil where:where modelClass:modelClass];
-    callback(result);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        callback(result);
+    });
     LKDBCode_Async_End;
 }
 
@@ -908,7 +910,10 @@ static BOOL LKDBNullIsEmptyString = NO;
     params.count = count;
 
     NSMutableArray *array = [sself searchBaseWithParams:params];
-    block(array);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        block(array);
+    });
+    
     LKDBCode_Async_End;
 }
 
@@ -999,7 +1004,10 @@ static BOOL LKDBNullIsEmptyString = NO;
     if (params.callback) {
         LKDBCode_Async_Begin;
         NSMutableArray *array = [sself searchBaseWithParams:params];
-        params.callback(array);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            params.callback(array);
+        });
+        
         LKDBCode_Async_End;
         return nil;
     } else {
@@ -1078,6 +1086,18 @@ static BOOL LKDBNullIsEmptyString = NO;
 {
     sql = [self replaceTableNameIfNeeded:sql withModelClass:modelClass];
     return [self searchWithRAWSQL:sql toClass:modelClass];
+}
+
+- (void)asynSearchWithSQL:(NSString *)sql toClass:(Class)modelClass completion:(void(^)(NSMutableArray *))completion {
+    LKDBCode_Async_Begin
+    NSString *newSql = [sself replaceTableNameIfNeeded:sql withModelClass:modelClass];
+    NSMutableArray *mArr = [sself searchWithRAWSQL:newSql toClass:modelClass];
+    if (completion) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            completion(mArr);
+        });
+    }
+    LKDBCode_Async_End
 }
 
 - (NSMutableArray *)searchWithRAWSQL:(NSString *)sql toClass:(Class)modelClass
@@ -1221,6 +1241,9 @@ static BOOL LKDBNullIsEmptyString = NO;
     LKDBCode_Async_Begin;
     BOOL result = [sself insertBase:model];
     if (block) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            block(result);
+        });
         block(result);
     }
     LKDBCode_Async_End;
@@ -1239,7 +1262,9 @@ static BOOL LKDBNullIsEmptyString = NO;
     LKDBCode_Async_Begin;
     BOOL result = [sself insertWhenNotExists:model];
     if (block) {
-        block(result);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            block(result);
+        });
     }
     LKDBCode_Async_End;
 }
@@ -1344,7 +1369,9 @@ static BOOL LKDBNullIsEmptyString = NO;
     LKDBCode_Async_Begin;
     BOOL result = [sself updateToDBBase:model where:where];
     if (block) {
-        block(result);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            block(result);
+        });
     }
     LKDBCode_Async_End;
 }
@@ -1482,7 +1509,9 @@ static BOOL LKDBNullIsEmptyString = NO;
     LKDBCode_Async_Begin;
     BOOL isDeleted = [sself deleteToDBBase:model];
     if (block) {
-        block(isDeleted);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            block(isDeleted);
+        });
     }
     LKDBCode_Async_End;
 }
@@ -1546,7 +1575,9 @@ static BOOL LKDBNullIsEmptyString = NO;
     LKDBCode_Async_Begin;
     BOOL isDeleted = [sself _deleteWithTableName:nil where:where modelClass:modelClass];
     if (block) {
-        block(isDeleted);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            block(isDeleted);
+        });
     }
     LKDBCode_Async_End;
 }

@@ -220,10 +220,10 @@
     LKDBProperty *db_property = [[LKDBProperty alloc] initWithType:type cname:column_name ctype:ctype pname:pname ptype:ptype];
 
     if (db_property.propertyName) {
-        _proNameDic[db_property.propertyName] = db_property;
+        [_proNameDic setObject:db_property forKey:db_property.propertyName];
     }
     if (db_property.sqlColumnName) {
-        _sqlNameDic[db_property.sqlColumnName] = db_property;
+        [_sqlNameDic setObject:db_property forKey:db_property.sqlColumnName];
     }
 }
 - (NSArray *)primaryKeys
@@ -255,13 +255,13 @@
 {
     [_proNameDic removeObjectForKey:property.propertyName];
     property.propertyName = propertyName;
-    _proNameDic[propertyName] = property;
+    [_proNameDic setObject:property forKey:propertyName];
 }
 - (void)updateProperty:(LKDBProperty *)property sqlColumnName:(NSString *)columnName
 {
     [_sqlNameDic removeObjectForKey:property.sqlColumnName];
     property.sqlColumnName = columnName;
-    _sqlNameDic[columnName] = property;
+    [_sqlNameDic setObject:property forKey:columnName];
 }
 - (void)removeWithColumnName:(NSString *)columnName
 {

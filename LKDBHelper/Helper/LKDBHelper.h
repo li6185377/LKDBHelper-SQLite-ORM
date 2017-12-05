@@ -154,6 +154,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable NSMutableArray *)searchWithSQL:(NSString *)sql toClass:(nullable Class)modelClass;
 
+- (void)asynSearchWithSQL:(NSString *)sql
+                  toClass:(Class)modelClass
+               completion:(void(^)(NSMutableArray *))completion;
+
 /**
  *  @brief don't do any operations of the sql
  */
@@ -290,3 +294,4 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
+
