@@ -56,7 +56,6 @@
 @interface LKDBHelper ()
 @property (nonatomic, weak) FMDatabase *usingdb;
 @property (nonatomic, strong) FMDatabaseQueue *bindingQueue;
-@property (nonatomic, copy) NSString *dbPath;
 @property (nonatomic, strong) NSMutableArray *createdTableNames;
 @property (nonatomic, strong) NSRecursiveLock *threadLock;
 
