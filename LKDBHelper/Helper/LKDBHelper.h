@@ -27,6 +27,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (void)setNullToEmpty:(BOOL)empty;
 
++ (NSString *)getDBPathWithDBName:(NSString *)dbName;
+
 /**
  *	@brief  filepath the use of : "documents/db/" + fileName + ".db"
  *          add to global cache with instance created
