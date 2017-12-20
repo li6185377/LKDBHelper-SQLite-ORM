@@ -361,7 +361,7 @@ static char LKModelBase_Key_Inserting;
         [dic enumerateKeysAndObjectsUsingBlock:^(id _Nonnull key, id _Nonnull obj, BOOL *_Nonnull stop) {
             id jsonObject = [self db_jsonObjectWithObject:obj];
             if (jsonObject) {
-                toDic[key] = jsonObject;
+                [toDic setObject:jsonObject forKey:key];
             }
         }];
         if (toDic.count) {
@@ -457,19 +457,19 @@ static char LKModelBase_Key_Inserting;
         return nil;
     }
 
-    jsonObject[LKDB_TypeKey] = LKDB_TypeKey_Model;
-    jsonObject[LKDB_TableNameKey] = model.db_tableName;
-    jsonObject[LKDB_ClassKey] = NSStringFromClass(clazz);
-    jsonObject[LKDB_RowIdKey] = @(model.rowid);
+    [jsonObject setObject:LKDB_TypeKey_Model forKey:LKDB_TypeKey];
+    [jsonObject setObject:model.db_tableName forKey:LKDB_TableNameKey];
+    [jsonObject setObject:NSStringFromClass(clazz) forKey:LKDB_ClassKey];
+    [jsonObject setObject:@(model.rowid) forKey:LKDB_RowIdKey];
 
     NSDictionary *dic = [model db_getPrimaryKeysValues];
     if (dic.count > 0 && [NSJSONSerialization isValidJSONObject:dic]) {
-        jsonObject[LKDB_PValueKey] = dic;
+        [jsonObject setObject:dic forKey:LKDB_PValueKey];
     }
     return jsonObject;
 }
 
-    - (NSString *)db_jsonStringFromObject : (NSObject *)jsonObject
+- (NSString *)db_jsonStringFromObject : (NSObject *)jsonObject
 {
     if (jsonObject && [NSJSONSerialization isValidJSONObject:jsonObject]) {
         NSData *data = [NSJSONSerialization dataWithJSONObject:jsonObject options:0 error:nil];
@@ -600,7 +600,7 @@ static char LKModelBase_Key_Inserting;
             }
 
             if (saveObj) {
-                toDic[key] = saveObj;
+                [toDic setObject:saveObj forKey:key];
             }
         }];
         return toDic;
@@ -645,7 +645,7 @@ static char LKModelBase_Key_Inserting;
             value = [self modelGetValue:property];
         }
         if (value) {
-            dic[property.sqlColumnName] = value;
+            [dic setObject:value forKey:property.sqlColumnName];
         }
 
     }];
@@ -761,7 +761,7 @@ static char LKModelBase_Key_Inserting;
         } else {
             infos = [[LKModelInfos alloc] init];
         }
-        oncePropertyDic[className] = infos;
+        [oncePropertyDic setObject:infos forKey:className];
     }
 
     [lock unlock];
