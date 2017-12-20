@@ -89,9 +89,17 @@
     return [[self getUsingLKDBHelper] searchWithSQL:sql toClass:self];
 }
 
++ (void)asynSearchWithSQL:(NSString *)sql completion:(void(^)(NSMutableArray *))completion {
+    [[self getUsingLKDBHelper] asynSearchWithSQL:sql toClass:self completion:completion];
+}
+
 + (id)searchSingleWithWhere:(id)where orderBy:(NSString *)orderBy
 {
     return [[self getUsingLKDBHelper] searchSingle:self where:where orderBy:orderBy];
+}
+
++ (void)searchWithWhere:(id)where orderBy:(NSString *)orderBy offset:(NSInteger)offset count:(NSInteger)count callback:(void (^)(NSMutableArray *))block {
+    [[self getUsingLKDBHelper] search:[self class] where:where orderBy:orderBy offset:offset count:count callback:block];
 }
 
 + (BOOL)insertToDB:(NSObject *)model

@@ -16,7 +16,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface LKDBHelper : NSObject
-
+@property (nonatomic, copy) NSString *dbPath;
 /**
  *  @brief Log error message, Default: NO
  */
@@ -26,6 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
  *  @brief null is '' , Default: NO
  */
 + (void)setNullToEmpty:(BOOL)empty;
+
++ (NSString *)getDBPathWithDBName:(NSString *)dbName;
 
 /**
  *	@brief  filepath the use of : "documents/db/" + fileName + ".db"
@@ -153,6 +155,10 @@ NS_ASSUME_NONNULL_BEGIN
  *
  */
 - (nullable NSMutableArray *)searchWithSQL:(NSString *)sql toClass:(nullable Class)modelClass;
+
+- (void)asynSearchWithSQL:(NSString *)sql
+                  toClass:(Class)modelClass
+               completion:(void(^)(NSMutableArray *))completion;
 
 /**
  *  @brief don't do any operations of the sql
@@ -290,3 +296,4 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
+

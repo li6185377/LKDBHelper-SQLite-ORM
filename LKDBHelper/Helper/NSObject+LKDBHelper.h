@@ -27,12 +27,12 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)dbWillDelete:(NSObject *)entity;
 + (void)dbDidDeleted:(NSObject *)entity result:(BOOL)result;
 
-///data read finish
+/// data read finish
 + (void)dbDidSeleted:(NSObject *)entity;
 
 @end
 
-//only simplify synchronous function
+// only simplify synchronous function
 @interface NSObject (LKDBHelper_Execute)
 
 /**
@@ -48,12 +48,13 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  搜索
  *
- *  @param columns type can NSArray or NSString(Search for a specific column.  Search only one, only to return the contents of the column collection)
- 
+ *  @param columns type can NSArray or NSString(Search for a specific column.  Search only one, only to return the
+ contents of the column collection)
+
  *  @param where   where type can NSDictionary or NSString
- *  @param orderBy
- *  @param offset
- *  @param count
+ *  @param orderBy  orderBy
+ *  @param offset   offset
+ *  @param count    count
  *
  *  @return model collection  or   contents of the columns collection
  */
@@ -72,16 +73,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (nullable NSMutableArray *)searchWithSQL:(NSString *)sql;
 
-+ (nullable id)searchSingleWithWhere:(nullable id)where
-                             orderBy:(nullable NSString *)orderBy;
++ (void)asynSearchWithSQL:(NSString *)sql completion:(void (^)(NSMutableArray *))completion;
+
++ (nullable id)searchSingleWithWhere:(nullable id)where orderBy:(nullable NSString *)orderBy;
+
++ (void)searchWithWhere:(id _Nullable)where
+                orderBy:(NSString *_Nullable)orderBy
+                 offset:(NSInteger)offset
+                  count:(NSInteger)count
+               callback:(void (^)(NSMutableArray *))block;
 
 + (BOOL)insertToDB:(NSObject *)model;
 + (BOOL)insertWhenNotExists:(NSObject *)model;
 
-+ (BOOL)updateToDB:(NSObject *)model
-             where:(nullable id)where, ...;
-+ (BOOL)updateToDBWithSet:(NSString *)sets
-                    where:(nullable id)where, ...;
++ (BOOL)updateToDB:(NSObject *)model where:(nullable id)where, ...;
++ (BOOL)updateToDBWithSet:(NSString *)sets where:(nullable id)where, ...;
 
 + (BOOL)deleteToDB:(NSObject *)model;
 + (BOOL)deleteWithWhere:(nullable id)where, ...;
@@ -97,7 +103,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)insertArrayByAsyncToDB:(NSArray *)models;
 + (void)insertArrayByAsyncToDB:(NSArray *)models completed:(void (^_Nullable)(BOOL allInserted))completedBlock;
 
-///begin translate for insert models  开始事务插入数组
+/// begin translate for insert models  开始事务插入数组
 + (void)insertToDBWithArray:(NSArray *)models
                      filter:(void (^_Nullable)(id model, BOOL inserted, BOOL *_Nullable rollback))filter;
 
