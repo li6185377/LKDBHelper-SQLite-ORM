@@ -78,8 +78,7 @@ static BOOL LKDBLogErrorEnable = NO;
 #ifdef DEBUG
     LKDBLogErrorEnable = logError;
     NSMutableArray *dbArray = [self dbHelperSingleArray];
-    @synchronized(dbArray)
-    {
+    @synchronized(dbArray) {
         [dbArray enumerateObjectsUsingBlock:^(LKDBWeakObject *weakObj, NSUInteger idx, BOOL *stop) {
             [weakObj.obj executeDB:^(FMDatabase *db) {
                 db.logsErrors = LKDBLogErrorEnable;
@@ -100,7 +99,7 @@ static BOOL LKDBNullIsEmptyString = NO;
 
 + (NSMutableArray *)dbHelperSingleArray
 {
-    static __strong NSMutableArray *dbArray;
+    static NSMutableArray *dbArray;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         dbArray = [NSMutableArray array];
@@ -110,32 +109,33 @@ static BOOL LKDBNullIsEmptyString = NO;
 
 + (LKDBHelper *)dbHelperWithPath:(NSString *)dbFilePath save:(LKDBHelper *)helper
 {
-    NSMutableArray *dbArray = [self dbHelperSingleArray];
     LKDBHelper *instance = nil;
     dbFilePath = dbFilePath.lowercaseString;
     
     NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
     BOOL hasCached = NO;
     
-    for (NSInteger i = 0; i < dbArray.count; i++) {
-        LKDBWeakObject *weakObj = [dbArray objectAtIndex:i];
-        if ([weakObj.obj.dbPath.lowercaseString isEqualToString:dbFilePath]) {
-            if (helper) {
-                hasCached = YES;
-            } else {
-                instance = weakObj.obj;
+    NSMutableArray *dbArray = [self dbHelperSingleArray];
+    @synchronized(dbArray) {
+        for (NSInteger i = 0; i < dbArray.count; i++) {
+            LKDBWeakObject *weakObj = [dbArray objectAtIndex:i];
+            if ([weakObj.obj.dbPath.lowercaseString isEqualToString:dbFilePath]) {
+                if (helper) {
+                    hasCached = YES;
+                } else {
+                    instance = weakObj.obj;
+                }
+            } else if (!weakObj.obj){
+                [indexSet addIndex:i];
             }
-        } else if (!weakObj.obj){
-            [indexSet addIndex:i];
         }
-    }
-    
-    [dbArray removeObjectsAtIndexes:indexSet];
-    
-    if (!hasCached && helper) {
-        LKDBWeakObject *weakObj = [[LKDBWeakObject alloc] init];
-        weakObj.obj = helper;
-        [dbArray addObject:weakObj];
+        [dbArray removeObjectsAtIndexes:indexSet];
+        
+        if (!hasCached && helper) {
+            LKDBWeakObject *weakObj = [[LKDBWeakObject alloc] init];
+            weakObj.obj = helper;
+            [dbArray addObject:weakObj];
+        }
     }
     
     return instance;
@@ -525,16 +525,19 @@ static BOOL LKDBNullIsEmptyString = NO;
 #pragma mark - dealloc
 - (void)dealloc
 {
-    NSArray *array = [LKDBHelper dbHelperSingleArray];
-    @synchronized(array)
-    {
-        for (LKDBWeakObject *weakObject in array) {
-            if ([weakObject.obj isEqual:self]) {
-                weakObject.obj = nil;
+    NSMutableArray *dbArray = [LKDBHelper dbHelperSingleArray];
+    @synchronized(dbArray) {
+        NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
+        for (NSInteger i = 0; i < dbArray.count; i++) {
+            LKDBWeakObject *weakObj = [dbArray objectAtIndex:i];
+            if (weakObj.obj == self){
+                weakObj.obj = nil;
+                [indexSet addIndex:i];
             }
         }
+        [dbArray removeObjectsAtIndexes:indexSet];
     }
-
+    
     [self.bindingQueue close];
     self.usingdb = nil;
     self.bindingQueue = nil;
