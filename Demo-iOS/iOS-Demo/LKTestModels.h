@@ -6,66 +6,63 @@
 //  Copyright (c) 2013年 ljh. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
 #import "LKDBHelper.h"
+#import <UIKit/UIKit.h>
 
 @interface LKTestForeignSuper : NSObject
-@property(copy,nonatomic)NSString* address;
-@property int postcode;
+@property (nonatomic, copy) NSString *address;
+@property (nonatomic, assign) int postcode;
 @end
 
 @class LKTest;
 @interface LKTestForeign : LKTestForeignSuper
-@property NSInteger addid;
-
-@property(strong,nonatomic) LKTest* nestModel;
-
+@property (nonatomic, assign) NSInteger addid;
+@property (nonatomic, strong) LKTest *nestModel;
 @end
-
 
 
 @interface LKTest : NSObject
 
-@property(strong,nonatomic) LKTestForeign* nestModel;
+@property (nonatomic, strong) LKTestForeign *nestModel;
 
-@property(copy, nonatomic) NSURL* url;
-@property(copy,nonatomic)NSString* name;
-@property NSUInteger  age;
-@property BOOL isGirl;
+@property (nonatomic, copy) NSURL *url;
+@property (nonatomic, copy) NSString *name;
+@property (nonatomic, assign) NSUInteger age;
+@property (nonatomic, assign) BOOL isGirl;
 
-@property(strong,nonatomic)LKTestForeign* address;
-@property(strong,nonatomic)NSArray* blah;
-@property(strong,nonatomic)NSDictionary* hoho;
+@property (nonatomic, strong) LKTestForeign *address;
+@property (nonatomic, strong) NSArray *blah;
+@property (nonatomic, strong) NSDictionary *hoho;
 
-@property char like;
+@property (nonatomic, assign) char like;
 
 #ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
-@property(strong,nonatomic) UIImage* img;
-@property(strong,nonatomic)UIColor* color;
-@property CGRect frame1;
+@property (nonatomic, strong) UIImage *img;
+@property (nonatomic, strong) UIColor *color;
+@property (nonatomic, assign) CGRect frame1;
 #else
-@property(strong,nonatomic) NSImage* img;
-@property(strong,nonatomic) NSColor* color;
-@property NSRect frame1;
+@property (nonatomic, strong) NSImage *img;
+@property (nonatomic, strong) NSColor *color;
+@property (nonatomic, assign) NSRect frame1;
 #endif
 
-@property(strong,nonatomic) NSDate* date;
+@property (nonatomic, strong) NSDate *date;
 
-@property(copy,nonatomic)NSString* error;
+@property (nonatomic, copy) NSString *error;
 
 //new add
-@property CGFloat score;
+@property (nonatomic, assign) CGFloat score;
 
-@property(strong,nonatomic)NSData* data;
+@property (nonatomic, strong) NSData *data;
 
-@property CGRect frame;
+@property (nonatomic, assign) CGRect frame;
 
-@property CGRect size;
-@property CGPoint point;
-@property NSRange range;
+@property (nonatomic, assign) CGRect size;
+@property (nonatomic, assign) CGPoint point;
+@property (nonatomic, assign) NSRange range;
 @end
 
 
-@interface NSObject(PrintSQL)
-+(NSString*)getCreateTableSQL;
+@interface NSObject (PrintSQL)
++ (NSString *)getCreateTableSQL;
 @end

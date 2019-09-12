@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import LKDBHelper
 
 class LKTestForeignSuper: NSObject {
     var address:NSString? = nil

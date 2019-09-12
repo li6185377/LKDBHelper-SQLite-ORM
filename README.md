@@ -6,7 +6,7 @@ thread-safe and not afraid of recursive deadlock
 
 QQ群号 113767274  有什么问题或者改进的地方大家一起讨论
 
-简书：不定时更新  [http://www.jianshu.com/users/376b950a20ec](http://www.jianshu.com/users/376b950a20ec/latest_articles)
+简书：不定时更新  [http://www.jianshu.com/users/376b950a20ec](http://www.jianshu.com/users/376b950a20ec/latest_articles) 
 
 # Big Upgrade 2.0
 
@@ -25,13 +25,13 @@ Requirements
 
 ## Adding to your project
 
-If you are using CocoaPods, then, just add this line to your PodFile<br>
+If you are using CocoaPods, then, just add this line to your Podfile <br>
 
 ```objective-c
 pod 'LKDBHelper'
 ```
 
-If you are using Encryption, Order can not be wrong<br>
+If you are using encryption, Order can not be wrong <br>
 
 ```objective-c
 pod 'FMDB/SQLCipher'
@@ -46,44 +46,44 @@ pod 'LKDBHelper'
 
 ```objective-c
 @interface LKTest : NSObject
-@property(copy,nonatomic)NSString* name;
-@property NSUInteger  age;
-@property BOOL isGirl;
+@property (nonatomic, copy) NSURL *url;
+@property (nonatomic, copy) NSString *name;
+@property (nonatomic, assign) NSUInteger age;
+@property (nonatomic, assign) BOOL isGirl;
 
-@property(strong,nonatomic)LKTestForeign* address;
-@property(strong,nonatomic)NSArray* blah;
-@property(strong,nonatomic)NSDictionary* hoho;
+@property (nonatomic, strong) LKTestForeign *address;
+@property (nonatomic, strong) NSArray *blah;
+@property (nonatomic, strong) NSDictionary *hoho;
 
-@property char like;
+@property (nonatomic, assign) char like;
 ...
 ```
 2. in the *.m file, overwirte getTableName function  (option)
 
 ```objective-c
-+(NSString *)getTableName
-{
++ (NSString *)getTableName {
     return @"LKTestTable";
 }
 ```
 3. in the *.m file, overwirte callback function (option)
 
 ```objective-c
-@interface NSObject(LKDBHelper_Delegate)
+@interface NSObject (LKDBHelper_Delegate)
 
-+(void)dbDidCreateTable:(LKDBHelper*)helper tableName:(NSString*)tableName;
-+(void)dbDidAlterTable:(LKDBHelper*)helper tableName:(NSString*)tableName addColumns:(NSArray*)columns;
++ (void)dbDidCreateTable:(LKDBHelper *)helper tableName:(NSString *)tableName;
++ (void)dbDidAlterTable:(LKDBHelper *)helper tableName:(NSString *)tableName addColumns:(NSArray *)columns;
 
-+(BOOL)dbWillInsert:(NSObject*)entity;
-+(void)dbDidInserted:(NSObject*)entity result:(BOOL)result;
++ (BOOL)dbWillInsert:(NSObject *)entity;
++ (void)dbDidInserted:(NSObject *)entity result:(BOOL)result;
 
-+(BOOL)dbWillUpdate:(NSObject*)entity;
-+(void)dbDidUpdated:(NSObject*)entity result:(BOOL)result;
++ (BOOL)dbWillUpdate:(NSObject *)entity;
++ (void)dbDidUpdated:(NSObject *)entity result:(BOOL)result;
 
-+(BOOL)dbWillDelete:(NSObject*)entity;
-+(void)dbDidDeleted:(NSObject*)entity result:(BOOL)result;
++ (BOOL)dbWillDelete:(NSObject *)entity;
++ (void)dbDidDeleted:(NSObject *)entity result:(BOOL)result;
 
 ///data read finish
-+(void)dbDidSeleted:(NSObject*)entity;
++ (void)dbDidSeleted:(NSObject *)entity;
 
 @end
 
@@ -91,21 +91,21 @@ pod 'LKDBHelper'
 4. Initialize your model with data and insert to database  
 
 ```objective-c
-    LKTestForeign* foreign = [[LKTestForeign alloc]init];
+    LKTestForeign *foreign = [[LKTestForeign alloc] init];
     foreign.address = @":asdasdasdsadasdsdas";
     foreign.postcode  = 123341;
     foreign.addid = 213214;
     
     //插入数据    insert table row
-    LKTest* test = [[LKTest alloc]init];
+    LKTest *test = [[LKTest alloc] init];
     test.name = @"zhan san";
     test.age = 16;
     
     //外键 foreign key
     test.address = foreign;
-    test.blah = @[@"1",@"2",@"3"];
-    test.blah = @[@"0",@[@1],@{@"2":@2},foreign];
-    test.hoho = @{@"array":test.blah,@"foreign":foreign,@"normal":@123456,@"date":[NSDate date]};
+    test.blah = @[@"1", @"2", @"3"];
+    test.blah = @[@"0", @[@1] ,@{ @"2" : @2 }, foreign];
+    test.hoho = @{@"array" : test.blah, @"foreign" : foreign, @"normal" : @123456, @"date" : [NSDate date]};
     
     //同步 插入第一条 数据   Insert the first
     [test saveToDB];
@@ -118,8 +118,8 @@ pod 'LKDBHelper'
 ```objective-c
     select:
         
-        NSMutableArray* array = [LKTest searchWithWhere:nil orderBy:nil offset:0 count:100];
-        for (id obj in arraySync) {
+        NSMutableArray *array = [LKTest searchWithWhere:nil orderBy:nil offset:0 count:100];
+        for (id obj in array) {
             addText(@"%@",[obj printAllPropertys]);
         }
         
@@ -146,16 +146,16 @@ pod 'LKDBHelper'
 
 ```objective-c
  For example: 
-        single:  @"rowid = 1"                         or      @{@"rowid":@1}
+        single:  @"rowid = 1"                         or      @{ @"rowid" : @1 }
  
-        more:    @"rowid = 1 and sex = 0"             or      @{@"rowid":@1,@"sex":@0}
+        more:    @"rowid = 1 and sex = 0"             or      @{ @"rowid" : @1, @"sex" : @0 }
                    
                     when where is "or" type , such as @"rowid = 1 or sex = 0"
                     you only use NSString
  
-        array:   @"rowid in (1,2,3)"                  or      @{@"rowid":@[@1,@2,@3]}
+        array:   @"rowid in (1,2,3)"                  or      @{ @"rowid" : @[@1, @2, @3] }
             
-        composite:  @"rowid in (1,2,3) and sex=0 "      or      @{@"rowid":@[@1,@2,@3],@"sex":@0}
+        composite:  @"rowid in (1,2,3) and sex=0 "      or      @{ @"rowid" : @[@1, @2, @3], @"sex" : @0}
  
         If you want to be judged , only use NSString
         For example: @"date >= '2013-04-01 00:00:00'"
@@ -166,48 +166,50 @@ pod 'LKDBHelper'
 overwirte getTableMapping Function (option)
 
 ```objective-c
-+(NSDictionary *)getTableMapping
-{
-    //return nil 
-    return @{@"name":LKSQLInherit,
-             @"MyAge":@"age",
-             @"img":LKSQLInherit,
-             @"MyDate":@"date",
-             @"color":LKSQLInherit,
-             @"address":LKSQLUserCalculate};
+//手动or自动 绑定sql列
++ (NSDictionary *)getTableMapping {
+    return @{ @"name" : LKSQL_Mapping_Inherit,
+              @"MyAge" : @"age",
+              @"img" : LKSQL_Mapping_Inherit,
+              @"MyDate" : @"date",
+              
+              // version 2 after add
+              @"color" : LKSQL_Mapping_Inherit,
+              
+              //version 3 after add
+              @"address" : LKSQL_Mapping_UserCalculate,
+              @"error" : LKSQL_Mapping_Inherit
+              };
 }
 ```
 
 ## table update (option)
 
 ```objective-c
-+(void)dbDidAlterTable:(LKDBHelper *)helper tableName:(NSString *)tableName addColumns:(NSArray *)columns
-{
-    for (int i=0; i<columns.count; i++)
-    {
-        LKDBProperty* p = [columns objectAtIndex:i];
-        if([p.propertyName isEqualToString:@"error"])
-        {
+// 表结构更新回调
++ (void)dbDidAlterTable:(LKDBHelper *)helper tableName:(NSString *)tableName addColumns:(NSArray *)columns {
+    for (int i = 0; i < columns.count; i++) {
+        LKDBProperty *p = [columns objectAtIndex:i];
+        if ([p.propertyName isEqualToString:@"error"]) {
             [helper executeDB:^(FMDatabase *db) {
-                NSString* sql = [NSString stringWithFormat:@"update %@ set error = name",tableName];
+                NSString *sql = [NSString stringWithFormat:@"update %@ set error = name", tableName];
                 [db executeUpdate:sql];
             }];
         }
     }
+    LKErrorLog(@"your know %@", columns);
 }
 ```
 ## set column attribute (option)
 
 ```objective-c
-+(void)columnAttributeWithProperty:(LKDBProperty *)property
-{
-    if([property.sqlColumnName isEqualToString:@"MyAge"])
-    {
+// 定制化列属性
++ (void)columnAttributeWithProperty:(LKDBProperty *)property {
+    if ([property.sqlColumnName isEqualToString:@"MyAge"]) {
         property.defaultValue = @"15";
-    }
-    if([property.propertyName isEqualToString:@"date"])
-    {
-        property.isUnique = YES;
+    } else if ([property.propertyName isEqualToString:@"date"]) {
+        // if you use unique,this property will also become the primary key
+        //        property.isUnique = YES;
         property.checkValue = @"MyDate > '2000-01-01 00:00:00'";
         property.length = 30;
     }
