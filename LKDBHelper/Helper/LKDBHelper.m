@@ -1103,26 +1103,35 @@ static BOOL LKDBNullIsEmptyString = NO;
     return array;
 }
 
+- (void)foreachResultSet:(FMResultSet *)set block:(void(^)(void))block {
+    while ([set next]) {
+        @autoreleasepool {
+            block();
+        }
+    }
+}
+
 - (NSMutableArray *)executeResult:(FMResultSet *)set Class:(Class)modelClass tableName:(NSString *)tableName {
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:0];
     if (!modelClass) {
-        while ([set next]) {
+        // 防止内存释放太慢引起的 OOM，用 autorelease 包一层
+        [self foreachResultSet:set block:^{
             NSDictionary *dict = [set resultDictionary];
             if (dict) {
                 [array addObject:dict];
             }
-        }
+        }];
     } else {
         LKModelInfos *infos = [modelClass getModelInfos];
         NSInteger columnCount = [set columnCount];
 
         ///当主键是int类型时 会替换掉rowid
         NSString *rowidAliasName = [modelClass db_rowidAliasName];
-
-        while ([set next]) {
+        // 防止内存释放太慢引起的 OOM，用 autorelease 包一层
+        [self foreachResultSet:set block:^{
             NSObject *bindingModel = [[modelClass alloc] init];
             if (bindingModel == nil) {
-                continue;
+                return;
             }
             for (int i = 0; i < columnCount; i++) {
                 NSString *sqlName = [set columnNameForIndex:i];
@@ -1159,21 +1168,28 @@ static BOOL LKDBNullIsEmptyString = NO;
             bindingModel.db_tableName = tableName;
             [modelClass dbDidSeleted:bindingModel];
             [array addObject:bindingModel];
-        }
+        }];
     }
     return array;
 }
 
 #pragma mark - insert operation
 - (BOOL)insertToDB:(NSObject *)model {
-    return [self insertBase:model];
+    BOOL success = NO;
+    @autoreleasepool {
+        success = [self insertBase:model];
+    }
+    return success;
 }
 
 - (void)insertToDB:(NSObject *)model callback:(void (^)(BOOL))block {
     LKDBCode_Async_Begin;
-    BOOL result = [sself insertBase:model];
+    BOOL success = NO;
+    @autoreleasepool {
+        success = [sself insertBase:model];
+    }
     if (block) {
-        block(result);
+        block(success);
     }
     LKDBCode_Async_End;
 }
@@ -1284,14 +1300,21 @@ static BOOL LKDBNullIsEmptyString = NO;
 
 #pragma mark - update operation
 - (BOOL)updateToDB:(NSObject *)model where:(id)where {
-    return [self updateToDBBase:model where:where];
+    BOOL success = NO;
+    @autoreleasepool {
+        success = [self updateToDBBase:model where:where];
+    }
+    return success;
 }
 
 - (void)updateToDB:(NSObject *)model where:(id)where callback:(void (^)(BOOL))block {
     LKDBCode_Async_Begin;
-    BOOL result = [sself updateToDBBase:model where:where];
+    BOOL success = NO;
+    @autoreleasepool {
+        success = [sself updateToDBBase:model where:where];
+    }
     if (block) {
-        block(result);
+        block(success);
     }
     LKDBCode_Async_End;
 }
