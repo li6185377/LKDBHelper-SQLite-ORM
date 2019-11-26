@@ -504,37 +504,37 @@ static char LKModelBase_Key_Inserting;
             NSInteger rowid = [[dic objectForKey:LKDB_RowIdKey] integerValue];
             NSString *tableName = [dic objectForKey:LKDB_TableNameKey];
 
-            NSString *where = nil;
+            NSString *subSQL = nil;
 
             NSString *rowCountWhere = [NSString stringWithFormat:@"select count(rowid) from %@ where rowid=%ld limit 1", tableName, (long)rowid];
             NSInteger result = [[[clazz getUsingLKDBHelper] executeScalarWithSQL:rowCountWhere arguments:nil] integerValue];
             if (result > 0) {
-                where = [NSString stringWithFormat:@"select rowid,* from %@ where rowid=%ld limit 1", tableName, (long)rowid];
+                subSQL = [NSString stringWithFormat:@"select rowid,* from %@ where rowid=%ld limit 1", tableName, (long)rowid];
             } else {
                 NSDictionary *pv = [dic objectForKey:LKDB_PValueKey];
                 if (pv.count > 0) {
                     BOOL isNeedAddDot = NO;
-                    NSMutableString *sb = [NSMutableString stringWithFormat:@"select rowid,* from %@ where", tableName];
+                    NSMutableString *mutableString = [NSMutableString stringWithFormat:@"select rowid,* from %@ where", tableName];
 
                     NSArray *allKeys = pv.allKeys;
                     for (NSString *key in allKeys) {
                         id obj = [pv objectForKey:key];
                         if (isNeedAddDot) {
-                            [sb appendString:@" and"];
+                            [mutableString appendString:@" and"];
                         }
-                        [sb appendFormat:@" %@ = '%@'", key, obj];
+                        [mutableString appendFormat:@" %@ = '%@'", key, obj];
 
                         isNeedAddDot = YES;
                     }
 
-                    [sb appendString:@" limit 1"];
+                    [mutableString appendString:@" limit 1"];
 
-                    where = [NSString stringWithString:sb];
+                    subSQL = mutableString.copy;
                 }
             }
 
-            if (where) {
-                NSArray *array = [[clazz getUsingLKDBHelper] searchWithSQL:where toClass:clazz];
+            if (subSQL.length > 0) {
+                NSArray *array = [[clazz getUsingLKDBHelper] searchWithSQL:subSQL toClass:clazz];
                 if (array.count > 0) {
                     NSObject *result = [array objectAtIndex:0];
                     result.db_tableName = tableName;

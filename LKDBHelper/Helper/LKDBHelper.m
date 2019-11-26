@@ -914,7 +914,7 @@ static BOOL LKDBNullIsEmptyString = NO;
         columnsString = @"*";
     }
 
-    NSMutableString *query = [NSMutableString stringWithFormat:@"select %@,rowid from @t", columnsString];
+    NSMutableString *query = [NSMutableString stringWithFormat:@"select %@,rowid from %@", columnsString, db_tableName];
     NSMutableArray *whereValues = nil;
 
     if (params.whereDic.count > 0) {
@@ -926,32 +926,24 @@ static BOOL LKDBNullIsEmptyString = NO;
     }
 
     [self sqlString:query groupBy:params.groupBy orderBy:params.orderBy offset:params.offset count:params.count];
-
-    // replace @t to model table name
-    NSString *replaceTableName = [NSString stringWithFormat:@" %@ ", db_tableName];
-
-    if ([query hasSuffix:@" @t"]) {
-        [query appendString:@" "];
-    }
-
-    [query replaceOccurrencesOfString:@" @t " withString:replaceTableName options:NSCaseInsensitiveSearch range:NSMakeRange(0, query.length)];
-
+    
+    NSString * const executeQuery = query.copy;
     __block NSMutableArray *results = nil;
     [self executeDB:^(FMDatabase *db) {
         FMResultSet *set = nil;
-
+        // 根据是否有 where 参数来决定调用哪个API
         if (whereValues.count == 0) {
-            set = [db executeQuery:query];
+            set = [db executeQuery:executeQuery];
         } else {
-            set = [db executeQuery:query withArgumentsInArray:whereValues];
+            set = [db executeQuery:executeQuery withArgumentsInArray:whereValues];
         }
-
+        // Results to Models
         if (columnCount == 1) {
             results = [self executeOneColumnResult:set];
         } else {
             results = [self executeResult:set Class:params.toClass tableName:db_tableName];
         }
-
+        // free sql handler
         [set close];
     }];
     return results;
@@ -994,42 +986,40 @@ static BOOL LKDBNullIsEmptyString = NO;
 }
 
 - (NSString *)replaceTableNameIfNeeded:(NSString *)sql withModelClass:(Class)modelClass {
-    if (!modelClass) {
+    
+    // 如果是单表查询情况下，给 query 追加 rowid column
+    if ([sql componentsSeparatedByString:@" from "].count == 2 && [sql rangeOfString:@" join "].length == 0) {
+        sql = [sql stringByReplacingOccurrencesOfString:@" from " withString:@",rowid from "];
+    }
+    
+    // 无需替换 tableName
+    if (!modelClass || [sql rangeOfString:@"@t"].length == 0) {
         return sql;
     }
-
-    NSString *tableName = [modelClass getTableName];
+    
+    NSString * const tableName = [modelClass getTableName];
     if (!tableName) {
         return sql;
     }
 
-    if (modelClass) {
-        // 检测是否创建过表
-        [self.threadLock lock];
-        if ([self.createdTableNames containsObject:tableName] == NO) {
-            [self _createTableWithModelClass:modelClass tableName:tableName];
-        }
-        [self.threadLock unlock];
+    // 检测是否创建过表
+    [self.threadLock lock];
+    if ([self.createdTableNames containsObject:tableName] == NO) {
+        [self _createTableWithModelClass:modelClass tableName:tableName];
     }
+    [self.threadLock unlock];
 
     // replace @t to model table name
-    NSString *replaceString = [tableName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if ([sql hasSuffix:@" @t"]) {
         sql = [sql stringByAppendingString:@" "];
     }
-    if ([sql componentsSeparatedByString:@" from "].count == 2 && [sql rangeOfString:@" join "].length == 0) {
-        sql = [sql stringByReplacingOccurrencesOfString:@" from " withString:[NSString stringWithFormat:@",%@.rowid from ", replaceString]];
-    }
 
     sql = [sql stringByReplacingOccurrencesOfString:@" @t "
-                                         withString:
-                                             [NSString stringWithFormat:@" %@ ", replaceString]];
+                                         withString:[NSString stringWithFormat:@" %@ ", tableName]];
     sql = [sql stringByReplacingOccurrencesOfString:@" @t,"
-                                         withString:
-                                             [NSString stringWithFormat:@" %@,", replaceString]];
+                                         withString:[NSString stringWithFormat:@" %@,", tableName]];
     sql = [sql stringByReplacingOccurrencesOfString:@",@t "
-                                         withString:
-                                             [NSString stringWithFormat:@",%@ ", replaceString]];
+                                         withString:[NSString stringWithFormat:@",%@ ", tableName]];
 
     return sql;
 }
