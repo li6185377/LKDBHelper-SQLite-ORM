@@ -93,9 +93,6 @@ static char LKModelBase_Key_Inserting;
     NSString *dir = [NSString stringWithFormat:@"dbdata/%@", NSStringFromClass(self)];
     return [LKDBUtils getPathForDocuments:filename inDir:dir];
 }
-+ (NSDictionary *)getTableMapping {
-    return nil;
-}
 #pragma mark - Table Data Function 表数据
 + (NSDateFormatter *)getModelDateFormatter {
     return nil;
