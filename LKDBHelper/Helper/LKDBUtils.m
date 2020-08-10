@@ -17,7 +17,7 @@
     self = [super init];
     if (self) {
         self.lock = [[NSRecursiveLock alloc] init];
-        self.generatesCalendarDates = YES;
+        self.generatesCalendarDates = NO;
         self.dateStyle = NSDateFormatterNoStyle;
         self.timeStyle = NSDateFormatterNoStyle;
         self.AMSymbol = nil;
