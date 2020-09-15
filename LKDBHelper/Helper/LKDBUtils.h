@@ -43,6 +43,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+/// 需要外部实现对应 API
+@interface LKDBUtils (output)
+
+// LKDateFormatter 创建完毕， 可以修改对应属性
++ (void)onCreateWithDateFormatter:(NSDateFormatter *)dateFormatter;
+
+// NSNumberFormatter 创建完毕， 可以修改对应属性
++ (void)onCreateWithNumberFormatter:(NSNumberFormatter *)numberFormatter;
+
+@end
+
 #ifdef DEBUG
 #ifdef NSLog
 #define LKErrorLog(fmt, ...) NSLog(@"#LKDBHelper ERROR:\n" fmt, ##__VA_ARGS__);

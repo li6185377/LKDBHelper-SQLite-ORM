@@ -9,14 +9,15 @@
 #import "LKDBUtils.h"
 
 @interface LKDateFormatter : NSDateFormatter
-@property (nonatomic, strong) NSRecursiveLock *lock;
+@property (nonatomic, assign) dispatch_semaphore_t lock;
 @end
 
 @implementation LKDateFormatter
-- (id)init {
+
+- (instancetype)init {
     self = [super init];
     if (self) {
-        self.lock = [[NSRecursiveLock alloc] init];
+        self.lock = dispatch_semaphore_create(1);
         self.generatesCalendarDates = YES;
         self.dateStyle = NSDateFormatterNoStyle;
         self.timeStyle = NSDateFormatterNoStyle;
@@ -26,22 +27,28 @@
         if (locale) {
             [self setLocale:locale];
         }
+        if ([LKDBUtils respondsToSelector:@selector(onCreateWithDateFormatter:)]) {
+            [LKDBUtils onCreateWithDateFormatter:self];
+        }
     }
     return self;
 }
+
 //防止 iOS5 多线程 格式化时间时 崩溃
 - (NSDate *)dateFromString:(NSString *)string {
-    [_lock lock];
+    dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER);
     NSDate *date = [super dateFromString:string];
-    [_lock unlock];
+    dispatch_semaphore_signal(_lock);
     return date;
 }
+
 - (NSString *)stringFromDate:(NSDate *)date {
-    [_lock lock];
+    dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER);
     NSString *string = [super stringFromDate:date];
-    [_lock unlock];
+    dispatch_semaphore_signal(_lock);
     return string;
 }
+
 @end
 
 @interface LKNumberFormatter : NSNumberFormatter
@@ -49,6 +56,17 @@
 @end
 
 @implementation LKNumberFormatter
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        if ([LKDBUtils respondsToSelector:@selector(onCreateWithNumberFormatter:)]) {
+            [LKDBUtils onCreateWithNumberFormatter:self];
+        }
+    }
+    return self;
+}
+
 - (NSString *)stringFromNumber:(NSNumber *)number {
     NSString *string = [number stringValue];
     if (!string) {
@@ -56,6 +74,7 @@
     }
     return string;
 }
+
 - (NSNumber *)numberFromString:(NSString *)string {
     NSNumber *number = [super numberFromString:string];
     if (!number) {
@@ -63,6 +82,7 @@
     }
     return number;
 }
+
 @end
 
 @implementation LKDBUtils
@@ -125,6 +145,7 @@
     return homePath;
 #endif
 }
+
 + (NSString *)getDirectoryForDocuments:(NSString *)dir {
     NSString *dirPath = [[self getDocumentPath] stringByAppendingPathComponent:dir];
     BOOL isDir = NO;
@@ -137,23 +158,29 @@
     }
     return dirPath;
 }
+
 + (NSString *)getPathForDocuments:(NSString *)filename {
     return [[self getDocumentPath] stringByAppendingPathComponent:filename];
 }
+
 + (NSString *)getPathForDocuments:(NSString *)filename inDir:(NSString *)dir {
     return [[self getDirectoryForDocuments:dir] stringByAppendingPathComponent:filename];
 }
+
 + (BOOL)isFileExists:(NSString *)filepath {
     return [[NSFileManager defaultManager] fileExistsAtPath:filepath];
 }
+
 + (BOOL)deleteWithFilepath:(NSString *)filepath {
     return [[NSFileManager defaultManager] removeItemAtPath:filepath error:nil];
 }
+
 + (NSArray *)getFilenamesWithDir:(NSString *)dir {
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSArray *fileList = [fileManager contentsOfDirectoryAtPath:dir error:nil];
     return fileList;
 }
+
 + (BOOL)checkStringIsEmpty:(NSString *)string {
     if (string == nil) {
         return YES;
@@ -179,6 +206,7 @@
     });
     return format;
 }
+
 + (NSString *)stringWithDate:(NSDate *)date {
     NSDateFormatter *formatter = [self getDBDateFormat];
     NSString *datestr = [formatter stringFromDate:date];
@@ -187,11 +215,13 @@
     }
     return datestr;
 }
+
 + (NSDate *)dateWithString:(NSString *)str {
     NSDateFormatter *formatter = [self getDBDateFormat];
     NSDate *date = [formatter dateFromString:str];
     return date;
 }
+
 + (NSNumberFormatter *)numberFormatter {
     static NSNumberFormatter *numberFormatter = nil;
     static dispatch_once_t onceToken;
@@ -200,6 +230,7 @@
     });
     return numberFormatter;
 }
+
 @end
 
 inline NSString *LKSQLTypeFromObjcType(NSString *objcType) {
