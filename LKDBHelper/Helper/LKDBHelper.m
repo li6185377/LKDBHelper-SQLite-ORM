@@ -64,6 +64,8 @@
 @property (nonatomic, assign) BOOL runingAutoCloseTimer;
 @property (nonatomic, assign) NSInteger autoCloseDBDelayTime;
 
+@property (nonatomic, assign) BOOL inAutoReleasePool;
+
 @end
 
 @implementation LKDBHelper
@@ -1093,11 +1095,22 @@ static BOOL LKDBNullIsEmptyString = NO;
     return array;
 }
 
+- (void)inAutoReleaseExecuteBlock:(void(^)(void))block {
+    if (self.inAutoReleasePool) {
+        // 已在 @autoreleasepool 范围内
+        block();
+    } else {
+        @autoreleasepool {
+            self.inAutoReleasePool = YES;
+            block();
+            self.inAutoReleasePool = NO;
+        }
+    }
+}
+
 - (void)foreachResultSet:(FMResultSet *)set block:(void(^)(void))block {
     while ([set next]) {
-        @autoreleasepool {
-            block();
-        }
+        [self inAutoReleaseExecuteBlock:block];
     }
 }
 
@@ -1165,19 +1178,19 @@ static BOOL LKDBNullIsEmptyString = NO;
 
 #pragma mark - insert operation
 - (BOOL)insertToDB:(NSObject *)model {
-    BOOL success = NO;
-    @autoreleasepool {
+    __block BOOL success = NO;
+    [self inAutoReleaseExecuteBlock:^{
         success = [self insertBase:model];
-    }
+    }];
     return success;
 }
 
 - (void)insertToDB:(NSObject *)model callback:(void (^)(BOOL))block {
     LKDBCode_Async_Begin;
-    BOOL success = NO;
-    @autoreleasepool {
+    __block BOOL success = NO;
+    [sself inAutoReleaseExecuteBlock:^{
         success = [sself insertBase:model];
-    }
+    }];
     if (block) {
         block(success);
     }
@@ -1290,19 +1303,19 @@ static BOOL LKDBNullIsEmptyString = NO;
 
 #pragma mark - update operation
 - (BOOL)updateToDB:(NSObject *)model where:(id)where {
-    BOOL success = NO;
-    @autoreleasepool {
+    __block BOOL success = NO;
+    [self inAutoReleaseExecuteBlock:^{
         success = [self updateToDBBase:model where:where];
-    }
+    }];
     return success;
 }
 
 - (void)updateToDB:(NSObject *)model where:(id)where callback:(void (^)(BOOL))block {
     LKDBCode_Async_Begin;
-    BOOL success = NO;
-    @autoreleasepool {
+    __block BOOL success = NO;
+    [sself inAutoReleaseExecuteBlock:^{
         success = [sself updateToDBBase:model where:where];
-    }
+    }];
     if (block) {
         block(success);
     }
