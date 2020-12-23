@@ -43,16 +43,32 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-/// 需要外部实现对应 API
-@interface LKDBUtils (output)
 
-// LKDateFormatter 创建完毕， 可以修改对应属性
-+ (void)onCreateWithDateFormatter:(NSDateFormatter *)dateFormatter;
+#pragma mark - 数据格式化相关，可 method swizzle 做逻辑替换
 
-// NSNumberFormatter 创建完毕， 可以修改对应属性
-+ (void)onCreateWithNumberFormatter:(NSNumberFormatter *)numberFormatter;
+@interface LKDateFormatter : NSDateFormatter
+
+///由于 NSDateFormatter 相关API 并不是线程安全的
+@property (nonatomic, assign) dispatch_semaphore_t lock;
 
 @end
+
+@interface LKNumberFormatter : NSNumberFormatter
+
+@end
+
+/// 需要外部实现对应 API
+@interface LKDBUtils (Events)
+
+// LKDateFormatter 创建完毕， 可以修改对应属性
++ (void)onCreateWithDateFormatter:(LKDateFormatter *)dateFormatter;
+
+// LKNumberFormatter 创建完毕， 可以修改对应属性
++ (void)onCreateWithNumberFormatter:(LKNumberFormatter *)numberFormatter;
+
+@end
+
+#pragma mark - Types
 
 #ifdef DEBUG
 #ifdef NSLog
@@ -100,6 +116,8 @@ static NSString *const LKDB_PValueKey = @"DB_PKeyValue";
 
 ///Object-c type converted to SQLite type  把Object-c 类型 转换为sqlite 类型
 extern NSString *LKSQLTypeFromObjcType(NSString *objcType);
+
+#pragma mark - Search Utils
 
 @interface LKDBQueryParams : NSObject
 

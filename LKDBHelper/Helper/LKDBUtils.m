@@ -8,10 +8,6 @@
 
 #import "LKDBUtils.h"
 
-@interface LKDateFormatter : NSDateFormatter
-@property (nonatomic, assign) dispatch_semaphore_t lock;
-@end
-
 @implementation LKDateFormatter
 
 - (instancetype)init {
@@ -51,10 +47,6 @@
 
 @end
 
-@interface LKNumberFormatter : NSNumberFormatter
-
-@end
-
 @implementation LKNumberFormatter
 
 - (instancetype)init {
@@ -76,9 +68,11 @@
 }
 
 - (NSNumber *)numberFromString:(NSString *)string {
-    NSNumber *number = [super numberFromString:string];
-    if (!number) {
-        number = @(string.doubleValue);
+    NSNumber *number = nil;
+    if ([string rangeOfString:@"."].length > 0) {
+        number = [NSNumber numberWithDouble:string.doubleValue];
+    } else {
+        number = [NSNumber numberWithLongLong:string.longLongValue];
     }
     return number;
 }

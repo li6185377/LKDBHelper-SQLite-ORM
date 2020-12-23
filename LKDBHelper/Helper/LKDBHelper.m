@@ -1178,19 +1178,13 @@ static BOOL LKDBNullIsEmptyString = NO;
 
 #pragma mark - insert operation
 - (BOOL)insertToDB:(NSObject *)model {
-    __block BOOL success = NO;
-    [self inAutoReleaseExecuteBlock:^{
-        success = [self insertBase:model];
-    }];
+    BOOL success = [self insertBase:model];
     return success;
 }
 
 - (void)insertToDB:(NSObject *)model callback:(void (^)(BOOL))block {
     LKDBCode_Async_Begin;
-    __block BOOL success = NO;
-    [sself inAutoReleaseExecuteBlock:^{
-        success = [sself insertBase:model];
-    }];
+    BOOL success = [sself insertBase:model];
     if (block) {
         block(success);
     }
@@ -1303,19 +1297,13 @@ static BOOL LKDBNullIsEmptyString = NO;
 
 #pragma mark - update operation
 - (BOOL)updateToDB:(NSObject *)model where:(id)where {
-    __block BOOL success = NO;
-    [self inAutoReleaseExecuteBlock:^{
-        success = [self updateToDBBase:model where:where];
-    }];
+    BOOL success = [self updateToDBBase:model where:where];
     return success;
 }
 
 - (void)updateToDB:(NSObject *)model where:(id)where callback:(void (^)(BOOL))block {
     LKDBCode_Async_Begin;
-    __block BOOL success = NO;
-    [sself inAutoReleaseExecuteBlock:^{
-        success = [sself updateToDBBase:model where:where];
-    }];
+    BOOL success = [sself updateToDBBase:model where:where];
     if (block) {
         block(success);
     }

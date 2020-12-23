@@ -146,7 +146,7 @@ static char LKModelBase_Key_Inserting;
 #endif
     } else if ([value isKindOfClass:[LKDBImage class]]) {
         long random = arc4random();
-        long date = [[NSDate date] timeIntervalSince1970];
+        long date = CFAbsoluteTimeGetCurrent();
         NSString *filename = [NSString stringWithFormat:@"img%ld%ld", date & 0xFFFFF, random & 0xFFF];
 
 #ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
@@ -163,7 +163,7 @@ static char LKModelBase_Key_Inserting;
         returnValue = filename;
     } else if ([value isKindOfClass:[NSData class]]) {
         long random = arc4random();
-        long date = [[NSDate date] timeIntervalSince1970];
+        long date = CFAbsoluteTimeGetCurrent();
         NSString *filename = [NSString stringWithFormat:@"data%ld%ld", date & 0xFFFFF, random & 0xFFF];
 
         [value writeToFile:[self.class getDBDataPathWithName:filename] atomically:YES];
