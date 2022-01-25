@@ -313,10 +313,13 @@ static BOOL LKDBNullIsEmptyString = NO;
     if (!self.autoCloseDBDelayTime) {
         return;
     }
-    // 超过阈值没有操作 关闭数据库链接
-    if (CFAbsoluteTimeGetCurrent() - self.lastExecuteDBTime > self.autoCloseDBDelayTime) {
-        [self closeDB];
+    // 判断阈值内是否有操作
+    const NSInteger nowTime = CFAbsoluteTimeGetCurrent();
+    if (nowTime - self.lastExecuteDBTime < self.autoCloseDBDelayTime) {
+        return;
     }
+    // 关闭数据库链接
+    [self closeDB];
 }
 
 - (void)runAutoVacuumAction {
@@ -326,6 +329,11 @@ static BOOL LKDBNullIsEmptyString = NO;
     }
     // 未开启自动压缩
     if (!self.enableAutoVacuum) {
+        return;
+    }
+    // 判断阈值内是否有操作
+    const NSInteger nowTime = CFAbsoluteTimeGetCurrent();
+    if (nowTime - self.lastExecuteDBTime < 10) {
         return;
     }
     // 读取全局缓存文件
@@ -344,7 +352,6 @@ static BOOL LKDBNullIsEmptyString = NO;
     });
     // 3天操作一次
     NSString *dbKey = self.dbPath.lastPathComponent;
-    NSInteger nowTime = CFAbsoluteTimeGetCurrent();
     dispatch_semaphore_wait(dbLock, DISPATCH_TIME_FOREVER);
     NSInteger lastTime = [[dbAutoVaccumMap objectForKey:dbKey] integerValue];
     if (0 == lastTime) {
