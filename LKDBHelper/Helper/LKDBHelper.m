@@ -61,11 +61,10 @@
 @property (nonatomic, strong) NSRecursiveLock *threadLock;
 
 @property (nonatomic, assign) NSInteger lastExecuteDBTime;
-@property (nonatomic, assign) BOOL runingAutoCloseTimer;
+@property (nonatomic, assign) BOOL runingAutoActionsTimer;
+
 @property (nonatomic, assign) NSInteger autoCloseDBDelayTime;
-
 @property (nonatomic, assign) BOOL inAutoReleasePool;
-
 @end
 
 @implementation LKDBHelper
@@ -161,9 +160,10 @@ static BOOL LKDBNullIsEmptyString = NO;
             if (self) {
                 self.threadLock = [[NSRecursiveLock alloc] init];
                 self.createdTableNames = [NSMutableArray array];
-                self.lastExecuteDBTime = [[NSDate date] timeIntervalSince1970];
+                self.lastExecuteDBTime = CFAbsoluteTimeGetCurrent();
                 self.autoCloseDBDelayTime = 15;
-
+                self.enableAutoVacuum = YES;
+                
                 [self setDBPath:filePath];
                 [LKDBHelper dbHelperWithPath:nil save:self];
             }
@@ -263,11 +263,10 @@ static BOOL LKDBNullIsEmptyString = NO;
         }];
     }
 
-    self.lastExecuteDBTime = [[NSDate date] timeIntervalSince1970];
-
-    if (self.autoCloseDBDelayTime > 0) {
-        [self startAutoCloseTimer];
-    }
+    self.lastExecuteDBTime = CFAbsoluteTimeGetCurrent();
+    
+    // 执行定时器任务
+    [self startAutoActionsTimer];
 
     [self.threadLock unlock];
 }
@@ -277,37 +276,94 @@ static BOOL LKDBNullIsEmptyString = NO;
         time = 0;
     }
     self.autoCloseDBDelayTime = time;
-    if (time > 0) {
-        [self startAutoCloseTimer];
-    }
+    // 执行定时器任务
+    [self startAutoActionsTimer];
 }
 
-- (void)startAutoCloseTimer {
-    if (self.runingAutoCloseTimer) {
+- (void)startAutoActionsTimer {
+    // 无需执行任务
+    if (!self.autoCloseDBDelayTime && !self.enableAutoVacuum) {
         return;
     }
-    self.runingAutoCloseTimer = YES;
+    if (self.runingAutoActionsTimer) {
+        return;
+    }
+    self.runingAutoActionsTimer = YES;
     __weak LKDBHelper *wself = self;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.autoCloseDBDelayTime * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
         __strong LKDBHelper *self = wself;
         [self.threadLock lock];
-        self.runingAutoCloseTimer = NO;
-        BOOL hasClosed = [self autoCloseDBConnection];
-        if (!hasClosed && self.autoCloseDBDelayTime > 0) {
-            [self startAutoCloseTimer];
+        [self runAutoVacuumAction];
+        [self runAutoCloseDBConnection];
+        self.runingAutoActionsTimer = NO;
+        if (self.bindingQueue != nil) {
+            // 数据库链接未关闭，则继续执行定时器
+            [self startAutoActionsTimer];
         }
         [self.threadLock unlock];
     });
 }
 
-- (BOOL)autoCloseDBConnection {
-    NSInteger now = [[NSDate date] timeIntervalSince1970];
-    /// 如果10秒没有操作 则关闭数据库链接
-    if (now - self.lastExecuteDBTime > 10) {
-        [self closeDB];
-        return YES;
+- (void)runAutoCloseDBConnection {
+    // 数据库链接已关闭
+    if (!self.bindingQueue) {
+        return;
     }
-    return NO;
+    // 未开启自动关闭数据库连接
+    if (!self.autoCloseDBDelayTime) {
+        return;
+    }
+    // 超过阈值没有操作 关闭数据库链接
+    if (CFAbsoluteTimeGetCurrent() - self.lastExecuteDBTime > self.autoCloseDBDelayTime) {
+        [self closeDB];
+    }
+}
+
+- (void)runAutoVacuumAction {
+    // 数据库链接已关闭
+    if (!self.bindingQueue) {
+        return;
+    }
+    // 未开启自动压缩
+    if (!self.enableAutoVacuum) {
+        return;
+    }
+    // 读取全局缓存文件
+    static NSMutableDictionary *dbAutoVaccumMap = nil;
+    static NSString *dbAutoVaccumPath = nil;
+    static dispatch_semaphore_t dbLock = NULL;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSString *cacheDirectory = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
+        dbAutoVaccumPath = [cacheDirectory stringByAppendingString:@"lkdb-auto-vacuum.plist"];
+        dbAutoVaccumMap = [NSMutableDictionary dictionaryWithContentsOfFile:dbAutoVaccumPath];
+        if (!dbAutoVaccumMap) {
+            dbAutoVaccumMap = [NSMutableDictionary dictionary];
+        }
+        dbLock = dispatch_semaphore_create(1);
+    });
+    // 3天操作一次
+    NSString *dbKey = self.dbPath.lastPathComponent;
+    NSInteger nowTime = CFAbsoluteTimeGetCurrent();
+    dispatch_semaphore_wait(dbLock, DISPATCH_TIME_FOREVER);
+    NSInteger lastTime = [[dbAutoVaccumMap objectForKey:dbKey] integerValue];
+    if (0 == lastTime) {
+        // 记录第一次运行的时间
+        lastTime = nowTime;
+        [dbAutoVaccumMap setObject:@(nowTime) forKey:dbKey];
+        [dbAutoVaccumMap writeToFile:dbAutoVaccumPath atomically:YES];
+    }
+    dispatch_semaphore_signal(dbLock);
+    if (nowTime - lastTime < 259200) { // 60 * 60 * 24 * 3
+        return;
+    }
+    // 执行数据压缩
+    [self executeSQL:@"vacuum" arguments:nil];
+    // 记录执行时间
+    dispatch_semaphore_wait(dbLock, DISPATCH_TIME_FOREVER);
+    [dbAutoVaccumMap setObject:@(nowTime) forKey:dbKey];
+    [dbAutoVaccumMap writeToFile:dbAutoVaccumPath atomically:YES];
+    dispatch_semaphore_signal(dbLock);
 }
 
 - (BOOL)executeSQL:(NSString *)sql arguments:(NSArray *)args {

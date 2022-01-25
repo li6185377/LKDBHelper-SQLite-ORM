@@ -48,9 +48,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)closeDB;
 
 /**
- *    @brief  当数据库无操作 多少秒后 自动关闭数据库连接, 区间 [10 ~ int_max]  默认：20秒
+ *    @brief  当数据库无操作 多少秒后 自动关闭数据库连接, 区间 [0 ~ int_max]  默认：15秒，0：不自动关闭
  */
 - (void)setAutoCloseDBTime:(NSInteger)time;
+
+/**
+ *    @brief  当数据库10秒未操作时，自动压缩数据库空间，3天只会执行一次
+ *            如果需要比较及时，自行执行 vacuum 命令
+ */
+@property (nonatomic, assign) BOOL enableAutoVacuum;
 
 /**
  *  @brief current encryption key.
