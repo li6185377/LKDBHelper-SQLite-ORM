@@ -542,7 +542,7 @@ static BOOL LKDBNullIsEmptyString = NO;
     __block BOOL success = NO;
     if (self.bindingQueue && _encryptionKey.length > 0) {
         [self executeDB:^(FMDatabase *db) {
-            success = [db setKey:_encryptionKey];
+            success = [db setKey:self->_encryptionKey];
         }];
     }
     [self.threadLock unlock];
@@ -554,7 +554,7 @@ static BOOL LKDBNullIsEmptyString = NO;
     __block BOOL success = NO;
     if (self.bindingQueue && _encryptionKey.length > 0) {
         [self executeDB:^(FMDatabase *db) {
-            success = [db rekey:_encryptionKey];
+            success = [db rekey:self->_encryptionKey];
         }];
     }
     [self.threadLock unlock];

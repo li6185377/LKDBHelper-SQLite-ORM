@@ -51,9 +51,6 @@ NS_ASSUME_NONNULL_BEGIN
  *  @param columns type can NSArray or NSString(Search for a specific column.  Search only one, only to return the contents of the column collection)
  
  *  @param where   where type can NSDictionary or NSString
- *  @param orderBy
- *  @param offset
- *  @param count
  *
  *  @return model collection  or   contents of the columns collection
  */

@@ -8,12 +8,14 @@
 
 #import "LKDBUtils.h"
 
-@implementation LKDateFormatter
+@implementation LKDateFormatter {
+    dispatch_semaphore_t _lock;
+}
 
 - (instancetype)init {
     self = [super init];
     if (self) {
-        self.lock = dispatch_semaphore_create(1);
+        _lock = dispatch_semaphore_create(1);
         self.generatesCalendarDates = YES;
         self.dateStyle = NSDateFormatterNoStyle;
         self.timeStyle = NSDateFormatterNoStyle;
@@ -28,6 +30,10 @@
         }
     }
     return self;
+}
+
+- (dispatch_semaphore_t)lock {
+    return _lock;
 }
 
 //防止 iOS5 多线程 格式化时间时 崩溃

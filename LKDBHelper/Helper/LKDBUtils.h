@@ -49,7 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface LKDateFormatter : NSDateFormatter
 
 ///由于 NSDateFormatter 相关API 并不是线程安全的
-@property (nonatomic, assign) dispatch_semaphore_t lock;
+@property (nonatomic, readonly) dispatch_semaphore_t lock;
 
 @end
 

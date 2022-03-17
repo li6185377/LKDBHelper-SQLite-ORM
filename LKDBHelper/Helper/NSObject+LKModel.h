@@ -51,7 +51,6 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  multi primary key
  *  联合主键
- *  @return
  */
 + (nullable NSArray *)getPrimaryKeyUnionArray;
 
