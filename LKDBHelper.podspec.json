@@ -14,26 +14,24 @@
   },
   "platforms": {
     "ios": "5.0",
-    "osx": "10.7"
+    "osx": "10.7",
+    "watchos": "2.0"
   },
 
   "requires_arc": true,
 
   "default_subspec": ["standard"],
-  "subspecs": [
-      {
-        "name": "standard",
-        "source_files": "LKDBHelper/Helper/*.{h,m}",
-        "dependencies": {
-          "FMDB": []
-        }
-      },
-      {
-        "name": "FMDBStandalone",
-        "source_files": "LKDBHelper/Helper/*.{h,m}",
-        "dependencies": {
-          "FMDB/standalone": []
-        }
-      }
-  ]
+  "subspecs": [{
+    "name": "standard",
+    "source_files": "LKDBHelper/Helper/*.{h,m}",
+    "dependencies": {
+      "FMDB": []
+    }
+  }, {
+    "name": "FMDBStandalone",
+    "source_files": "LKDBHelper/Helper/*.{h,m}",
+    "dependencies": {
+      "FMDB/standalone": []
+    }
+  }]
 }

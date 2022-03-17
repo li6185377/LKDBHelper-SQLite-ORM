@@ -1,4 +1,9 @@
-platform :ios,5.0
 target 'iOS-Demo' do
+platform :ios,5.0
+pod 'LKDBHelper', :path => '../'
+end
+
+target 'Watch WatchKit Extension' do
+platform :watchos, '2.0'
 pod 'LKDBHelper', :path => '../'
 end

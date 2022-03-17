@@ -2,16 +2,16 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
-  - LKDBHelper (2.5.1):
-    - LKDBHelper/standard (= 2.5.1)
-  - LKDBHelper/standard (2.5.1):
+  - LKDBHelper (2.5.8):
+    - LKDBHelper/standard (= 2.5.8)
+  - LKDBHelper/standard (2.5.8):
     - FMDB
 
 DEPENDENCIES:
   - LKDBHelper (from `../`)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  trunk:
     - FMDB
 
 EXTERNAL SOURCES:
@@ -20,8 +20,8 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  LKDBHelper: 9a276ba51f2e16263d46a9517e16cc9b03472664
+  LKDBHelper: f74f6b4de67fffa578412052c6aa23ecf952dae2
 
-PODFILE CHECKSUM: 8ab4fcb50ca555a64e4a5b32b3d09ca09c6105ce
+PODFILE CHECKSUM: b9c1948f10a28d51b2e02ab96e4f7eb69e105bd8
 
-COCOAPODS: 1.7.5
+COCOAPODS: 1.10.2
