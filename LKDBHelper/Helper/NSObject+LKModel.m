@@ -100,7 +100,8 @@ static char LKModelBase_Key_Inserting;
 
 ///get
 - (id)modelGetValue:(LKDBProperty *)property {
-    id value = [self valueForKey:property.propertyName];
+    NSString * const pKey = property.propertyName;
+    id const value = [self valueForKey:pKey];
     id returnValue = value;
     if (value == nil) {
         return nil;
@@ -173,11 +174,11 @@ static char LKModelBase_Key_Inserting;
         returnValue = [value absoluteString];
     } else {
         if ([value isKindOfClass:[NSArray class]]) {
-            returnValue = [self db_jsonObjectFromArray:value];
+            returnValue = [self db_jsonObjectFromArray:value pKey:pKey];
         } else if ([value isKindOfClass:[NSDictionary class]]) {
-            returnValue = [self db_jsonObjectFromDictionary:value];
+            returnValue = [self db_jsonObjectFromDictionary:value pKey:pKey];
         } else {
-            returnValue = [self db_jsonObjectFromModel:value];
+            returnValue = [self db_jsonObjectFromModel:value pKey:pKey];
         }
         returnValue = [self db_jsonStringFromObject:returnValue];
     }
@@ -331,14 +332,14 @@ static char LKModelBase_Key_Inserting;
     [self setValue:modelValue forKey:property.propertyName];
 }
 #pragma mark - 对 model NSArray NSDictionary 进行支持
-- (id)db_jsonObjectFromDictionary:(NSDictionary *)dic {
+- (id)db_jsonObjectFromDictionary:(NSDictionary *)dic pKey:(NSString *)pKey {
     if ([NSJSONSerialization isValidJSONObject:dic]) {
         NSDictionary *bomb = @{LKDB_TypeKey: LKDB_TypeKey_JSON, LKDB_ValueKey: dic};
         return bomb;
     } else {
         NSMutableDictionary *toDic = [NSMutableDictionary dictionary];
         [dic enumerateKeysAndObjectsUsingBlock:^(id _Nonnull key, id _Nonnull obj, BOOL *_Nonnull stop) {
-            id jsonObject = [self db_jsonObjectWithObject:obj];
+            id jsonObject = [self db_jsonObjectWithObject:obj pKey:pKey];
             if (jsonObject) {
                 toDic[key] = jsonObject;
             }
@@ -350,7 +351,7 @@ static char LKModelBase_Key_Inserting;
     }
     return nil;
 }
-- (id)db_jsonObjectFromArray:(NSArray *)array {
+- (id)db_jsonObjectFromArray:(NSArray *)array pKey:(NSString *)pKey {
     if ([NSJSONSerialization isValidJSONObject:array]) {
         NSDictionary *bomb = @{LKDB_TypeKey: LKDB_TypeKey_JSON, LKDB_ValueKey: array};
         return bomb;
@@ -359,7 +360,7 @@ static char LKModelBase_Key_Inserting;
         NSInteger count = array.count;
         for (NSInteger i = 0; i < count; i++) {
             id obj = [array objectAtIndex:i];
-            id jsonObject = [self db_jsonObjectWithObject:obj];
+            id jsonObject = [self db_jsonObjectWithObject:obj pKey:pKey];
             if (jsonObject) {
                 [toArray addObject:jsonObject];
             }
@@ -373,7 +374,7 @@ static char LKModelBase_Key_Inserting;
     return nil;
 }
 ///目前只支持 model、NSString、NSNumber 简单类型
-- (id)db_jsonObjectWithObject:(id)obj {
+- (id)db_jsonObjectWithObject:(id)obj pKey:(NSString *)pKey {
     id jsonObject = nil;
     if ([obj isKindOfClass:[NSString class]] || [obj isKindOfClass:[NSNumber class]]) {
         jsonObject = obj;
@@ -390,11 +391,11 @@ static char LKModelBase_Key_Inserting;
             jsonObject = @{LKDB_TypeKey: LKDB_TypeKey_Date, LKDB_ValueKey: dateString};
         }
     } else if ([obj isKindOfClass:[NSArray class]]) {
-        jsonObject = [self db_jsonObjectFromArray:obj];
+        jsonObject = [self db_jsonObjectFromArray:obj pKey:pKey];
     } else if ([obj isKindOfClass:[NSDictionary class]]) {
-        jsonObject = [self db_jsonObjectFromDictionary:obj];
+        jsonObject = [self db_jsonObjectFromDictionary:obj pKey:pKey];
     } else {
-        jsonObject = [self db_jsonObjectFromModel:obj];
+        jsonObject = [self db_jsonObjectFromModel:obj pKey:pKey];
     }
 
     if (jsonObject == nil) {
@@ -403,7 +404,7 @@ static char LKModelBase_Key_Inserting;
     return jsonObject;
 }
 
-- (id)db_jsonObjectFromModel:(NSObject *)model {
+- (id)db_jsonObjectFromModel:(NSObject *)model pKey:(NSString *)pKey {
     Class clazz = model.class;
     NSDictionary *jsonObject = nil;
     if (model.rowid > 0) {
@@ -416,7 +417,7 @@ static char LKModelBase_Key_Inserting;
                 jsonObject = [self db_readInfoWithModel:model class:clazz];
             }
         } else {
-            NSAssert(NO, @"目前LKDB 还不支持 循环引用。  比如 A 持有 B，   B 持有 A，这种的存储");
+            NSAssert(NO, @"目前LKDB不支持循环引用。Model:%@ Key:%@ Value:%@", self, pKey, model);
         }
     }
     return jsonObject;
