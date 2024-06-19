@@ -8,6 +8,7 @@
 
 #import "LKDBHelper.h"
 #import <sqlite3.h>
+#import <pthread/pthread.h>
 
 #ifndef SQLITE_OPEN_FILEPROTECTION_NONE
 #define SQLITE_OPEN_FILEPROTECTION_NONE 0x00400000
@@ -340,6 +341,7 @@ static BOOL LKDBNullIsEmptyString = NO;
     // 读取全局缓存文件
     static NSMutableDictionary *dbAutoVaccumMap = nil;
     static NSString *dbAutoVaccumPath = nil;
+    static pthread_mutex_t dbLock;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSString *cacheDirectory = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
@@ -348,9 +350,11 @@ static BOOL LKDBNullIsEmptyString = NO;
         if (!dbAutoVaccumMap) {
             dbAutoVaccumMap = [NSMutableDictionary dictionary];
         }
+        pthread_mutex_init(&dbLock, NULL);
     });
     // 3天操作一次
     NSString *dbKey = self.dbPath.lastPathComponent;
+    pthread_mutex_lock(&dbLock);
     NSInteger lastTime = [[dbAutoVaccumMap objectForKey:dbKey] integerValue];
     if (0 == lastTime) {
         // 记录第一次运行的时间
@@ -358,14 +362,17 @@ static BOOL LKDBNullIsEmptyString = NO;
         [dbAutoVaccumMap setObject:@(nowTime) forKey:dbKey];
         [dbAutoVaccumMap writeToFile:dbAutoVaccumPath atomically:YES];
     }
+    pthread_mutex_unlock(&dbLock);
     if (nowTime - lastTime < 259200) { // 60 * 60 * 24 * 3
         return;
     }
     // 执行数据压缩
     [self executeSQL:@"vacuum" arguments:nil];
     // 记录执行时间
+    pthread_mutex_lock(&dbLock);
     [dbAutoVaccumMap setObject:@(nowTime) forKey:dbKey];
     [dbAutoVaccumMap writeToFile:dbAutoVaccumPath atomically:YES];
+    pthread_mutex_unlock(&dbLock);
 }
 
 - (BOOL)executeSQL:(NSString *)sql arguments:(NSArray *)args {
