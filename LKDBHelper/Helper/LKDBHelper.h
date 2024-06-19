@@ -10,7 +10,13 @@
 #import "LKDBUtils.h"
 #import "NSObject+LKDBHelper.h"
 #import "NSObject+LKModel.h"
+
+#if __has_include(<fmdb/FMDB.h>)
 #import <fmdb/FMDB.h>
+#else
+#import <FMDB/FMDB.h>
+#endif
+
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN

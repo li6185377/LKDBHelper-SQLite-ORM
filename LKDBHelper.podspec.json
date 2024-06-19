@@ -1,6 +1,6 @@
 {
   "name": "LKDBHelper",
-  "version": "2.6.1",
+  "version": "2.6.2",
   "summary": "全自动的插入,查询,更新,删除， an automatic database operation thread-safe and not afraid of recursive deadlock",
   "description": "全面支持 NSArray,NSDictionary, ModelClass, NSNumber, NSString, NSDate, NSData, UIColor, UIImage, CGRect, CGPoint, CGSize, NSRange, int,char,float, double, long.. 等属性的自动化操作(插入和查询)",
   "homepage": "https://github.com/li6185377/LKDBHelper-SQLite-ORM",
@@ -10,12 +10,12 @@
   },
   "source": {
     "git": "https://github.com/li6185377/LKDBHelper-SQLite-ORM.git",
-    "tag": "2.6.1"
+    "tag": "2.6.2"
   },
   "platforms": {
-    "ios": "6.0",
-    "osx": "10.7",
-    "watchos": "2.0"
+    "ios": "11.0",
+    "osx": "10.13",
+    "watchos": "7.0"
   },
 
   "requires_arc": true,
