@@ -11,10 +11,15 @@
 #import "NSObject+LKDBHelper.h"
 #import "NSObject+LKModel.h"
 
+#ifdef __has_feature(FMDB)
+@import FMDB;
+#else
 #if __has_include(<fmdb/FMDB.h>)
 #import <fmdb/FMDB.h>
 #else
 #import <FMDB/FMDB.h>
+#endif
+
 #endif
 
 #import <Foundation/Foundation.h>
