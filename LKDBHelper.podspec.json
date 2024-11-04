@@ -20,18 +20,18 @@
 
   "requires_arc": true,
 
-  "default_subspec": ["standard"],
+  "default_subspec": [ "standard" ],
   "subspecs": [{
     "name": "standard",
     "source_files": "LKDBHelper/Helper/*.{h,m}",
     "dependencies": {
-      "FMDB": ['2.7.11']
+      "FMDB": [ "2.7.11" ]
     }
   }, {
     "name": "FMDBStandalone",
     "source_files": "LKDBHelper/Helper/*.{h,m}",
     "dependencies": {
-      "FMDB/standalone": ['2.7.11']
+      "FMDB/standalone": [ "2.7.11" ]
     }
   }]
 }
