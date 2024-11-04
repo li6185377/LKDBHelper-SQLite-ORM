@@ -25,13 +25,13 @@
     "name": "standard",
     "source_files": "LKDBHelper/Helper/*.{h,m}",
     "dependencies": {
-      "FMDB": []
+      "FMDB": ['2.7.11']
     }
   }, {
     "name": "FMDBStandalone",
     "source_files": "LKDBHelper/Helper/*.{h,m}",
     "dependencies": {
-      "FMDB/standalone": []
+      "FMDB/standalone": ['2.7.11']
     }
   }]
 }
