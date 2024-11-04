@@ -1054,7 +1054,9 @@ static BOOL LKDBNullIsEmptyString = NO;
 - (NSString *)replaceTableNameIfNeeded:(NSString *)sql withModelClass:(Class)modelClass {
     
     // 如果是单表查询情况下，给 query 追加 rowid column
-    if ([sql rangeOfString:@" from "].length != 0 && [sql rangeOfString:@" join "].length == 0) {
+    NSRange beginRange = [sql rangeOfString:@" from "];
+    NSRange endRange = [sql rangeOfString:@" from " options:NSBackwardsSearch];
+    if (beginRange.length != 0 && beginRange.location == endRange.location && [sql rangeOfString:@" join "].length == 0) {
         sql = [sql stringByReplacingOccurrencesOfString:@" from " withString:@",rowid from "];
     }
     
