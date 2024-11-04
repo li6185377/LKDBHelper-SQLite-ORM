@@ -288,13 +288,21 @@ static char LKModelBase_Key_Inserting;
         }
     } else if ([columnClass isSubclassOfClass:[LKDBColor class]]) {
         NSString *colorString = value;
-        NSArray *array = [colorString componentsSeparatedByString:@","];
-        float r, g, b, a;
-        r = [[array objectAtIndex:0] floatValue];
-        g = [[array objectAtIndex:1] floatValue];
-        b = [[array objectAtIndex:2] floatValue];
-        a = [[array objectAtIndex:3] floatValue];
-
+        static NSCharacterSet *charSet;
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            charSet = [NSCharacterSet characterSetWithCharactersInString:@","];
+        });
+        NSArray *array = [colorString componentsSeparatedByCharactersInSet:charSet];
+        CGFloat r, g, b, a;
+        if (array.count >= 4) {
+            r = [array[0] floatValue];
+            g = [array[1] floatValue];
+            b = [array[2] floatValue];
+            a = [array[3] floatValue];
+        } else {
+            r = g = b = a = 0;
+        }
         modelValue = [LKDBColor colorWithRed:r green:g blue:b alpha:a];
     } else if ([columnClass isSubclassOfClass:[LKDBImage class]]) {
         NSString *filename = value;

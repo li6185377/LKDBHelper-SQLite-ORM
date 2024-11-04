@@ -467,7 +467,7 @@ static BOOL LKDBNullIsEmptyString = NO;
     if (dic.count == 0) {
         return @"";
     }
-    NSMutableString *wherekey = [NSMutableString stringWithCapacity:0];
+    NSMutableString *wherekey = [NSMutableString string];
     [dic enumerateKeysAndObjectsUsingBlock:^(NSString *key, id obj, BOOL *stop) {
         if ([obj isKindOfClass:[NSArray class]]) {
             NSArray *vlist = obj;
@@ -968,15 +968,14 @@ static BOOL LKDBNullIsEmptyString = NO;
     [self.threadLock unlock];
 
     NSString *columnsString = nil;
-    NSUInteger columnCount = 0;
+    BOOL isSingleColumn = NO;
 
     if (params.columnArray.count > 0) {
-        columnCount = params.columnArray.count;
-        columnsString = [params.columnArray componentsJoinedByString:@","];
+        isSingleColumn = (params.columnArray.count == 1);
+        columnsString = (isSingleColumn ? params.columnArray.firstObject : [params.columnArray componentsJoinedByString:@","]);
     } else if ([LKDBUtils checkStringIsEmpty:params.columns] == NO) {
         columnsString = params.columns;
-        NSArray *array = [params.columns componentsSeparatedByString:@","];
-        columnCount = array.count;
+        isSingleColumn = ([columnsString containsString:@","] == NO);
     } else {
         columnsString = @"*";
     }
@@ -1005,7 +1004,7 @@ static BOOL LKDBNullIsEmptyString = NO;
             set = [db executeQuery:executeQuery withArgumentsInArray:whereValues];
         }
         // Results to Models
-        if (columnCount == 1) {
+        if (isSingleColumn) {
             results = [self executeOneColumnResult:set];
         } else {
             results = [self executeResult:set Class:params.toClass tableName:db_tableName];
@@ -1055,7 +1054,7 @@ static BOOL LKDBNullIsEmptyString = NO;
 - (NSString *)replaceTableNameIfNeeded:(NSString *)sql withModelClass:(Class)modelClass {
     
     // 如果是单表查询情况下，给 query 追加 rowid column
-    if ([sql componentsSeparatedByString:@" from "].count == 2 && [sql rangeOfString:@" join "].length == 0) {
+    if ([sql rangeOfString:@" from "].length != 0 && [sql rangeOfString:@" join "].length == 0) {
         sql = [sql stringByReplacingOccurrencesOfString:@" from " withString:@",rowid from "];
     }
     
