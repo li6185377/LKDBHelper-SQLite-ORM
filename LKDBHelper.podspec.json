@@ -18,8 +18,19 @@
     "watchos": "7.0"
   },
   "requires_arc": true,
-  "source_files": "LKDBHelper/Helper/*.{h,m}",
-  "dependencies": {
-    "FMDB": []
-  }
+
+  "default_subspec": ["standard"],
+  "subspecs": [{
+    "name": "standard",
+    "source_files": "LKDBHelper/Helper/*.{h,m}",
+    "dependencies": {
+      "FMDB": []
+    }
+  }, {
+    "name": "FMDBStandalone",
+    "source_files": "LKDBHelper/Helper/*.{h,m}",
+    "dependencies": {
+      "FMDB/standalone": []
+    }
+  }]
 }
