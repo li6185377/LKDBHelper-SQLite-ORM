@@ -17,9 +17,11 @@ Supported  __NSArray__,__NSDictionary__, __ModelClass__, __NSNumber__, __NSStrin
 Requirements
 ====================================
 
-* iOS 4.3+ 
+* iOS 12.0+ 
 * ARC only
 * FMDB(https://github.com/ccgus/fmdb)
+
+由于 FMDB 限制，需要支持 iOS12 之前系统，自行限定到 FMDB(2.7.5) 和 LKDB (2.6.3)
 
 ## Adding to your project
 
