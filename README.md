@@ -21,7 +21,7 @@ Requirements
 * ARC only
 * FMDB(https://github.com/ccgus/fmdb)
 
-由于 FMDB 限制，需要支持 iOS12 之前系统，自行限定到 FMDB(2.7.5) 和 LKDB (2.6.3)
+由于 FMDB 限制，需要支持 iOS12 之前系统，自行限定到 FMDB(2.7.5) 和 LKDBHelper (2.6.3)
 
 ## Adding to your project
 
@@ -30,6 +30,14 @@ If you are using CocoaPods, then, just add this line to your Podfile <br>
 ```objective-c
 pod 'LKDBHelper'
 ```
+
+Before iOS12
+
+```objective-c
+pod 'LKDBHelper', '2.6.3'
+pod 'FMDB', '2.7.5'
+```
+
 
 If you are using encryption, Order can not be wrong <br>
 
