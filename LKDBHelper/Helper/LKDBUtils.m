@@ -87,24 +87,24 @@
 
 + (BOOL)createDirectoryWithFilePath:(NSString *)filePath {
     NSString *dirPath = filePath.stringByDeletingLastPathComponent;
-    if (!dirPath) {
+    return [self createDirectoryWithDirectoryPath:dirPath];
+}
+
++ (BOOL)createDirectoryWithDirectoryPath:(NSString * const)directoryPath {
+    if (!directoryPath.length) {
         return NO;
     }
-
     NSFileManager *fileManager = [NSFileManager defaultManager];
-
     BOOL isDir = NO;
-    BOOL isCreated = [fileManager fileExistsAtPath:dirPath isDirectory:&isDir];
-
-#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
-    NSDictionary *attributes = @{NSFileProtectionKey: NSFileProtectionNone};
-#else
-    NSDictionary *attributes = nil;
-#endif
-
+    BOOL isCreated = [fileManager fileExistsAtPath:directoryPath isDirectory:&isDir];
     if (!isCreated || !isDir) {
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
+        NSDictionary *attributes = @{NSFileProtectionKey: NSFileProtectionNone};
+#else
+        NSDictionary *attributes = nil;
+#endif
         NSError *error = nil;
-        BOOL success = [fileManager createDirectoryAtPath:dirPath
+        BOOL success = [fileManager createDirectoryAtPath:directoryPath
                               withIntermediateDirectories:YES
                                                attributes:attributes
                                                     error:&error];
@@ -112,25 +112,15 @@
             LKErrorLog(@"create dir error: %@", error.debugDescription);
             /// 下个主线程继续尝试次
             dispatch_async(dispatch_get_main_queue(), ^{
-                [fileManager createDirectoryAtPath:dirPath
+                [fileManager createDirectoryAtPath:directoryPath
                        withIntermediateDirectories:YES
                                         attributes:attributes
                                              error:nil];
             });
         }
         return success;
-    } else {
-        /**
-         *  @brief  Disk I/O error when device is locked
-         *          https://github.com/ccgus/fmdb/issues/262
-         */
-#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
-        [fileManager setAttributes:attributes
-                      ofItemAtPath:dirPath
-                             error:nil];
-#endif
-        return YES;
     }
+    return YES;
 }
 
 + (NSString *)getDocumentPath {
@@ -144,16 +134,13 @@
 #endif
 }
 
-+ (NSString *)getDirectoryForDocuments:(NSString *)dir {
-    NSString *dirPath = [[self getDocumentPath] stringByAppendingPathComponent:dir];
-    BOOL isDir = NO;
-    BOOL isCreated = [[NSFileManager defaultManager] fileExistsAtPath:dirPath isDirectory:&isDir];
-    if (isCreated == NO || isDir == NO) {
-        NSError *error = nil;
-        BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:dirPath withIntermediateDirectories:YES attributes:nil error:&error];
-        if (success == NO)
-            NSLog(@"create dir error: %@", error.debugDescription);
++ (NSString *)getDirectoryForDocuments:(NSString *)name {
+    if (!name.length) {
+        return [self getDocumentPath];
     }
+    NSString *dirPath = [[self getDocumentPath] stringByAppendingPathComponent:name];
+    [self createDirectoryWithDirectoryPath:dirPath];
+    // 返回目录地址
     return dirPath;
 }
 

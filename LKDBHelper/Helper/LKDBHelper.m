@@ -366,8 +366,10 @@ static BOOL LKDBNullIsEmptyString = NO;
     if (nowTime - lastTime < 259200) { // 60 * 60 * 24 * 3
         return;
     }
+    // 执行数据分析，提高后续执行效率
+    [self executeSQL:@"ANALYZE" arguments:nil];
     // 执行数据压缩
-    [self executeSQL:@"vacuum" arguments:nil];
+    [self executeSQL:@"VACUUM" arguments:nil];
     // 记录执行时间
     pthread_mutex_lock(&dbLock);
     [dbAutoVaccumMap setObject:@(nowTime) forKey:dbKey];
