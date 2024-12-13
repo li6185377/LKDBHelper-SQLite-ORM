@@ -66,6 +66,9 @@
 
 @property (nonatomic, assign) NSInteger autoCloseDBDelayTime;
 @property (nonatomic, assign) BOOL inAutoReleasePool;
+
+@property (atomic, assign) NSInteger latestAutoActionIndex;
+
 @end
 
 @implementation LKDBHelper
@@ -164,6 +167,7 @@ static BOOL LKDBNullIsEmptyString = NO;
                 self.lastExecuteDBTime = CFAbsoluteTimeGetCurrent();
                 self.autoCloseDBDelayTime = 15;
                 self.enableAutoVacuum = YES;
+                self.latestAutoActionIndex = 0;
                 
                 [self setDBPath:filePath];
                 [LKDBHelper dbHelperWithPath:nil save:self];
@@ -291,8 +295,20 @@ static BOOL LKDBNullIsEmptyString = NO;
     }
     self.runingAutoActionsTimer = YES;
     __weak LKDBHelper *wself = self;
+    
+    NSInteger const newAutoActionIndex = self.latestAutoActionIndex + 1;
+    self.latestAutoActionIndex = newAutoActionIndex;
+    
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
         __strong LKDBHelper *self = wself;
+        if (!self) {
+            return;
+        }
+        if (self.latestAutoActionIndex != newAutoActionIndex) {
+            // 当前的操作 已经不是最新那条，可以过滤该Block的执行，避免多次加锁
+            return;
+        }
+        
         [self.threadLock lock];
         [self runAutoVacuumAction];
         [self runAutoCloseDBConnection];
