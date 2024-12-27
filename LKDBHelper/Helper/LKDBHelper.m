@@ -364,7 +364,7 @@ static BOOL LKDBNullIsEmptyString = NO;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSString *cacheDirectory = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
-        dbAutoVaccumPath = [cacheDirectory stringByAppendingString:@"lkdb-auto-vacuum.plist"];
+        dbAutoVaccumPath = [cacheDirectory stringByAppendingPathComponent:@"lkdb-auto-vacuum.plist"];
         dbAutoVaccumMap = [NSMutableDictionary dictionaryWithContentsOfFile:dbAutoVaccumPath];
         if (!dbAutoVaccumMap) {
             dbAutoVaccumMap = [NSMutableDictionary dictionary];
@@ -395,8 +395,8 @@ static BOOL LKDBNullIsEmptyString = NO;
         // 无法获取到DB文件大小
         return;
     }
-    // DB文件大小变化 > 10kb，才执行DB文件优化
-    BOOL const needDBAction = labs(dbSize - lastSize) > 1024 * 10;
+    // DB文件大小变化 > 20kb，才执行DB文件优化
+    BOOL const needDBAction = labs(dbSize - lastSize) > 1024 * 20;
     if (needDBAction) {
         // 执行数据分析，提高后续SQL执行效率
         if (self.enableAutoAnalyze) {
