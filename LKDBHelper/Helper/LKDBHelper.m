@@ -167,6 +167,7 @@ static BOOL LKDBNullIsEmptyString = NO;
                 self.lastExecuteDBTime = CFAbsoluteTimeGetCurrent();
                 self.autoCloseDBDelayTime = 15;
                 self.enableAutoVacuum = YES;
+                self.enableAutoAnalyze = YES;
                 self.latestAutoActionIndex = 0;
                 
                 [self setDBPath:filePath];
@@ -210,17 +211,20 @@ static BOOL LKDBNullIsEmptyString = NO;
 }
 
 - (void)openDB {
-    /// 重置所有配置
+    // 重置所有配置
     [self.bindingQueue close];
     [self.createdTableNames removeAllObjects];
 
     NSString *filePath = self.dbPath;
-    BOOL hasCreated = [LKDBUtils createDirectoryWithFilePath:filePath];
+    BOOL const hasCreated = [LKDBUtils createDirectoryWithFilePath:filePath];
     if (!hasCreated) {
-        /// 数据库目录创建失败
+        // 数据库目录创建失败
         return;
     }
-
+    
+    // 如果DB不存在，则标记为首次创建，在 iOS侧 关闭文件保护：NSFileProtectionNone
+    BOOL const isCreateDB = ![[NSFileManager defaultManager] fileExistsAtPath:filePath];
+    
     self.bindingQueue = [[FMDatabaseQueue alloc] initWithPath:filePath
                                                         flags:LKDBOpenFlags];
     [self.bindingQueue inDatabase:^(FMDatabase *db) {
@@ -228,9 +232,8 @@ static BOOL LKDBNullIsEmptyString = NO;
     }];
 
 #ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    if ([fileManager fileExistsAtPath:filePath]) {
-        [fileManager setAttributes:@{NSFileProtectionKey: NSFileProtectionNone} ofItemAtPath:filePath error:nil];
+    if (isCreateDB) {
+        [[NSFileManager defaultManager] setAttributes:@{NSFileProtectionKey: NSFileProtectionNone} ofItemAtPath:filePath error:nil];
     }
 #endif
 }
@@ -342,11 +345,11 @@ static BOOL LKDBNullIsEmptyString = NO;
 /// 整个方法已经处于加锁状态
 - (void)runAutoVacuumAction {
     // 数据库链接已关闭
-    if (!self.bindingQueue) {
+    if (!self.bindingQueue || !self.dbPath) {
         return;
     }
     // 未开启自动压缩
-    if (!self.enableAutoVacuum) {
+    if (!self.enableAutoVacuum && !self.enableAutoAnalyze) {
         return;
     }
     // 判断阈值内是否有操作
@@ -357,7 +360,7 @@ static BOOL LKDBNullIsEmptyString = NO;
     // 读取全局缓存文件
     static NSMutableDictionary *dbAutoVaccumMap = nil;
     static NSString *dbAutoVaccumPath = nil;
-    static pthread_mutex_t dbLock;
+    static pthread_mutex_t dbVaccumLock;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSString *cacheDirectory = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
@@ -366,31 +369,52 @@ static BOOL LKDBNullIsEmptyString = NO;
         if (!dbAutoVaccumMap) {
             dbAutoVaccumMap = [NSMutableDictionary dictionary];
         }
-        pthread_mutex_init(&dbLock, NULL);
+        pthread_mutex_init(&dbVaccumLock, NULL);
     });
-    // 3天操作一次
-    NSString *dbKey = self.dbPath.lastPathComponent;
-    pthread_mutex_lock(&dbLock);
-    NSInteger lastTime = [[dbAutoVaccumMap objectForKey:dbKey] integerValue];
+    // 获取上次操作时间
+    NSString * const dbKey = self.dbPath.lastPathComponent;
+    NSString * const dbSizeKey = [NSString stringWithFormat:@"%@-size", dbKey];
+    pthread_mutex_lock(&dbVaccumLock);
+    NSInteger lastTime = [[dbAutoVaccumMap objectForKey:dbKey] longValue];
+    NSInteger lastSize = [[dbAutoVaccumMap objectForKey:dbSizeKey] longValue];
     if (0 == lastTime) {
         // 记录第一次运行的时间
         lastTime = nowTime;
         [dbAutoVaccumMap setObject:@(nowTime) forKey:dbKey];
+        [dbAutoVaccumMap setObject:@(0) forKey:dbSizeKey];
         [dbAutoVaccumMap writeToFile:dbAutoVaccumPath atomically:YES];
     }
-    pthread_mutex_unlock(&dbLock);
-    if (nowTime - lastTime < 259200) { // 60 * 60 * 24 * 3
+    pthread_mutex_unlock(&dbVaccumLock);
+    if (labs(nowTime - lastTime) < 259200) {
+        // 3天内只执行一次：60 * 60 * 24 * 3
         return;
     }
-    // 执行数据分析，提高后续执行效率
-    [self executeSQL:@"ANALYZE" arguments:nil];
-    // 执行数据压缩
-    [self executeSQL:@"VACUUM" arguments:nil];
+    NSDictionary *dbAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:self.dbPath error:nil];
+    NSInteger const dbSize = [[dbAttributes objectForKey:NSFileSize] longValue];
+    if (dbSize < 10) {
+        // 无法获取到DB文件大小
+        return;
+    }
+    // DB文件大小变化 > 10kb，才执行DB文件优化
+    BOOL const needDBAction = labs(dbSize - lastSize) > 1024 * 10;
+    if (needDBAction) {
+        // 执行数据分析，提高后续SQL执行效率
+        if (self.enableAutoAnalyze) {
+            [self executeSQL:@"ANALYZE" arguments:nil];
+        }
+        // 执行数据压缩
+        if (self.enableAutoVacuum) {
+            [self executeSQL:@"VACUUM" arguments:nil];
+        }
+    }
     // 记录执行时间
-    pthread_mutex_lock(&dbLock);
+    pthread_mutex_lock(&dbVaccumLock);
     [dbAutoVaccumMap setObject:@(nowTime) forKey:dbKey];
+    if (needDBAction) {
+        [dbAutoVaccumMap setObject:@(dbSize) forKey:dbSizeKey];
+    }
     [dbAutoVaccumMap writeToFile:dbAutoVaccumPath atomically:YES];
-    pthread_mutex_unlock(&dbLock);
+    pthread_mutex_unlock(&dbVaccumLock);
 }
 
 - (BOOL)executeSQL:(NSString *)sql arguments:(NSArray *)args {
