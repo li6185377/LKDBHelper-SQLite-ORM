@@ -55,8 +55,11 @@
 @end
 
 @interface LKDBHelper ()
-@property (nonatomic, weak) FMDatabase *usingdb;
+
+@property (nonatomic, weak) FMDatabase *inExecuteDB;
+@property (nonatomic, weak) FMDatabase *inBindingDB;
 @property (nonatomic, strong) FMDatabaseQueue *bindingQueue;
+
 @property (nonatomic, copy) NSString *dbPath;
 @property (nonatomic, strong) NSMutableArray *createdTableNames;
 @property (nonatomic, strong) NSRecursiveLock *threadLock;
@@ -167,7 +170,8 @@ static BOOL LKDBNullIsEmptyString = NO;
                 self.lastExecuteDBTime = CFAbsoluteTimeGetCurrent();
                 self.autoCloseDBDelayTime = 15;
                 self.enableAutoVacuum = YES;
-                self.enableAutoAnalyze = YES;
+                self.enableAutoQuickCheck = YES;
+                self.enablePragmaWAL = NO;
                 self.latestAutoActionIndex = 0;
                 
                 [self setDBPath:filePath];
@@ -203,6 +207,8 @@ static BOOL LKDBNullIsEmptyString = NO;
     } else {
         // reset encryptionKey
         _encryptionKey = nil;
+        [self.usingFMDB close];
+        self.bindingQueue = nil;
         // set db path
         self.dbPath = filePath;
         [self openDB];
@@ -210,39 +216,248 @@ static BOOL LKDBNullIsEmptyString = NO;
     [self.threadLock unlock];
 }
 
+- (FMDatabase *)usingFMDB {
+    return self.inExecuteDB ?: self.inBindingDB;
+}
+
 - (void)openDB {
     // 重置所有配置
-    [self.bindingQueue close];
     [self.createdTableNames removeAllObjects];
-
-    NSString *filePath = self.dbPath;
+    
+    // 创建数据库目录
+    NSString * const filePath = self.dbPath;
     BOOL const hasCreated = [LKDBUtils createDirectoryWithFilePath:filePath];
     if (!hasCreated) {
-        // 数据库目录创建失败
         return;
     }
     
     // 如果DB不存在，则标记为首次创建，在 iOS侧 关闭文件保护：NSFileProtectionNone
-    BOOL const isCreateDB = ![[NSFileManager defaultManager] fileExistsAtPath:filePath];
-    
-    self.bindingQueue = [[FMDatabaseQueue alloc] initWithPath:filePath
-                                                        flags:LKDBOpenFlags];
+    NSFileManager * const fileManager = [NSFileManager defaultManager];
+    BOOL const isCreateDB = ![fileManager fileExistsAtPath:filePath];
+    if (!self.bindingQueue) {
+        self.bindingQueue = [[FMDatabaseQueue alloc] initWithPath:filePath
+                                                            flags:LKDBOpenFlags];
+    }
     [self.bindingQueue inDatabase:^(FMDatabase *db) {
+        self.inExecuteDB = db;
         db.logsErrors = LKDBLogErrorEnable;
+        // 需要开启 WAL 模式
+        if (self.enablePragmaWAL) {
+            [db executeUpdate:@"pragma journal_mode = wal; pragma synchronous = normal;"];
+        }
+        // 数据库损坏检测
+        if (!isCreateDB && self.enableAutoQuickCheck) {
+            FMResultSet * const bkFMSet = [db executeQuery:@"pragma quick_check;"];
+            NSString * const bkRetStr = [bkFMSet next] ? [bkFMSet stringForColumnIndex:0] : db.lastErrorMessage;
+            int const bkErrCode = db.lastErrorCode;
+            [bkFMSet close];
+            if ([bkRetStr containsString:@"database disk image is malformed"] ||
+                bkErrCode == SQLITE_CORRUPT ||
+                bkErrCode == SQLITE_NOTADB) {
+                // 数据库错误
+                NSError * const dbError = [NSError errorWithDomain:bkRetStr ?: @"unknown" code:bkErrCode userInfo:nil];
+                // 先关闭链接
+                [db close];
+                // 告知外部数据库损坏
+                if ([LKDBUtils respondsToSelector:@selector(onLKDBWithFails:dbError:)]) {
+                    [LKDBUtils onLKDBWithFails:self dbError:dbError];
+                }
+                // 重新打开数据库
+                [db openWithFlags:LKDBOpenFlags];
+                // 需要开启 WAL 模式
+                if (self.enablePragmaWAL) {
+                    [db executeUpdate:@"pragma journal_mode = wal; pragma synchronous = normal;"];
+                }
+            }
+        }
+        self.inExecuteDB = nil;
     }];
-
+    
 #ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
     if (isCreateDB) {
-        [[NSFileManager defaultManager] setAttributes:@{NSFileProtectionKey: NSFileProtectionNone} ofItemAtPath:filePath error:nil];
+        [fileManager setAttributes:@{NSFileProtectionKey: NSFileProtectionNone} ofItemAtPath:filePath error:nil];
     }
 #endif
 }
 
 - (void)closeDB {
     [self.threadLock lock];
-    [self.bindingQueue close];
-    self.bindingQueue = nil;
+    [self.usingFMDB close];
     [self.threadLock unlock];
+}
+
+- (BOOL)backupDBFilesToDirectory:(NSString *)directoryPath {
+    if (!directoryPath.length) {
+        return NO;
+    }
+    if (![directoryPath hasSuffix:@"/"]) {
+        directoryPath = [directoryPath stringByAppendingString:@"/"];
+    }
+    BOOL isSuccess = YES;
+    
+    [self.threadLock lock];
+    
+    // 关闭数据库链接
+    FMDatabase * const nowdb = self.usingFMDB;
+    [nowdb close];
+    
+    do {
+        NSFileManager * const fileManager = [NSFileManager defaultManager];
+        
+        // 获取数据库文件地址
+        NSString * const mainPath = self.dbPath;
+        NSString * const shmPath = [mainPath stringByAppendingPathComponent:@"-shm"];
+        NSString * const walPath = [mainPath stringByAppendingPathComponent:@"-wal"];
+        
+        NSString * const dbName = mainPath.lastPathComponent;
+        NSString * const mainBackupPath = [directoryPath stringByAppendingFormat:@"%@-backup", dbName];
+        NSString * const shmBackupPath = [directoryPath stringByAppendingFormat:@"%@-shm-backup", dbName];
+        NSString * const walBackupPath = [directoryPath stringByAppendingFormat:@"%@-wal-backup", dbName];
+        
+        // 数据库文件不存在
+        if (![fileManager fileExistsAtPath:mainPath]) {
+            isSuccess = NO;
+            break;
+        }
+        
+        // 创建备份目录
+        [LKDBUtils createDirectoryWithFilePath:mainBackupPath];
+        
+        // 保证备份数据库路径可存储
+        [fileManager removeItemAtPath:mainBackupPath error:nil];
+        [fileManager removeItemAtPath:shmBackupPath error:nil];
+        [fileManager removeItemAtPath:walBackupPath error:nil];
+        
+        // 备份数据库文件
+        isSuccess &= [fileManager copyItemAtPath:mainPath toPath:mainBackupPath error:nil];
+        if (isSuccess && [fileManager fileExistsAtPath:shmPath]) {
+            isSuccess &= [fileManager copyItemAtPath:shmPath toPath:shmBackupPath error:nil];
+        }
+        if (isSuccess && [fileManager fileExistsAtPath:walPath]) {
+            isSuccess &= [fileManager copyItemAtPath:walPath toPath:walBackupPath error:nil];
+        }
+    } while (0);
+    
+    // 重新打开数据库链接
+    [nowdb openWithFlags:LKDBOpenFlags];
+    // 需要开启 WAL 模式
+    if (self.enablePragmaWAL) {
+        [nowdb executeUpdate:@"pragma journal_mode = wal; pragma synchronous = normal;"];
+    }
+    
+    [self.threadLock unlock];
+    
+    return isSuccess;
+}
+
+- (BOOL)restoreDBFilesFromDirectory:(NSString *)directoryPath {
+    if (!directoryPath.length) {
+        return NO;
+    }
+    if (![directoryPath hasSuffix:@"/"]) {
+        directoryPath = [directoryPath stringByAppendingString:@"/"];
+    }
+    BOOL isSuccess = YES;
+    
+    [self.threadLock lock];
+    
+    // 关闭数据库链接
+    FMDatabase * const nowdb = self.usingFMDB;
+    [nowdb close];
+    
+    do {
+        NSFileManager * const fileManager = [NSFileManager defaultManager];
+        
+        // 获取数据库文件地址
+        NSString * const mainPath = self.dbPath;
+        NSString * const shmPath = [mainPath stringByAppendingPathComponent:@"-shm"];
+        NSString * const walPath = [mainPath stringByAppendingPathComponent:@"-wal"];
+        
+        NSString * const dbName = mainPath.lastPathComponent;
+        NSString * const mainBackupPath = [directoryPath stringByAppendingFormat:@"%@-backup", dbName];
+        NSString * const shmBackupPath = [directoryPath stringByAppendingFormat:@"%@-shm-backup", dbName];
+        NSString * const walBackupPath = [directoryPath stringByAppendingFormat:@"%@-wal-backup", dbName];
+        
+        // 不存在备份数据库文件，直接返回失败
+        if (![fileManager fileExistsAtPath:mainBackupPath]) {
+            isSuccess = NO;
+            break;
+        }
+        // 检测备份数据库是否损坏 （已损坏的数据库不能用于还原）
+        FMDatabase * const backupDB = [FMDatabase databaseWithPath:mainBackupPath];
+        if ([backupDB openWithFlags:SQLITE_OPEN_READONLY] != SQLITE_OK) {
+            isSuccess = NO;
+            break;
+        }
+        FMResultSet * const bkFMSet = [backupDB executeQuery:@"pragma quick_check;"];
+        NSString * const bkRetStr = [bkFMSet next] ? [bkFMSet stringForColumnIndex:0] : backupDB.lastErrorMessage;
+        int const bkErrCode = backupDB.lastErrorCode;
+        [bkFMSet close];
+        [backupDB close];
+        
+        if ([bkRetStr containsString:@"database disk image is malformed"] ||
+            bkErrCode == SQLITE_CORRUPT ||
+            bkErrCode == SQLITE_NOTADB) {
+            // 备份数据库处于损坏状态
+            isSuccess = NO;
+            break;
+        }
+        
+        // 先删除原数据库文件
+        [fileManager removeItemAtPath:mainPath error:nil];
+        [fileManager removeItemAtPath:shmPath error:nil];
+        [fileManager removeItemAtPath:walPath error:nil];
+        
+        // 还原备份文件
+        isSuccess &= [fileManager copyItemAtPath:mainBackupPath toPath:mainPath error:nil];
+        if (isSuccess && [fileManager fileExistsAtPath:shmBackupPath]) {
+            isSuccess &= [fileManager copyItemAtPath:shmBackupPath toPath:shmPath error:nil];
+        }
+        if (isSuccess && [fileManager fileExistsAtPath:walBackupPath]) {
+            isSuccess &= [fileManager copyItemAtPath:walBackupPath toPath:walPath error:nil];
+        }
+    } while (0);
+    
+    // 删除已创建的表记录
+    [self.createdTableNames removeAllObjects];
+    
+    // 重新打开数据库链接
+    [nowdb openWithFlags:LKDBOpenFlags];
+    // 需要开启 WAL 模式
+    if (self.enablePragmaWAL) {
+        [nowdb executeUpdate:@"pragma journal_mode = wal; pragma synchronous = normal;"];
+    }
+    
+    [self.threadLock unlock];
+    
+    return isSuccess;
+}
+
+- (BOOL)removeDBFiles {
+    if (!self.dbPath.length) {
+        return NO;
+    }
+    
+    [self.threadLock lock];
+    
+    // 关闭数据库链接
+    FMDatabase * const nowdb = self.usingFMDB;
+    [nowdb close];
+    
+    // 获取数据库文件地址
+    NSString * const mainPath = self.dbPath;
+    NSString * const shmPath = [mainPath stringByAppendingPathComponent:@"-shm"];
+    NSString * const walPath = [mainPath stringByAppendingPathComponent:@"-wal"];
+    
+    // 先删除原数据库文件
+    NSFileManager * const fileManager = [NSFileManager defaultManager];
+    [fileManager removeItemAtPath:mainPath error:nil];
+    [fileManager removeItemAtPath:shmPath error:nil];
+    [fileManager removeItemAtPath:walPath error:nil];
+    
+    [self.threadLock unlock];
+    
+    return YES;
 }
 
 #pragma mark - core
@@ -253,10 +468,10 @@ static BOOL LKDBNullIsEmptyString = NO;
     }
     [self.threadLock lock];
 
-    if (self.usingdb != nil) {
-        block(self.usingdb);
+    if (self.inExecuteDB != nil) {
+        block(self.inExecuteDB);
     } else {
-        if (self.bindingQueue == nil) {
+        if (!self.usingFMDB.isOpen) {
             [self openDB];
             if (_encryptionKey.length > 0) {
                 [self.bindingQueue inDatabase:^(FMDatabase *db) {
@@ -265,9 +480,9 @@ static BOOL LKDBNullIsEmptyString = NO;
             }
         }
         [self.bindingQueue inDatabase:^(FMDatabase *db) {
-            self.usingdb = db;
+            self.inExecuteDB = db;
             block(db);
-            self.usingdb = nil;
+            self.inExecuteDB = nil;
         }];
     }
 
@@ -288,6 +503,12 @@ static BOOL LKDBNullIsEmptyString = NO;
     [self startAutoActionsTimer];
 }
 
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
+#if !TARGET_OS_WATCH
+static UIApplicationState kGlobalApplicationState = UIApplicationStateBackground;
+#endif
+#endif
+
 - (void)startAutoActionsTimer {
     // 无需执行任务
     if (!self.autoCloseDBDelayTime && !self.enableAutoVacuum) {
@@ -307,16 +528,26 @@ static BOOL LKDBNullIsEmptyString = NO;
         if (!self) {
             return;
         }
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
+#if !TARGET_OS_WATCH
+        // 切换到主线程获取App状态 (不能在加锁区间获取)
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            kGlobalApplicationState = [UIApplication sharedApplication].applicationState;
+        });
+#endif
+#endif
+        
+        // 当前的操作 已经不是最新那条，可以过滤该Block的执行，避免多次加锁
         if (self.latestAutoActionIndex != newAutoActionIndex) {
-            // 当前的操作 已经不是最新那条，可以过滤该Block的执行，避免多次加锁
             return;
         }
         
+        // 加锁区间
         [self.threadLock lock];
         [self runAutoVacuumAction];
         [self runAutoCloseDBConnection];
         self.runingAutoActionsTimer = NO;
-        if (self.bindingQueue != nil) {
+        if (self.usingFMDB.isOpen) {
             // 数据库链接未关闭，则继续执行定时器
             [self startAutoActionsTimer];
         }
@@ -326,7 +557,7 @@ static BOOL LKDBNullIsEmptyString = NO;
 
 - (void)runAutoCloseDBConnection {
     // 数据库链接已关闭
-    if (!self.bindingQueue) {
+    if (!self.usingFMDB.isOpen) {
         return;
     }
     // 未开启自动关闭数据库连接
@@ -345,11 +576,11 @@ static BOOL LKDBNullIsEmptyString = NO;
 /// 整个方法已经处于加锁状态
 - (void)runAutoVacuumAction {
     // 数据库链接已关闭
-    if (!self.bindingQueue || !self.dbPath) {
+    if (!self.usingFMDB.isOpen || !self.dbPath) {
         return;
     }
     // 未开启自动压缩
-    if (!self.enableAutoVacuum && !self.enableAutoAnalyze) {
+    if (!self.enableAutoVacuum) {
         return;
     }
     // 判断阈值内是否有操作
@@ -389,22 +620,26 @@ static BOOL LKDBNullIsEmptyString = NO;
         // 3天内只执行一次：60 * 60 * 24 * 3
         return;
     }
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
+#if !TARGET_OS_WATCH
+    if (kGlobalApplicationState != UIApplicationStateActive) {
+        // 后台阶段不执行DB操作（磁盘IO不允许）
+        return;
+    }
+#endif
+#endif
     NSDictionary *dbAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:self.dbPath error:nil];
     NSInteger const dbSize = [[dbAttributes objectForKey:NSFileSize] longValue];
     if (dbSize < 10) {
         // 无法获取到DB文件大小
         return;
     }
-    // DB文件大小变化 > 20kb，才执行DB文件优化
+    // DB文件大小变化 > 10kb，才执行DB文件优化
     BOOL const needDBAction = labs(dbSize - lastSize) > 1024 * 20;
     if (needDBAction) {
-        // 执行数据分析，提高后续SQL执行效率
-        if (self.enableAutoAnalyze) {
-            [self executeSQL:@"ANALYZE" arguments:nil];
-        }
         // 执行数据压缩
         if (self.enableAutoVacuum) {
-            [self executeSQL:@"VACUUM" arguments:nil];
+            [self executeSQL:@"vacuum" arguments:nil];
         }
     }
     // 记录执行时间
@@ -625,11 +860,8 @@ static BOOL LKDBNullIsEmptyString = NO;
         [dbArray removeObjectsAtIndexes:indexSet];
     }
 
-    [self.bindingQueue close];
-    self.usingdb = nil;
-    self.bindingQueue = nil;
-    self.dbPath = nil;
-    self.threadLock = nil;
+    FMDatabase * const nowdb = self.usingFMDB;
+    [nowdb close];
 }
 
 @end
@@ -656,6 +888,13 @@ static BOOL LKDBNullIsEmptyString = NO;
             }
         }
 
+        // 数据库出现损坏，删除当前数据库
+        int const bkErrCode = db.lastErrorCode;
+        if (bkErrCode == SQLITE_CORRUPT || bkErrCode == SQLITE_NOTADB) {
+            [self removeDBFiles];
+        }
+        
+        // 清空表名
         [self.createdTableNames removeAllObjects];
     }];
 }

@@ -61,6 +61,16 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setDBPath:(NSString *)filePath;
 
 /**
+ *    @brief  获取数据库地址
+ */
+@property (nonatomic, copy, readonly) NSString *dbPath;
+
+/**
+ *    @brief  获取当前的FMDB管理类，必须要在 executeDB: Block 内获取
+ */
+@property (nonatomic, weak, readonly) FMDatabase *usingFMDB;
+
+/**
  *    @brief  closing a database connection and remove instance for global cache
  */
 - (void)closeDB;
@@ -77,10 +87,15 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL enableAutoVacuum;
 
 /**
- *    @brief  当数据库10秒未操作时，自动分析SQL语句，提高后续SQL执行效率，3天只会执行一次
- *            如果需要比较及时，自行执行 ANALYZE 命令
+ *    @brief  数据库开启损坏检测，需要重载 + (void)onLKDBWithMalformed: 方法
+ *            IMYBaseKit 有实现：首次建立链接时候，会先进行一次备份，然后采用一次默认修复
  */
-@property (nonatomic, assign) BOOL enableAutoAnalyze;
+@property (nonatomic, assign) BOOL enableAutoQuickCheck;
+
+/**
+ *    @brief  数据库开启WAL写入模式
+ */
+@property (nonatomic, assign) BOOL enablePragmaWAL;
 
 /**
  *  @brief current encryption key.
@@ -115,6 +130,20 @@ NS_ASSUME_NONNULL_BEGIN
             block 返回 YES commit 事务    返回 NO  rollback 事务
  */
 - (void)executeForTransaction:(BOOL (^)(LKDBHelper *helper))block;
+
+/**
+ *    @brief  备份数据库文件，会将数据库文件增加 -backup 后缀 (.db-backup、.db-wal-backup、.db-shm-backup)
+ */
+- (BOOL)backupDBFilesToDirectory:(NSString *)directoryPath;
+
+/**
+ *    @brief  从对应目录下还原数据库文件，数据库文件需要有 -backup 后缀 (.db-backup、.db-wal-backup、.db-shm-backup)
+ */
+- (BOOL)restoreDBFilesFromDirectory:(NSString *)directoryPath;
+
+
+/// 删除全部数据库文件（重建）
+- (BOOL)removeDBFiles;
 
 @end
 

@@ -138,8 +138,21 @@
     if (!name.length) {
         return [self getDocumentPath];
     }
-    NSString *dirPath = [[self getDocumentPath] stringByAppendingPathComponent:name];
-    [self createDirectoryWithDirectoryPath:dirPath];
+    NSString *dirPath = [self getDocumentPath];
+    if ([name containsString:@"/"]) {
+        // 多重目录，采用递归创建
+        NSArray<NSString *> *components = [name componentsSeparatedByString:@"/"];
+        for (NSString *comName in components) {
+            if (comName.length > 0) {
+                dirPath = [dirPath stringByAppendingPathComponent:comName];
+                [self createDirectoryWithDirectoryPath:dirPath];
+            }
+        }
+    } else {
+        dirPath = [dirPath stringByAppendingPathComponent:name];
+        [self createDirectoryWithDirectoryPath:dirPath];
+    }
+    
     // 返回目录地址
     return dirPath;
 }

@@ -1,0 +1,6 @@
+framework module LKDBRecover {
+  umbrella header "LKDBRecover.h"
+  export *
+
+  module * { export * }
+}

@@ -66,7 +66,7 @@
 }
 //已经插入数据库
 + (void)dbDidInserted:(NSObject *)entity result:(BOOL)result {
-    LKErrorLog(@"did insert : %@", NSStringFromClass(self));
+    LKErrorLog(@"did insert (%d) : %@", result, NSStringFromClass(self));
 }
 
 // 重载    返回自己处理过的 要插入数据库的值
@@ -79,6 +79,7 @@
     }
     return nil;
 }
+
 // 重载    从数据库中  获取的值   经过自己处理 再保存
 - (void)userSetValueForModel:(LKDBProperty *)property value:(id)value {
     if ([property.sqlColumnName isEqualToString:@"address"]) {

@@ -24,11 +24,11 @@
         [_ms appendString:@"\n"];
         [_ms appendString:txt];
         [_ms appendString:@"\n"];
-
+        
         self.tv.text = _ms;
     });
 }
-#define addText(fmt, ...) [self add:[NSString stringWithFormat:fmt, ##__VA_ARGS__]]
+#define addText(fmt, ...) [self add:[NSString stringWithFormat:fmt, ##__VA_ARGS__]];
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
@@ -124,16 +124,17 @@
 
         //insert fail
         if (insertSucceed == NO) {
-            ///rollback
+            // rollback
+            addText(@"不可插入相同主键的数据!");
             return NO;
         } else {
-            ///commit
+            // commit
             return YES;
         }
     }];
 
 
-    addText(@"同步插入 完成!  Insert completed synchronization");
+    addText(@"Insert completed synchronization");
 
     sleep(1);
 
@@ -146,7 +147,7 @@
     //查询   search
     NSMutableArray *searchResultArray = nil;
 
-    [LKTest searchWithSQL:@"select * from @t,LKTestAddress"];
+    [LKTest searchWithSQL:@"select * from LKTestAddress"];
 
     addText(@"\n search one: \n");
     ///同步搜索 执行sql语句 把结果变为LKTest对象
@@ -183,7 +184,7 @@
 
     //异步 asynchronous
     [globalHelper search:[LKTest class]
-                   where:@{@"name": @"zhan san", @"blah": @[@"1", @"3", @"5"]}
+                   where:@{@"name": @"zhan san"}
                  orderBy:nil
                   offset:0
                    count:100

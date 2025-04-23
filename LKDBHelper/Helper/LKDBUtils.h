@@ -57,6 +57,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@class LKDBHelper;
+
 /// 需要外部实现对应 API
 @interface LKDBUtils (Events)
 
@@ -66,15 +68,18 @@ NS_ASSUME_NONNULL_BEGIN
 // LKNumberFormatter 创建完毕， 可以修改对应属性
 + (void)onCreateWithNumberFormatter:(LKNumberFormatter *)numberFormatter;
 
+/// 数据库损坏
++ (void)onLKDBWithFails:(LKDBHelper *)dbHelper dbError:(NSError *)dbError;
+
 @end
 
 #pragma mark - Types
 
 #ifdef DEBUG
 #ifdef NSLog
-#define LKErrorLog(fmt, ...) NSLog(@"#LKDBHelper ERROR:\n" fmt, ##__VA_ARGS__);
+#define LKErrorLog(fmt, ...) NSLog(@"#LKDBHelper Log:\n" fmt, ##__VA_ARGS__);
 #else
-#define LKErrorLog(fmt, ...) NSLog(@"\n#LKDBHelper ERROR: %s  [Line %d] \n" fmt, __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+#define LKErrorLog(fmt, ...) NSLog(@"\n#LKDBHelper Log: %s  [Line %d] \n" fmt, __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
 #endif
 #else
 #define LKErrorLog(...)
