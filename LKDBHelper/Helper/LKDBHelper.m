@@ -243,6 +243,7 @@ static BOOL LKDBNullIsEmptyString = NO;
         self.inBindingDB = db;
         // 每次 Execute Block 结束后，都会置空
         self.inExecuteDB = db;
+        // 默认开启错误日志打印
         db.logsErrors = LKDBLogErrorEnable;
         // 需要开启 WAL 模式
         if (self.enablePragmaWAL) {
