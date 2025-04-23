@@ -239,6 +239,9 @@ static BOOL LKDBNullIsEmptyString = NO;
                                                             flags:LKDBOpenFlags];
     }
     [self.bindingQueue inDatabase:^(FMDatabase *db) {
+        // 只赋值一次（不主动释放）
+        self.inBindingDB = db;
+        // 每次 Execute Block 结束后，都会置空
         self.inExecuteDB = db;
         db.logsErrors = LKDBLogErrorEnable;
         // 需要开启 WAL 模式
