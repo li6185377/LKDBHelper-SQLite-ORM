@@ -1,8 +1,13 @@
 
 LKDBHelper
 ====================================
-this is sqlite ORM (an automatic database operation) <br>
-thread-safe and not afraid of recursive deadlock
+全自动的 SQLite ORM 框架
+
+1、线程安全，不怕递归死锁
+
+2、线上日活超千万，极佳的代码稳定性。（线上App直接用pod依赖，相同github代码）
+
+3、长期保持迭代，iOS 5 ~ iOS 26 系统均无问题。
 
 简书：不定时更新  [http://www.jianshu.com/users/376b950a20ec](http://www.jianshu.com/users/376b950a20ec/latest_articles) 
 
@@ -11,6 +16,14 @@ thread-safe and not afraid of recursive deadlock
 Supported  __NSArray__,__NSDictionary__, __ModelClass__, __NSNumber__, __NSString__, __NSDate__, __NSData__, __UIColor__, __UIImage__, __CGRect__, __CGPoint__, __CGSize__, __NSRange__, __int__,__char__,__float__, __double__, __long__.. attribute to insert and select automation.
 
 全面支持 __NSArray__,__NSDictionary__, __ModelClass__, __NSNumber__, __NSString__, __NSDate__, __NSData__, __UIColor__, __UIImage__, __CGRect__, __CGPoint__, __CGSize__, __NSRange__, __int__,__char__,__float__, __double__, __long__.. 等属性的自动化操作(插入和查询)
+
+
+# 数据库损坏修复工具
+
+当出现数据库损坏错误：`SQLITE_CORRUPT`、`database disk image is malformed` ，可以使用 `LKDBRecover.xcframework` 进行修复，具体API请查看头文件。
+
+原理：基于 sqlite3.org 的源码中 recover API （ LKDBRecover.xcframework 基于 3.49.1 版本，日期：2025-02-18） ：https://sqlite.org/src/file/ext/recover/sqlite3recover.c
+
 
 ------------------------------------
 
