@@ -11,9 +11,7 @@ LKDBHelper
 
 简书：不定时更新  [http://www.jianshu.com/users/376b950a20ec](http://www.jianshu.com/users/376b950a20ec/latest_articles) 
 
-# Big Upgrade 2.0
-
-Supported  __NSArray__,__NSDictionary__, __ModelClass__, __NSNumber__, __NSString__, __NSDate__, __NSData__, __UIColor__, __UIImage__, __CGRect__, __CGPoint__, __CGSize__, __NSRange__, __int__,__char__,__float__, __double__, __long__.. attribute to insert and select automation.
+# 2.0的超级大升级
 
 全面支持 __NSArray__,__NSDictionary__, __ModelClass__, __NSNumber__, __NSString__, __NSDate__, __NSData__, __UIColor__, __UIImage__, __CGRect__, __CGPoint__, __CGSize__, __NSRange__, __int__,__char__,__float__, __double__, __long__.. 等属性的自动化操作(插入和查询)
 
