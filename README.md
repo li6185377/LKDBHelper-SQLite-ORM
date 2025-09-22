@@ -50,14 +50,24 @@ pod 'FMDB', '2.7.5'
 ```
 
 
-If you are using encryption, Order can not be wrong <br>
+If you are using encryption <br>
 
 ```objective-c
 pod 'FMDB/SQLCipher'
-pod 'LKDBHelper'
+pod 'LKDBHelper/FMDBSQLCipher'
 ```
 
-@property(strong,nonatomic)NSString* encryptionKey;
+```
+/**
+ *  @brief Set encryption key
+ refer: FMDatabase.h  - (BOOL)setKey:(NSString *)key;
+ *  invoking after the `LKDBHelper initialize` in YourModelClass.m `getUsingLKDBHelper` function
+ */
+- (BOOL)setKey:(NSString *)key;
+
+/// Reset encryption key
+- (BOOL)rekey:(NSString *)key;
+```
 
 ## Basic usage
 
