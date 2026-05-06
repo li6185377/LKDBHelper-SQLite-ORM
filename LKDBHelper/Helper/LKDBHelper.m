@@ -172,10 +172,16 @@ static BOOL LKDBNullIsEmptyString = NO;
                 self.enableAutoVacuum = YES;
                 self.enableAutoQuickCheck = YES;
                 self.enablePragmaWAL = NO;
+                self.enablePerformanceOptimization = NO;
                 self.latestAutoActionIndex = 0;
                 
                 [self setDBPath:filePath];
                 [LKDBHelper dbHelperWithPath:nil save:self];
+                
+                // 方便业务层统一修改配置
+                if ([LKDBUtils respondsToSelector:@selector(onCreateWithLKDBHelper:)]) {
+                    [LKDBUtils onCreateWithLKDBHelper:self];
+                }
             }
         }
     }
@@ -211,13 +217,21 @@ static BOOL LKDBNullIsEmptyString = NO;
         self.bindingQueue = nil;
         // set db path
         self.dbPath = filePath;
-        [self openDB];
     }
     [self.threadLock unlock];
 }
 
 - (FMDatabase *)usingFMDB {
     return self.inExecuteDB ?: self.inBindingDB;
+}
+
+- (void)applyPragmaSettingsToDatabase:(FMDatabase *)db {
+    if (self.enablePragmaWAL) {
+        [db executeUpdate:@"pragma journal_mode = wal; pragma synchronous = normal;"];
+    }
+    if (self.enablePerformanceOptimization) {
+        [db executeStatements:@"pragma mmap_size = 67108864; pragma cache_size = -8192; pragma temp_store = memory;"];
+    }
 }
 
 - (void)openDB {
@@ -245,10 +259,8 @@ static BOOL LKDBNullIsEmptyString = NO;
         self.inExecuteDB = db;
         // 默认开启错误日志打印
         db.logsErrors = LKDBLogErrorEnable;
-        // 需要开启 WAL 模式
-        if (self.enablePragmaWAL) {
-            [db executeUpdate:@"pragma journal_mode = wal; pragma synchronous = normal;"];
-        }
+        // 应用 PRAGMA 设置
+        [self applyPragmaSettingsToDatabase:db];
         // 数据库损坏检测
         if (!isCreateDB && self.enableAutoQuickCheck) {
             FMResultSet * const bkFMSet = [db executeQuery:@"pragma quick_check;"];
@@ -268,10 +280,8 @@ static BOOL LKDBNullIsEmptyString = NO;
                 }
                 // 重新打开数据库
                 [db openWithFlags:LKDBOpenFlags];
-                // 需要开启 WAL 模式
-                if (self.enablePragmaWAL) {
-                    [db executeUpdate:@"pragma journal_mode = wal; pragma synchronous = normal;"];
-                }
+                // 应用 PRAGMA 设置
+                [self applyPragmaSettingsToDatabase:db];
             }
         }
         self.inExecuteDB = nil;
@@ -344,10 +354,8 @@ static BOOL LKDBNullIsEmptyString = NO;
     
     // 重新打开数据库链接
     [nowdb openWithFlags:LKDBOpenFlags];
-    // 需要开启 WAL 模式
-    if (self.enablePragmaWAL) {
-        [nowdb executeUpdate:@"pragma journal_mode = wal; pragma synchronous = normal;"];
-    }
+    // 应用 PRAGMA 设置
+    [self applyPragmaSettingsToDatabase:nowdb];
     
     [self.threadLock unlock];
     
@@ -427,10 +435,8 @@ static BOOL LKDBNullIsEmptyString = NO;
     
     // 重新打开数据库链接
     [nowdb openWithFlags:LKDBOpenFlags];
-    // 需要开启 WAL 模式
-    if (self.enablePragmaWAL) {
-        [nowdb executeUpdate:@"pragma journal_mode = wal; pragma synchronous = normal;"];
-    }
+    // 应用 PRAGMA 设置
+    [self applyPragmaSettingsToDatabase:nowdb];
     
     [self.threadLock unlock];
     

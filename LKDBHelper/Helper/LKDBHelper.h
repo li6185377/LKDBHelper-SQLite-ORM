@@ -98,6 +98,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL enablePragmaWAL;
 
 /**
+ *    @brief  数据库开启性能优化（mmap、cache_size、temp_store）
+ *            mmap_size = 67108864 (64MB)
+ *            cache_size = -8192 (8MB)
+ *            temp_store = memory
+ */
+@property (nonatomic, assign) BOOL enablePerformanceOptimization;
+
+/**
  *  @brief current encryption key.
  */
 @property (nullable, nonatomic, copy, readonly) NSString *encryptionKey;

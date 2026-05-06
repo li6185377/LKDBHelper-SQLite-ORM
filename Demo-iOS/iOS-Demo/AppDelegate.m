@@ -9,6 +9,7 @@
 #import "AppDelegate.h"
 #import "LKTestModels.h"
 #import <LKDBHelper.h>
+#import <sqlite3.h>
 
 @interface AppDelegate () <UITextViewDelegate>
 @property (nonatomic, strong) NSMutableString *ms;
@@ -54,6 +55,23 @@
 
     ///获取 LKTest 类使用的 LKDBHelper
     LKDBHelper *globalHelper = [LKTest getUsingLKDBHelper];
+    
+    // 打印优化后的 PRAGMA 值
+    [globalHelper executeDB:^(FMDatabase *db) {
+        FMResultSet *rs = [db executeQuery:@"PRAGMA cache_size;"];
+        if ([rs next]) { printf("[PRAGMA] cache_size = %d\n", [rs intForColumnIndex:0]); }
+        [rs close];
+        rs = [db executeQuery:@"PRAGMA mmap_size;"];
+        if ([rs next]) { printf("[PRAGMA] mmap_size = %lld\n", [rs longLongIntForColumnIndex:0]); }
+        [rs close];
+        rs = [db executeQuery:@"PRAGMA page_size;"];
+        if ([rs next]) { printf("[PRAGMA] page_size = %d\n", [rs intForColumnIndex:0]); }
+        [rs close];
+        rs = [db executeQuery:@"PRAGMA temp_store;"];
+        if ([rs next]) { printf("[PRAGMA] temp_store = %d\n", [rs intForColumnIndex:0]); }
+        [rs close];
+        printf("[PRAGMA] sqlite_version = %s\n", sqlite3_libversion());
+    }];
 
     ///删除所有表   delete all table
     [globalHelper dropAllTable];

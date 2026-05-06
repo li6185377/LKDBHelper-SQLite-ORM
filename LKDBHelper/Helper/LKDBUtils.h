@@ -71,6 +71,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// 数据库损坏
 + (void)onLKDBWithFails:(LKDBHelper *)dbHelper dbError:(NSError *)dbError;
 
+/// LKDBHelper 初始化完毕
++ (void)onCreateWithLKDBHelper:(LKDBHelper *)dbHelper;
+
 @end
 
 #pragma mark - Types
