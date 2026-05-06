@@ -23,6 +23,62 @@ LKDBHelper
 原理：基于 sqlite3.org 的源码中 recover API （ LKDBRecover.xcframework 基于 3.49.1 版本，日期：2025-02-18） ：https://sqlite.org/src/file/ext/recover/sqlite3recover.c
 
 
+# 数据库性能优化
+
+通过 `enablePerformanceOptimization` 开关启用数据库性能优化，开启后自动设置以下 PRAGMA：
+
+| PRAGMA | 值 | 说明 |
+|--------|------|------|
+| `mmap_size` | 67108864 | 64MB 内存映射，减少 read/write 系统调用 |
+| `cache_size` | -8192 | 8MB 页缓存，减少磁盘 I/O |
+| `temp_store` | memory | 临时表和索引放内存 |
+
+```objective-c
++ (LKDBHelper *)getUsingLKDBHelper {
+    static LKDBHelper *db;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        db = [[LKDBHelper alloc] init];
+        db.enablePerformanceOptimization = YES;
+    });
+    return db;
+}
+```
+
+WAL 模式可通过 `enablePragmaWAL` 单独开启：
+
+```objective-c
+db.enablePragmaWAL = YES;
+```
+
+### 性能基准测试
+
+测试环境：iPhone 真机，iOS 26.2，SQLite 3.51.0，多字段模型（20+ 属性），逐条操作（不使用事务）。
+
+| 操作 | 优化关闭 | 优化开启 | 提升 |
+|------|----------|----------|------|
+| 逐条插入 50 条 | 9.1 ms | 3.6 ms | **60%** |
+| 全量查询 50 次 | 1.9 ms | 1.5 ms | **21%** |
+| 随机主键查询 1000 次 | 31.1 ms | 29.8 ms | **4%** |
+| 范围查询 200 次 | 6.4 ms | 6.1 ms | **5%** |
+| 逐条更新 20 次 | 0.9 ms | 0.8 ms | **11%** |
+| **总耗时** | **49.4 ms** | **41.8 ms** | **15%** |
+
+## 生命周期回调 `onCreateWithLKDBHelper:`
+
+LKDBHelper 初始化完毕后（数据库尚未打开），会回调 `LKDBUtils` 的 `onCreateWithLKDBHelper:` 类方法，方便业务层统一配置：
+
+```objective-c
+@implementation LKDBUtils (MyConfig)
+
++ (void)onCreateWithLKDBHelper:(LKDBHelper *)dbHelper {
+    dbHelper.enablePerformanceOptimization = YES;
+    dbHelper.enablePragmaWAL = YES;
+}
+
+@end
+```
+
 ------------------------------------
 
 Requirements
