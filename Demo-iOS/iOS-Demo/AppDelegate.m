@@ -51,101 +51,31 @@
     return YES;
 }
 - (void)test {
-    // ===== 性能对比测试 =====
-    [self runBenchmarkWithOptimization:NO];
-    [self runBenchmarkWithOptimization:YES];
-}
+    addText(@"示例 开始 example start \n\n");
 
-- (void)runBenchmarkWithOptimization:(BOOL)enabled {
-    NSString *dbPath = [NSTemporaryDirectory() stringByAppendingPathComponent:
-                        enabled ? @"bench_opt.db" : @"bench_default.db"];
-    [[NSFileManager defaultManager] removeItemAtPath:dbPath error:nil];
-    [[NSFileManager defaultManager] removeItemAtPath:[dbPath stringByAppendingString:@"-wal"] error:nil];
-    [[NSFileManager defaultManager] removeItemAtPath:[dbPath stringByAppendingString:@"-shm"] error:nil];
+    ///获取 LKTest 类使用的 LKDBHelper
+    LKDBHelper *globalHelper = [LKTest getUsingLKDBHelper];
     
-    LKDBHelper *helper = [[LKDBHelper alloc] initWithDBPath:dbPath];
-    if (enabled) {
-        helper.enablePerformanceOptimization = YES;
-    }
-    
-    int const INSERT_COUNT = 50;
-    int const QUERY_REPEAT = 50;
-    
-    // 1. 逐条插入
-    CFAbsoluteTime t0 = CFAbsoluteTimeGetCurrent();
-    for (int i = 0; i < INSERT_COUNT; i++) {
-        LKTest *obj = [[LKTest alloc] init];
-        obj.name = [NSString stringWithFormat:@"user_%d_with_long_name_padding", i];
-        obj.age = i;
-        obj.isGirl = (i % 2 == 0);
-        obj.like = 'A' + (i % 26);
-        obj.score = i * 1.5;
-        obj.url = [NSURL URLWithString:[NSString stringWithFormat:@"https://example.com/user/%d", i]];
-        obj.error = [NSString stringWithFormat:@"error_message_for_user_%d_detail", i];
-        obj.date = [NSDate dateWithTimeIntervalSince1970:i * 86400];
-        obj.frame = CGRectMake(i, i * 2, 100 + i, 200 + i);
-        obj.frame1 = CGRectMake(i * 3, i * 4, 300, 400);
-        obj.point = CGPointMake(i * 1.1, i * 2.2);
-        obj.range = NSMakeRange(i, 10);
-        obj.size = CGRectMake(0, 0, 320 + i, 480 + i);
-        obj.blah = @[@"item1", @"item2", [NSString stringWithFormat:@"item_%d", i]];
-        obj.hoho = @{@"key1": @"value1", @"index": @(i), @"desc": [NSString stringWithFormat:@"desc_%d", i]};
-        [helper insertToDB:obj];
-    }
-    CFAbsoluteTime t1 = CFAbsoluteTimeGetCurrent();
-    
-    // 2. 全量查询（重复读取热数据）
-    CFAbsoluteTime t2 = CFAbsoluteTimeGetCurrent();
-    for (int i = 0; i < QUERY_REPEAT; i++) {
-        [helper search:[LKTest class] where:nil orderBy:@"rowid" offset:0 count:INSERT_COUNT];
-    }
-    CFAbsoluteTime t3 = CFAbsoluteTimeGetCurrent();
-    
-    // 3. 随机条件查询（主键查询）
-    CFAbsoluteTime t4 = CFAbsoluteTimeGetCurrent();
-    for (int i = 0; i < 1000; i++) {
-        int idx = arc4random_uniform(INSERT_COUNT);
-        [helper search:[LKTest class] where:[NSString stringWithFormat:@"rowid = %d", idx + 1] orderBy:nil offset:0 count:1];
-    }
-    CFAbsoluteTime t5 = CFAbsoluteTimeGetCurrent();
-    
-    // 4. 范围查询
-    CFAbsoluteTime t6 = CFAbsoluteTimeGetCurrent();
-    for (int i = 0; i < 200; i++) {
-        int start = arc4random_uniform(INSERT_COUNT - 20);
-        NSString *where = [NSString stringWithFormat:@"rowid >= %d and rowid < %d", start + 1, start + 21];
-        [helper search:[LKTest class] where:where orderBy:@"rowid" offset:0 count:20];
-    }
-    CFAbsoluteTime t7 = CFAbsoluteTimeGetCurrent();
-    
-    // 5. 逐条更新（主键条件）
-    CFAbsoluteTime t8 = CFAbsoluteTimeGetCurrent();
-    for (int i = 0; i < 20; i++) {
-        LKTest *obj = [[LKTest alloc] init];
-        obj.name = [NSString stringWithFormat:@"updated_%d_with_long_name", i];
-        obj.age = i + 1000;
-        obj.isGirl = (i % 2 != 0);
-        obj.score = i * 3.14;
-        obj.error = [NSString stringWithFormat:@"updated_error_%d", i];
-        obj.date = [NSDate date];
-        obj.frame = CGRectMake(i * 10, i * 20, 500, 600);
-        obj.blah = @[@"updated1", @"updated2", @"updated3"];
-        obj.hoho = @{@"updated": @YES, @"index": @(i)};
-        [helper updateToDB:obj where:[NSString stringWithFormat:@"rowid = %d", i + 1]];
-    }
-    CFAbsoluteTime t9 = CFAbsoluteTimeGetCurrent();
-    
-    printf("\n========== %s ==========\n", enabled ? "优化开启" : "优化关闭（系统默认）");
-    printf("逐条插入 %d 条: %.1f ms\n", INSERT_COUNT, (t1 - t0) * 1000);
-    printf("全量查询 %d 次（每次 %d 条）: %.1f ms\n", QUERY_REPEAT, INSERT_COUNT, (t3 - t2) * 1000);
-    printf("随机主键查询 1000 次: %.1f ms\n", (t5 - t4) * 1000);
-    printf("范围查询 200 次（每次20条）: %.1f ms\n", (t7 - t6) * 1000);
-    printf("逐条更新 20 次: %.1f ms\n", (t9 - t8) * 1000);
-    double total = (t1-t0+t3-t2+t5-t4+t7-t6+t9-t8) * 1000;
-    printf("总耗时: %.1f ms\n", total);
-}
+    // 打印优化后的 PRAGMA 值
+    [globalHelper executeDB:^(FMDatabase *db) {
+        FMResultSet *rs = [db executeQuery:@"PRAGMA cache_size;"];
+        if ([rs next]) { printf("[PRAGMA] cache_size = %d\n", [rs intForColumnIndex:0]); }
+        [rs close];
+        rs = [db executeQuery:@"PRAGMA mmap_size;"];
+        if ([rs next]) { printf("[PRAGMA] mmap_size = %lld\n", [rs longLongIntForColumnIndex:0]); }
+        [rs close];
+        rs = [db executeQuery:@"PRAGMA page_size;"];
+        if ([rs next]) { printf("[PRAGMA] page_size = %d\n", [rs intForColumnIndex:0]); }
+        [rs close];
+        rs = [db executeQuery:@"PRAGMA temp_store;"];
+        if ([rs next]) { printf("[PRAGMA] temp_store = %d\n", [rs intForColumnIndex:0]); }
+        [rs close];
+        printf("[PRAGMA] sqlite_version = %s\n", sqlite3_libversion());
+    }];
 
-/*
+    ///删除所有表   delete all table
+    [globalHelper dropAllTable];
+
     addText(@"LKTest create table sql :\n%@\n", [LKTest getCreateTableSQL]);
     addText(@"LKTestForeign create table sql :\n%@\n", [LKTestForeign getCreateTableSQL]);
 
@@ -326,5 +256,4 @@
                     [LKDBHelper clearNoneImage:[LKTest class] columns:[NSArray arrayWithObjects:@"img", nil]];
                 }];
 }
-*/
 @end
