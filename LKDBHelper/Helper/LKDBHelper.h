@@ -106,6 +106,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL enablePerformanceOptimization;
 
 /**
+ *    @brief  自定义数据库打开标志位，默认值：
+ *            SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_PRIVATECACHE | SQLITE_OPEN_FILEPROTECTION_NONE
+ *            需在数据库首次访问前设置
+ */
+@property (nonatomic, assign) int dbOpenFlags;
+
+/**
  *  @brief current encryption key.
  */
 @property (nullable, nonatomic, copy, readonly) NSString *encryptionKey;

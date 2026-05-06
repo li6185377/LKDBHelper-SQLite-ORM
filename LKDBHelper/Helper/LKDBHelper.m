@@ -14,7 +14,7 @@
 #define SQLITE_OPEN_FILEPROTECTION_NONE 0x00400000
 #endif
 
-#define LKDBOpenFlags (SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_PRIVATECACHE | SQLITE_OPEN_FILEPROTECTION_NONE)
+#define LKDBOpenFlagsDefault (SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_PRIVATECACHE | SQLITE_OPEN_FILEPROTECTION_NONE)
 
 #define LKDBCheck_tableNameIsInvalid(tableName)                           \
     if ([LKDBUtils checkStringIsEmpty:tableName]) {                       \
@@ -173,6 +173,7 @@ static BOOL LKDBNullIsEmptyString = NO;
                 self.enableAutoQuickCheck = YES;
                 self.enablePragmaWAL = NO;
                 self.enablePerformanceOptimization = NO;
+                self.dbOpenFlags = LKDBOpenFlagsDefault;
                 self.latestAutoActionIndex = 0;
                 
                 [self setDBPath:filePath];
@@ -250,7 +251,7 @@ static BOOL LKDBNullIsEmptyString = NO;
     BOOL const isCreateDB = ![fileManager fileExistsAtPath:filePath];
     if (!self.bindingQueue) {
         self.bindingQueue = [[FMDatabaseQueue alloc] initWithPath:filePath
-                                                            flags:LKDBOpenFlags];
+                                                            flags:self.dbOpenFlags];
     }
     [self.bindingQueue inDatabase:^(FMDatabase *db) {
         // 只赋值一次（不主动释放）
@@ -279,7 +280,7 @@ static BOOL LKDBNullIsEmptyString = NO;
                     [LKDBUtils onLKDBWithFails:self dbError:dbError];
                 }
                 // 重新打开数据库
-                [db openWithFlags:LKDBOpenFlags];
+                [db openWithFlags:self.dbOpenFlags];
                 // 应用 PRAGMA 设置
                 [self applyPragmaSettingsToDatabase:db];
             }
@@ -353,7 +354,7 @@ static BOOL LKDBNullIsEmptyString = NO;
     } while (0);
     
     // 重新打开数据库链接
-    [nowdb openWithFlags:LKDBOpenFlags];
+    [nowdb openWithFlags:self.dbOpenFlags];
     // 应用 PRAGMA 设置
     [self applyPragmaSettingsToDatabase:nowdb];
     
@@ -434,7 +435,7 @@ static BOOL LKDBNullIsEmptyString = NO;
     [self.createdTableNames removeAllObjects];
     
     // 重新打开数据库链接
-    [nowdb openWithFlags:LKDBOpenFlags];
+    [nowdb openWithFlags:self.dbOpenFlags];
     // 应用 PRAGMA 设置
     [self applyPragmaSettingsToDatabase:nowdb];
     
